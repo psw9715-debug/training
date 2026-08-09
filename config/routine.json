@@ -1,0 +1,131 @@
+{
+  "mon": {
+    "label": "가슴 · 삼두",
+    "exercises": [
+      {
+        "id": "bench",
+        "name": "벤치프레스",
+        "sets": 4,
+        "targetReps": 8,
+        "targetWeight": 40,
+        "unit": "kg"
+      },
+      {
+        "id": "incline_db",
+        "name": "인클라인 덤벨프레스",
+        "sets": 3,
+        "targetReps": 10,
+        "targetWeight": 16,
+        "unit": "kg"
+      },
+      {
+        "id": "triceps_pushdown",
+        "name": "트라이셉 푸시다운",
+        "sets": 3,
+        "targetReps": 12,
+        "targetWeight": 15,
+        "unit": "kg"
+      }
+    ]
+  },
+  "tue": {
+    "label": "등 · 이두",
+    "exercises": [
+      {
+        "id": "latpulldown",
+        "name": "랫풀다운",
+        "sets": 3,
+        "targetReps": 15,
+        "targetWeight": 40,
+        "unit": "kg"
+      },
+      {
+        "id": "seated_row",
+        "name": "시티드로우",
+        "sets": 3,
+        "targetReps": 12,
+        "targetWeight": 35,
+        "unit": "kg"
+      },
+      {
+        "id": "db_curl",
+        "name": "덤벨컬",
+        "sets": 3,
+        "targetReps": 12,
+        "targetWeight": 10,
+        "unit": "kg"
+      }
+    ]
+  },
+  "wed": {
+    "label": "하체",
+    "exercises": [
+      {
+        "id": "squat",
+        "name": "스쿼트",
+        "sets": 4,
+        "targetReps": 10,
+        "targetWeight": 50,
+        "unit": "kg"
+      },
+      {
+        "id": "leg_press",
+        "name": "레그프레스",
+        "sets": 3,
+        "targetReps": 12,
+        "targetWeight": 80,
+        "unit": "kg"
+      },
+      {
+        "id": "leg_curl",
+        "name": "레그컬",
+        "sets": 3,
+        "targetReps": 15,
+        "targetWeight": 25,
+        "unit": "kg"
+      }
+    ]
+  },
+  "thu": {
+    "label": "어깨",
+    "exercises": [
+      {
+        "id": "shoulder_press",
+        "name": "숄더프레스",
+        "sets": 3,
+        "targetReps": 10,
+        "targetWeight": 20,
+        "unit": "kg"
+      },
+      {
+        "id": "lateral_raise",
+        "name": "사이드레터럴레이즈",
+        "sets": 3,
+        "targetReps": 15,
+        "targetWeight": 6,
+        "unit": "kg"
+      }
+    ]
+  },
+  "fri": {
+    "label": "전신 · 유산소",
+    "exercises": [
+      {
+        "id": "running",
+        "name": "러닝",
+        "sets": 1,
+        "targetReps": 20,
+        "targetWeight": 0,
+        "unit": "분"
+      }
+    ]
+  },
+  "sat": {
+    "label": "자유",
+    "exercises": []
+  },
+  "sun": {
+    "label": "휴식",
+    "exercises": []
+  }
+}
