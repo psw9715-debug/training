@@ -367,17 +367,39 @@ function showToast(msg){
    저장소(window.storage) - 개인 설정(토큰 등) 보관
 ============================================================ */
 const CFG_KEY = 'training-log:github-config';
+
+// Claude 아티팩트 미리보기 안에서는 window.storage를 쓰고,
+// 일반 브라우저(로컬 파일, GitHub Pages 등)에서는 localStorage로 자동 전환합니다.
+function hasClaudeStorage(){
+  return typeof window.storage !== 'undefined' && window.storage && typeof window.storage.get === 'function';
+}
+
 async function loadConfig(){
+  if(hasClaudeStorage()){
+    try{
+      const res = await window.storage.get(CFG_KEY, false);
+      return res ? JSON.parse(res.value) : null;
+    }catch(e){ /* 키가 없으면 에러가 날 수 있음 - 아래 localStorage로 폴백 시도 안 함, 그냥 null */ return null; }
+  }
   try{
-    const res = await window.storage.get(CFG_KEY, false);
-    return res ? JSON.parse(res.value) : null;
+    const raw = localStorage.getItem(CFG_KEY);
+    return raw ? JSON.parse(raw) : null;
   }catch(e){ return null; }
 }
+
 async function saveConfig(cfg){
-  await window.storage.set(CFG_KEY, JSON.stringify(cfg), false);
+  if(hasClaudeStorage()){
+    try{ await window.storage.set(CFG_KEY, JSON.stringify(cfg), false); return; }
+    catch(e){ /* fall through to localStorage */ }
+  }
+  try{ localStorage.setItem(CFG_KEY, JSON.stringify(cfg)); }catch(e){ /* 저장 공간을 못 쓰면 무시하고 세션 내에서만 동작 */ }
 }
+
 async function clearConfig(){
-  try{ await window.storage.delete(CFG_KEY, false); }catch(e){}
+  if(hasClaudeStorage()){
+    try{ await window.storage.delete(CFG_KEY, false); }catch(e){}
+  }
+  try{ localStorage.removeItem(CFG_KEY); }catch(e){}
 }
 
 /* ============================================================
