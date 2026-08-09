@@ -1,0 +1,1073 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>훈련일지</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Mono:wght@500;600;700&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#EFEAE1;
+  --paper-line:#D9D1BF;
+  --card:#FBF8F2;
+  --ink:#1C2B39;
+  --ink-soft:#5B6B74;
+  --ink-faint:#93A0A6;
+  --red:#C1432E;
+  --green:#3F7D58;
+  --amber:#C98A2C;
+  --blue:#2E5C8A;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  background:
+    linear-gradient(var(--paper-line) 1px, transparent 1px);
+  background-size: 100% 34px;
+  background-color:var(--paper);
+  color:var(--ink);
+  font-family:'Noto Sans KR',sans-serif;
+  min-height:100vh;
+  padding-bottom:60px;
+}
+.wrap{max-width:720px;margin:0 auto;padding:0 16px;}
+
+/* ---------- Header ---------- */
+header.top{padding:26px 16px 10px;max-width:720px;margin:0 auto;}
+.stamp-title{
+  display:inline-flex;align-items:center;gap:10px;
+  font-family:'Space Grotesk',sans-serif;
+  font-weight:700;font-size:22px;letter-spacing:0.5px;
+  color:var(--ink);
+  border:2.5px solid var(--ink);
+  padding:6px 14px;
+  transform:rotate(-1.2deg);
+  border-radius:3px;
+  background:var(--card);
+}
+.stamp-title .dot{width:9px;height:9px;border-radius:50%;background:var(--red);display:inline-block;}
+.subtitle{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-soft);margin:8px 2px 0;letter-spacing:0.3px;}
+
+/* ---------- Tabs ---------- */
+nav.tabs{
+  display:flex;gap:6px;max-width:720px;margin:18px auto 0;padding:0 16px;
+  overflow-x:auto;
+}
+nav.tabs button{
+  font-family:'IBM Plex Mono',monospace;
+  font-weight:600;font-size:13px;
+  padding:9px 14px 8px;
+  background:var(--paper);
+  border:2px solid var(--paper-line);
+  border-bottom:none;
+  border-radius:6px 6px 0 0;
+  color:var(--ink-soft);
+  cursor:pointer;
+  white-space:nowrap;
+  position:relative;top:2px;
+}
+nav.tabs button.active{
+  background:var(--card);
+  border-color:var(--ink);
+  color:var(--ink);
+}
+
+main{max-width:720px;margin:0 auto;padding:0 16px 40px;}
+.card{
+  background:var(--card);
+  border:2px solid var(--ink);
+  border-radius:8px;
+  padding:18px;
+  margin-top:16px;
+  box-shadow:3px 3px 0 var(--paper-line);
+}
+.card h2{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:16px;margin:0 0 12px;
+  display:flex;align-items:center;justify-content:space-between;
+  gap:8px;
+}
+.card h2 .badge{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;
+  color:var(--ink-soft);border:1px solid var(--paper-line);padding:2px 8px;border-radius:12px;
+}
+.muted{color:var(--ink-soft);font-size:13px;line-height:1.6;}
+label{display:block;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-soft);margin-bottom:4px;letter-spacing:0.3px;}
+input[type=text],input[type=number],input[type=password],input[type=date],select,textarea{
+  width:100%;padding:9px 10px;border:1.5px solid var(--paper-line);border-radius:6px;
+  background:#fff;color:var(--ink);font-family:'Noto Sans KR',sans-serif;font-size:14px;
+}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--blue);outline-offset:1px;}
+.row{display:flex;gap:8px;}
+.row > *{flex:1;}
+.field{margin-bottom:12px;}
+.btn{
+  font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:13px;
+  padding:10px 16px;border-radius:6px;border:2px solid var(--ink);
+  background:var(--ink);color:var(--paper);cursor:pointer;
+}
+.btn.secondary{background:transparent;color:var(--ink);}
+.btn.ghost{border-color:var(--paper-line);color:var(--ink-soft);background:transparent;}
+.btn.small{padding:6px 10px;font-size:12px;}
+.btn:disabled{opacity:0.45;cursor:not-allowed;}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;}
+
+.exercise-block{border:1.5px dashed var(--paper-line);border-radius:8px;padding:12px;margin-bottom:12px;background:#fff;}
+.exercise-block .exhead{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;}
+.exname{font-weight:700;font-size:14.5px;}
+.extarget{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--ink-soft);}
+.setrow{display:grid;grid-template-columns:28px 1fr 1fr;gap:8px;align-items:center;margin-bottom:6px;}
+.setrow .setnum{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-faint);text-align:center;}
+
+.pr-stamp{
+  display:inline-block;font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:11px;
+  color:var(--red);border:2px solid var(--red);border-radius:4px;padding:1px 7px;
+  transform:rotate(-7deg);letter-spacing:1px;margin-left:6px;
+}
+
+.mealrow{display:grid;grid-template-columns:1fr 90px 32px;gap:8px;margin-bottom:8px;align-items:center;}
+.iconbtn{background:transparent;border:none;color:var(--red);font-size:18px;cursor:pointer;line-height:1;}
+
+.weekday-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+.weekday-tabs button{
+  font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:13px;
+  width:38px;height:38px;border-radius:50%;border:2px solid var(--paper-line);
+  background:#fff;color:var(--ink-soft);cursor:pointer;
+}
+.weekday-tabs button.active{border-color:var(--ink);color:var(--ink);background:var(--paper);}
+.weekday-tabs button.sun{color:var(--red);}
+.weekday-tabs button.sat{color:var(--blue);}
+
+.hist-item{display:flex;justify-content:space-between;align-items:center;padding:10px 4px;border-bottom:1px dashed var(--paper-line);cursor:pointer;}
+.hist-item:hover{background:rgba(0,0,0,0.02);}
+.hist-item .d{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:13px;}
+.hist-item .meta{font-size:12px;color:var(--ink-soft);}
+
+.toast{
+  position:fixed;bottom:18px;left:50%;transform:translateX(-50%);
+  background:var(--ink);color:var(--paper);padding:11px 18px;border-radius:8px;
+  font-family:'IBM Plex Mono',monospace;font-size:13px;box-shadow:0 4px 14px rgba(0,0,0,0.25);
+  z-index:999;opacity:0;pointer-events:none;transition:opacity 0.25s, transform 0.25s;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(-4px);}
+
+.empty{text-align:center;padding:30px 10px;color:var(--ink-soft);font-size:13px;}
+.empty .big{font-size:30px;display:block;margin-bottom:8px;}
+
+svg.spark{width:100%;height:120px;display:block;}
+.suggest-item{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px dashed var(--paper-line);font-size:13.5px;}
+.suggest-item:last-child{border-bottom:none;}
+.arrow{font-family:'IBM Plex Mono',monospace;color:var(--green);font-weight:700;}
+
+.hidden{display:none !important;}
+.divider{height:1px;background:var(--paper-line);margin:14px 0;}
+.small-note{font-size:11.5px;color:var(--ink-faint);margin-top:6px;line-height:1.5;}
+a{color:var(--blue);}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="stamp-title"><span class="dot"></span>훈련일지 TRAINING LOG</div>
+  <div class="subtitle" id="statusLine">GitHub 연결 대기 중...</div>
+</header>
+
+<nav class="tabs" id="tabNav">
+  <button data-tab="today" class="active">오늘</button>
+  <button data-tab="routine">루틴</button>
+  <button data-tab="goals">목표</button>
+  <button data-tab="history">기록</button>
+  <button data-tab="settings">설정</button>
+</nav>
+
+<main>
+
+<!-- ===================== SETTINGS ===================== -->
+<section id="tab-settings" class="tab-panel">
+  <div class="card">
+    <h2>GitHub 연결</h2>
+    <p class="muted">이 앱은 별도 서버 없이 시우님의 GitHub 저장소를 데이터베이스로 사용합니다. 데이터는 전부 그 저장소(비공개로 생성 권장)에 JSON 파일로 저장됩니다.</p>
+    <div class="field">
+      <label>GITHUB 아이디 (username)</label>
+      <input type="text" id="cfgOwner" placeholder="예: parksiwoo">
+    </div>
+    <div class="field">
+      <label>저장소 이름 (없으면 새로 생성)</label>
+      <input type="text" id="cfgRepo" placeholder="예: my-training-log">
+    </div>
+    <div class="field">
+      <label>Personal Access Token</label>
+      <input type="password" id="cfgToken" placeholder="ghp_로 시작하는 토큰">
+      <div class="small-note">
+        토큰이 없다면 <a href="https://github.com/settings/tokens/new?scopes=repo&description=training-log-app" target="_blank" rel="noopener">여기서 발급</a>하세요 (classic token, <b>repo</b> 권한 체크). 이 토큰은 시우님 브라우저 세션의 개인 저장 공간에만 보관되고, 다른 사람에게 공유되지 않습니다.
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn" id="btnConnect">연결 / 저장소 준비</button>
+      <button class="btn ghost" id="btnForget">저장된 정보 삭제</button>
+    </div>
+    <div class="small-note" id="connectMsg"></div>
+  </div>
+</section>
+
+<!-- ===================== TODAY ===================== -->
+<section id="tab-today" class="tab-panel hidden">
+  <div class="card">
+    <h2>날짜 <span class="badge" id="todayWeekdayBadge">-</span></h2>
+    <input type="date" id="dateInput">
+  </div>
+
+  <div class="card">
+    <h2>오늘의 루틴</h2>
+    <div id="exerciseList"></div>
+    <div class="empty hidden" id="noRoutineMsg"><span class="big">🗓️</span>이 요일에 등록된 루틴이 없습니다. '루틴' 탭에서 먼저 만들어주세요.</div>
+  </div>
+
+  <div class="card">
+    <h2>체중 / 컨디션</h2>
+    <div class="row">
+      <div class="field"><label>체중 (kg)</label><input type="number" step="0.1" id="bodyWeightInput"></div>
+      <div class="field"><label>메모</label><input type="text" id="memoInput" placeholder="컨디션, 특이사항"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>식단 <span class="badge" id="calorieBadge">0 kcal</span></h2>
+    <div id="mealList"></div>
+    <button class="btn ghost small" id="btnAddMeal">+ 식사 추가</button>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn" id="btnSaveLog">오늘 기록 저장</button>
+    <span class="muted" id="saveHint" style="align-self:center;"></span>
+  </div>
+
+  <div class="card hidden" id="suggestCard">
+    <h2>다음 목표 제안 <span class="badge">자동 계산</span></h2>
+    <div id="suggestList"></div>
+    <div class="btn-row">
+      <button class="btn" id="btnApplySuggest">루틴에 반영</button>
+      <button class="btn ghost" id="btnSkipSuggest">다음에 결정</button>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== ROUTINE ===================== -->
+<section id="tab-routine" class="tab-panel hidden">
+  <div class="card">
+    <h2>요일별 루틴</h2>
+    <div class="weekday-tabs" id="routineWeekdayTabs"></div>
+    <div class="field">
+      <label>이 요일 이름 (예: 가슴/삼두)</label>
+      <input type="text" id="dayLabelInput">
+    </div>
+    <div id="routineExerciseList"></div>
+    <button class="btn ghost small" id="btnAddExercise">+ 종목 추가</button>
+    <div class="btn-row">
+      <button class="btn" id="btnSaveRoutine">루틴 저장</button>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== GOALS ===================== -->
+<section id="tab-goals" class="tab-panel hidden">
+  <div class="card">
+    <h2>목표</h2>
+    <div class="row">
+      <div class="field"><label>시작 체중 (kg)</label><input type="number" step="0.1" id="goalStartWeight"></div>
+      <div class="field"><label>목표 체중 (kg)</label><input type="number" step="0.1" id="goalTargetWeight"></div>
+    </div>
+    <div class="row">
+      <div class="field"><label>목표 체지방률 (%)</label><input type="number" step="0.1" id="goalBodyFat"></div>
+      <div class="field"><label>일일 목표 칼로리 (kcal)</label><input type="number" id="goalCalories"></div>
+    </div>
+    <div class="field"><label>메모</label><textarea id="goalMemo" rows="2"></textarea></div>
+    <div class="btn-row"><button class="btn" id="btnSaveGoals">목표 저장</button></div>
+  </div>
+
+  <div class="card">
+    <h2>체중 추이 <span class="badge" id="weightTrendBadge">최근 20일</span></h2>
+    <div id="weightChartWrap"><div class="empty"><span class="big">📉</span>기록을 저장하면 그래프가 나타납니다.</div></div>
+  </div>
+
+  <div class="card">
+    <h2>개인 기록 (PR)</h2>
+    <div id="recordsList"><div class="empty"><span class="big">🏆</span>아직 기록이 없습니다.</div></div>
+  </div>
+</section>
+
+<!-- ===================== HISTORY ===================== -->
+<section id="tab-history" class="tab-panel hidden">
+  <div class="card">
+    <h2>지난 기록 <span class="badge" id="histCountBadge">0건</span></h2>
+    <div id="historyList"><div class="empty"><span class="big">📓</span>불러온 기록이 없습니다.</div></div>
+    <button class="btn ghost small" id="btnLoadMoreHist">불러오기</button>
+  </div>
+  <div class="card hidden" id="histDetailCard">
+    <h2 id="histDetailTitle">-</h2>
+    <div id="histDetailBody"></div>
+    <div class="btn-row"><button class="btn secondary small" id="btnEditHistDay">이 날짜 편집(오늘 탭으로)</button></div>
+  </div>
+</section>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   상수 / 유틸
+============================================================ */
+const WEEKDAYS = ['sun','mon','tue','wed','thu','fri','sat'];
+const WEEKDAY_LABEL = {sun:'일',mon:'월',tue:'화',wed:'수',thu:'목',fri:'금',sat:'토'};
+const DEFAULT_ROUTINE = {
+  mon:{label:'가슴 · 삼두', exercises:[
+    {id:'bench', name:'벤치프레스', sets:4, targetReps:8, targetWeight:40, unit:'kg'},
+    {id:'incline_db', name:'인클라인 덤벨프레스', sets:3, targetReps:10, targetWeight:16, unit:'kg'},
+    {id:'triceps_pushdown', name:'트라이셉 푸시다운', sets:3, targetReps:12, targetWeight:15, unit:'kg'},
+  ]},
+  tue:{label:'등 · 이두', exercises:[
+    {id:'latpulldown', name:'랫풀다운', sets:3, targetReps:15, targetWeight:40, unit:'kg'},
+    {id:'seated_row', name:'시티드로우', sets:3, targetReps:12, targetWeight:35, unit:'kg'},
+    {id:'db_curl', name:'덤벨컬', sets:3, targetReps:12, targetWeight:10, unit:'kg'},
+  ]},
+  wed:{label:'하체', exercises:[
+    {id:'squat', name:'스쿼트', sets:4, targetReps:10, targetWeight:50, unit:'kg'},
+    {id:'leg_press', name:'레그프레스', sets:3, targetReps:12, targetWeight:80, unit:'kg'},
+    {id:'leg_curl', name:'레그컬', sets:3, targetReps:15, targetWeight:25, unit:'kg'},
+  ]},
+  thu:{label:'어깨', exercises:[
+    {id:'shoulder_press', name:'숄더프레스', sets:3, targetReps:10, targetWeight:20, unit:'kg'},
+    {id:'lateral_raise', name:'사이드레터럴레이즈', sets:3, targetReps:15, targetWeight:6, unit:'kg'},
+  ]},
+  fri:{label:'전신 · 유산소', exercises:[
+    {id:'running', name:'러닝', sets:1, targetReps:20, targetWeight:0, unit:'분'},
+  ]},
+  sat:{label:'자유', exercises:[]},
+  sun:{label:'휴식', exercises:[]},
+};
+
+function uid(){ return Math.random().toString(36).slice(2,9); }
+function pad2(n){ return String(n).padStart(2,'0'); }
+function todayISO(){ const d=new Date(); return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`; }
+function weekdayOf(isoDate){ const d=new Date(isoDate+'T00:00:00'); return WEEKDAYS[d.getDay()]; }
+function b64EncodeUnicode(str){ return btoa(unescape(encodeURIComponent(str))); }
+function b64DecodeUnicode(str){ return decodeURIComponent(escape(atob(str))); }
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(showToast._tm);
+  showToast._tm = setTimeout(()=>t.classList.remove('show'), 2600);
+}
+
+/* ============================================================
+   저장소(window.storage) - 개인 설정(토큰 등) 보관
+============================================================ */
+const CFG_KEY = 'training-log:github-config';
+async function loadConfig(){
+  try{
+    const res = await window.storage.get(CFG_KEY, false);
+    return res ? JSON.parse(res.value) : null;
+  }catch(e){ return null; }
+}
+async function saveConfig(cfg){
+  await window.storage.set(CFG_KEY, JSON.stringify(cfg), false);
+}
+async function clearConfig(){
+  try{ await window.storage.delete(CFG_KEY, false); }catch(e){}
+}
+
+/* ============================================================
+   GitHub API 래퍼
+============================================================ */
+const gh = {
+  cfg: null,
+  headers(){
+    return {
+      'Authorization': 'token ' + this.cfg.token,
+      'Accept': 'application/vnd.github+json',
+    };
+  },
+  api(path){ return `https://api.github.com${path}`; },
+  async whoami(){
+    const r = await fetch(this.api('/user'), {headers:this.headers()});
+    if(!r.ok) throw new Error('토큰이 유효하지 않습니다 (' + r.status + ')');
+    return r.json();
+  },
+  async repoExists(){
+    const r = await fetch(this.api(`/repos/${this.cfg.owner}/${this.cfg.repo}`), {headers:this.headers()});
+    return r.ok;
+  },
+  async createRepo(){
+    const r = await fetch(this.api('/user/repos'), {
+      method:'POST', headers:{...this.headers(),'Content-Type':'application/json'},
+      body: JSON.stringify({name:this.cfg.repo, private:true, description:'훈련일지 - 운동/식단/목표 기록', auto_init:true})
+    });
+    if(!r.ok){ const j = await r.json().catch(()=>({})); throw new Error('저장소 생성 실패: ' + (j.message||r.status)); }
+    return r.json();
+  },
+  async getFile(path){
+    const r = await fetch(this.api(`/repos/${this.cfg.owner}/${this.cfg.repo}/contents/${path}`), {headers:this.headers()});
+    if(r.status === 404) return null;
+    if(!r.ok) throw new Error(`파일 조회 실패 (${path}): ${r.status}`);
+    const j = await r.json();
+    return { sha:j.sha, data: JSON.parse(b64DecodeUnicode(j.content.replace(/\n/g,''))) };
+  },
+  async putFile(path, obj, sha, message){
+    const body = {
+      message: message || `update ${path}`,
+      content: b64EncodeUnicode(JSON.stringify(obj, null, 2)),
+    };
+    if(sha) body.sha = sha;
+    const r = await fetch(this.api(`/repos/${this.cfg.owner}/${this.cfg.repo}/contents/${path}`), {
+      method:'PUT', headers:{...this.headers(),'Content-Type':'application/json'}, body: JSON.stringify(body)
+    });
+    if(!r.ok){ const j = await r.json().catch(()=>({})); throw new Error(`저장 실패 (${path}): ` + (j.message||r.status)); }
+    return r.json();
+  },
+  async listDir(path){
+    const r = await fetch(this.api(`/repos/${this.cfg.owner}/${this.cfg.repo}/contents/${path}`), {headers:this.headers()});
+    if(r.status === 404) return [];
+    if(!r.ok) throw new Error(`목록 조회 실패 (${path}): ${r.status}`);
+    return r.json();
+  }
+};
+
+/* ============================================================
+   앱 상태
+============================================================ */
+const state = {
+  connected:false,
+  routine:null, routineSha:null,
+  goals:null, goalsSha:null,
+  records:null, recordsSha:null,
+  currentDate: todayISO(),
+  todayLog:null, todayLogSha:null,
+  meals:[],
+  routineEditingDay:'mon',
+  historyDates:[],
+  historyLoaded:[],
+  pendingSuggestions:null,
+};
+
+/* ============================================================
+   초기화
+============================================================ */
+async function init(){
+  bindTabNav();
+  bindSettingsHandlers();
+  bindTodayHandlers();
+  bindRoutineHandlers();
+  bindGoalsHandlers();
+  bindHistoryHandlers();
+
+  document.getElementById('dateInput').value = state.currentDate;
+
+  const cfg = await loadConfig();
+  if(cfg && cfg.owner && cfg.repo && cfg.token){
+    document.getElementById('cfgOwner').value = cfg.owner;
+    document.getElementById('cfgRepo').value = cfg.repo;
+    document.getElementById('cfgToken').value = cfg.token;
+    gh.cfg = cfg;
+    try{
+      await ensureBootstrapped(false);
+      setConnected(true);
+      switchTab('today');
+      await loadTodayTab();
+    }catch(e){
+      setConnected(false);
+      document.getElementById('connectMsg').textContent = '자동 연결 실패: ' + e.message + ' — 설정 탭에서 다시 연결해주세요.';
+      switchTab('settings');
+    }
+  } else {
+    switchTab('settings');
+  }
+}
+
+function setConnected(ok){
+  state.connected = ok;
+  document.getElementById('statusLine').textContent = ok
+    ? `연결됨 · ${gh.cfg.owner}/${gh.cfg.repo}`
+    : 'GitHub 연결 대기 중...';
+}
+
+function bindTabNav(){
+  document.getElementById('tabNav').addEventListener('click', (e)=>{
+    const btn = e.target.closest('button[data-tab]');
+    if(!btn) return;
+    switchTab(btn.dataset.tab);
+  });
+}
+function switchTab(name){
+  document.querySelectorAll('#tabNav button').forEach(b=>b.classList.toggle('active', b.dataset.tab===name));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.add('hidden'));
+  document.getElementById('tab-'+name).classList.remove('hidden');
+  if(!state.connected && name!=='settings'){
+    switchTab('settings');
+    showToast('먼저 GitHub 설정을 완료해주세요');
+    return;
+  }
+  if(name==='routine') renderRoutineTab();
+  if(name==='goals') loadGoalsTab();
+  if(name==='history') loadHistoryTab();
+}
+
+/* ============================================================
+   설정 탭
+============================================================ */
+function bindSettingsHandlers(){
+  document.getElementById('btnConnect').addEventListener('click', async ()=>{
+    const owner = document.getElementById('cfgOwner').value.trim();
+    const repo = document.getElementById('cfgRepo').value.trim();
+    const token = document.getElementById('cfgToken').value.trim();
+    const msg = document.getElementById('connectMsg');
+    if(!owner || !repo || !token){ msg.textContent = '아이디, 저장소 이름, 토큰을 모두 입력해주세요.'; return; }
+    gh.cfg = {owner, repo, token};
+    msg.textContent = '연결 확인 중...';
+    try{
+      const me = await gh.whoami();
+      const exists = await gh.repoExists();
+      if(!exists){
+        msg.textContent = `저장소가 없어 새로 생성 중... (${owner}/${repo})`;
+        await gh.createRepo();
+      }
+      await ensureBootstrapped(true);
+      await saveConfig(gh.cfg);
+      setConnected(true);
+      msg.textContent = `연결 완료! (${me.login})`;
+      showToast('GitHub 연결 완료');
+      switchTab('today');
+      await loadTodayTab();
+    }catch(e){
+      msg.textContent = '오류: ' + e.message;
+      setConnected(false);
+    }
+  });
+
+  document.getElementById('btnForget').addEventListener('click', async ()=>{
+    await clearConfig();
+    document.getElementById('cfgOwner').value='';
+    document.getElementById('cfgRepo').value='';
+    document.getElementById('cfgToken').value='';
+    setConnected(false);
+    document.getElementById('connectMsg').textContent = '저장된 정보를 삭제했습니다.';
+  });
+}
+
+async function ensureBootstrapped(forceMsg){
+  // routine.json
+  let r = await gh.getFile('config/routine.json');
+  if(!r){
+    await gh.putFile('config/routine.json', DEFAULT_ROUTINE, null, 'init routine template');
+    r = await gh.getFile('config/routine.json');
+  }
+  state.routine = r.data; state.routineSha = r.sha;
+
+  // goals.json
+  let g = await gh.getFile('config/goals.json');
+  if(!g){
+    const blank = {startWeight:null,targetWeight:null,targetBodyFat:null,targetCalories:null,memo:''};
+    await gh.putFile('config/goals.json', blank, null, 'init goals');
+    g = await gh.getFile('config/goals.json');
+  }
+  state.goals = g.data; state.goalsSha = g.sha;
+
+  // records.json
+  let rec = await gh.getFile('config/records.json');
+  if(!rec){
+    await gh.putFile('config/records.json', {}, null, 'init records');
+    rec = await gh.getFile('config/records.json');
+  }
+  state.records = rec.data; state.recordsSha = rec.sha;
+}
+
+/* ============================================================
+   오늘 탭
+============================================================ */
+function bindTodayHandlers(){
+  document.getElementById('dateInput').addEventListener('change', async (e)=>{
+    state.currentDate = e.target.value;
+    await loadTodayTab();
+  });
+  document.getElementById('btnAddMeal').addEventListener('click', ()=>{
+    state.meals.push({id:uid(), name:'', kcal:0});
+    renderMeals();
+  });
+  document.getElementById('btnSaveLog').addEventListener('click', saveTodayLog);
+  document.getElementById('btnApplySuggest').addEventListener('click', applySuggestions);
+  document.getElementById('btnSkipSuggest').addEventListener('click', ()=>{
+    document.getElementById('suggestCard').classList.add('hidden');
+  });
+}
+
+async function loadTodayTab(){
+  const date = state.currentDate;
+  const wd = weekdayOf(date);
+  document.getElementById('todayWeekdayBadge').textContent = WEEKDAY_LABEL[wd] + '요일';
+  document.getElementById('suggestCard').classList.add('hidden');
+
+  const existing = await gh.getFile(`logs/${date}.json`);
+  if(existing){
+    state.todayLog = existing.data;
+    state.todayLogSha = existing.sha;
+  } else {
+    state.todayLog = null;
+    state.todayLogSha = null;
+  }
+
+  const dayRoutine = state.routine[wd] || {label:'', exercises:[]};
+  const list = document.getElementById('exerciseList');
+  const noRoutine = document.getElementById('noRoutineMsg');
+  list.innerHTML = '';
+  if(!dayRoutine.exercises || dayRoutine.exercises.length===0){
+    noRoutine.classList.remove('hidden');
+  } else {
+    noRoutine.classList.add('hidden');
+    dayRoutine.exercises.forEach(ex=>{
+      const prevSets = state.todayLog?.exercises?.find(e=>e.id===ex.id)?.sets;
+      list.appendChild(buildExerciseBlock(ex, prevSets));
+    });
+  }
+
+  document.getElementById('bodyWeightInput').value = state.todayLog?.bodyWeight ?? '';
+  document.getElementById('memoInput').value = state.todayLog?.memo ?? '';
+  state.meals = state.todayLog?.diet?.meals ? JSON.parse(JSON.stringify(state.todayLog.diet.meals)) : [];
+  renderMeals();
+}
+
+function buildExerciseBlock(ex, prevSets){
+  const wrap = document.createElement('div');
+  wrap.className = 'exercise-block';
+  wrap.dataset.exid = ex.id;
+  wrap.dataset.exname = ex.name;
+  wrap.dataset.unit = ex.unit || 'kg';
+  wrap.dataset.targetReps = ex.targetReps;
+  wrap.dataset.targetWeight = ex.targetWeight;
+
+  const head = document.createElement('div');
+  head.className = 'exhead';
+  head.innerHTML = `<span class="exname">${ex.name}</span><span class="extarget">목표 ${ex.sets}세트 × ${ex.targetReps}회${ex.targetWeight?` · ${ex.targetWeight}${ex.unit||'kg'}`:''}</span>`;
+  wrap.appendChild(head);
+
+  for(let i=0;i<ex.sets;i++){
+    const prev = prevSets && prevSets[i] ? prevSets[i] : null;
+    const row = document.createElement('div');
+    row.className = 'setrow';
+    row.innerHTML = `
+      <span class="setnum">${i+1}</span>
+      <input type="number" placeholder="reps" class="setReps" value="${prev?prev.reps:''}">
+      <input type="number" placeholder="${ex.unit==='분'?'분':'kg'}" step="0.5" class="setWeight" value="${prev?prev.weight:(ex.targetWeight||'')}">
+    `;
+    wrap.appendChild(row);
+  }
+  return wrap;
+}
+
+function renderMeals(){
+  const wrap = document.getElementById('mealList');
+  wrap.innerHTML = '';
+  state.meals.forEach(m=>{
+    const row = document.createElement('div');
+    row.className = 'mealrow';
+    row.innerHTML = `
+      <input type="text" placeholder="음식 이름" class="mealName" value="${m.name.replace(/"/g,'&quot;')}">
+      <input type="number" placeholder="kcal" class="mealKcal" value="${m.kcal||''}">
+      <button class="iconbtn" title="삭제">✕</button>
+    `;
+    row.querySelector('.mealName').addEventListener('input', e=>{ m.name = e.target.value; });
+    row.querySelector('.mealKcal').addEventListener('input', e=>{ m.kcal = Number(e.target.value)||0; updateCalorieBadge(); });
+    row.querySelector('.iconbtn').addEventListener('click', ()=>{
+      state.meals = state.meals.filter(x=>x.id!==m.id);
+      renderMeals();
+    });
+    wrap.appendChild(row);
+  });
+  updateCalorieBadge();
+}
+function updateCalorieBadge(){
+  const total = state.meals.reduce((s,m)=>s+(Number(m.kcal)||0),0);
+  document.getElementById('calorieBadge').textContent = `${total} kcal`;
+}
+
+function collectExerciseData(){
+  return Array.from(document.querySelectorAll('#exerciseList .exercise-block')).map(block=>{
+    const sets = Array.from(block.querySelectorAll('.setrow')).map(row=>({
+      reps: Number(row.querySelector('.setReps').value)||0,
+      weight: Number(row.querySelector('.setWeight').value)||0,
+    }));
+    return {
+      id: block.dataset.exid,
+      name: block.dataset.exname,
+      unit: block.dataset.unit,
+      targetReps: Number(block.dataset.targetReps)||0,
+      targetWeight: Number(block.dataset.targetWeight)||0,
+      sets,
+    };
+  });
+}
+
+async function saveTodayLog(){
+  if(!state.connected){ showToast('GitHub 연결이 필요합니다'); return; }
+  const date = state.currentDate;
+  const wd = weekdayOf(date);
+  const exercises = collectExerciseData();
+  const bodyWeight = document.getElementById('bodyWeightInput').value ? Number(document.getElementById('bodyWeightInput').value) : null;
+  const memo = document.getElementById('memoInput').value;
+  const totalKcal = state.meals.reduce((s,m)=>s+(Number(m.kcal)||0),0);
+
+  const log = {
+    date, weekday: wd,
+    bodyWeight,
+    memo,
+    exercises,
+    diet: { meals: state.meals, totalCalories: totalKcal },
+    savedAt: new Date().toISOString(),
+  };
+
+  const btn = document.getElementById('btnSaveLog');
+  btn.disabled = true;
+  document.getElementById('saveHint').textContent = '저장 중...';
+  try{
+    const result = await gh.putFile(`logs/${date}.json`, log, state.todayLogSha, `log ${date}`);
+    state.todayLog = log;
+    state.todayLogSha = result.content.sha;
+
+    const { suggestions, prUpdates } = computeSuggestionsAndPRs(exercises, wd);
+    await maybeUpdateRecords(prUpdates);
+    if(suggestions.length){
+      state.pendingSuggestions = suggestions;
+      renderSuggestions(suggestions);
+      document.getElementById('suggestCard').classList.remove('hidden');
+    }
+    document.getElementById('saveHint').textContent = '저장 완료 ✓';
+    showToast('오늘 기록 저장 완료');
+  }catch(e){
+    document.getElementById('saveHint').textContent = '오류: ' + e.message;
+  }finally{
+    btn.disabled = false;
+    setTimeout(()=>{ document.getElementById('saveHint').textContent=''; }, 3000);
+  }
+}
+
+function computeSuggestionsAndPRs(exercises, wd){
+  const suggestions = [];
+  const prUpdates = [];
+  exercises.forEach(ex=>{
+    if(!ex.sets.length) return;
+    const allMet = ex.sets.every(s=>s.reps >= ex.targetReps && ex.targetReps>0);
+    const maxReps = Math.max(...ex.sets.map(s=>s.reps));
+    const maxWeight = Math.max(...ex.sets.map(s=>s.weight));
+
+    if(ex.targetReps>0 && allMet){
+      let nextReps = ex.targetReps + 1;
+      let nextWeight = ex.targetWeight;
+      // 목표 횟수를 5회 이상 초과 달성하면 다음엔 무게를 올리고 횟수는 기본치로 리셋
+      if(maxReps >= ex.targetReps + 5 && ex.targetWeight>0){
+        nextWeight = Math.round((ex.targetWeight + 2.5)*2)/2;
+        nextReps = Math.max(8, ex.targetReps - 4);
+      }
+      suggestions.push({ id:ex.id, name:ex.name, weekday:wd,
+        fromReps:ex.targetReps, toReps:nextReps,
+        fromWeight:ex.targetWeight, toWeight:nextWeight, unit:ex.unit });
+    }
+
+    const prevRecord = state.records[ex.id];
+    const isNewPR = !prevRecord || maxReps > prevRecord.reps || (maxReps===prevRecord.reps && maxWeight>prevRecord.weight);
+    if(isNewPR && (maxReps>0)){
+      prUpdates.push({id:ex.id, name:ex.name, reps:maxReps, weight:maxWeight, date:state.currentDate});
+    }
+  });
+  return { suggestions, prUpdates };
+}
+
+function renderSuggestions(list){
+  const wrap = document.getElementById('suggestList');
+  wrap.innerHTML = '';
+  list.forEach(s=>{
+    const row = document.createElement('div');
+    row.className = 'suggest-item';
+    const weightPart = s.fromWeight ? ` <span class="muted">/ ${s.fromWeight}${s.unit} <span class="arrow">→</span> ${s.toWeight}${s.unit}</span>` : '';
+    row.innerHTML = `<span>${s.name}</span><span>${s.fromReps}회 <span class="arrow">→</span> <b>${s.toReps}회</b>${weightPart}</span>`;
+    wrap.appendChild(row);
+  });
+}
+
+async function applySuggestions(){
+  if(!state.pendingSuggestions) return;
+  const wd = weekdayOf(state.currentDate);
+  const day = state.routine[wd];
+  state.pendingSuggestions.forEach(s=>{
+    const ex = day.exercises.find(e=>e.id===s.id);
+    if(ex){ ex.targetReps = s.toReps; ex.targetWeight = s.toWeight; }
+  });
+  try{
+    const result = await gh.putFile('config/routine.json', state.routine, state.routineSha, `progressive update after ${state.currentDate}`);
+    state.routineSha = result.content.sha;
+    showToast('다음 목표가 루틴에 반영되었습니다');
+    document.getElementById('suggestCard').classList.add('hidden');
+  }catch(e){
+    showToast('반영 실패: ' + e.message);
+  }
+}
+
+async function maybeUpdateRecords(prUpdates){
+  if(!prUpdates.length) return;
+  prUpdates.forEach(p=>{ state.records[p.id] = {reps:p.reps, weight:p.weight, date:p.date, name:p.name}; });
+  try{
+    const result = await gh.putFile('config/records.json', state.records, state.recordsSha, `PR update ${state.currentDate}`);
+    state.recordsSha = result.content.sha;
+    prUpdates.forEach(p=>showToast(`🏆 신기록! ${p.name} ${p.reps}회`));
+  }catch(e){ /* silent */ }
+}
+
+/* ============================================================
+   루틴 탭
+============================================================ */
+function bindRoutineHandlers(){
+  document.getElementById('btnAddExercise').addEventListener('click', ()=>{
+    const day = state.routine[state.routineEditingDay];
+    day.exercises.push({id:'ex_'+uid(), name:'새 종목', sets:3, targetReps:10, targetWeight:0, unit:'kg'});
+    renderRoutineDayExercises();
+  });
+  document.getElementById('btnSaveRoutine').addEventListener('click', async ()=>{
+    const day = state.routine[state.routineEditingDay];
+    day.label = document.getElementById('dayLabelInput').value;
+    collectRoutineExerciseInputs();
+    try{
+      const result = await gh.putFile('config/routine.json', state.routine, state.routineSha, 'update routine');
+      state.routineSha = result.content.sha;
+      showToast('루틴 저장 완료');
+    }catch(e){ showToast('오류: ' + e.message); }
+  });
+}
+
+function renderRoutineTab(){
+  const nav = document.getElementById('routineWeekdayTabs');
+  nav.innerHTML = '';
+  WEEKDAYS.forEach(wd=>{
+    const b = document.createElement('button');
+    b.textContent = WEEKDAY_LABEL[wd];
+    b.className = (wd==='sun'?'sun ':wd==='sat'?'sat ':'') + (wd===state.routineEditingDay?'active':'');
+    b.addEventListener('click', ()=>{ state.routineEditingDay = wd; renderRoutineTab(); });
+    nav.appendChild(b);
+  });
+  document.getElementById('dayLabelInput').value = state.routine[state.routineEditingDay]?.label || '';
+  renderRoutineDayExercises();
+}
+
+function renderRoutineDayExercises(){
+  const day = state.routine[state.routineEditingDay];
+  const wrap = document.getElementById('routineExerciseList');
+  wrap.innerHTML = '';
+  day.exercises.forEach((ex, idx)=>{
+    const block = document.createElement('div');
+    block.className = 'exercise-block';
+    block.dataset.idx = idx;
+    block.innerHTML = `
+      <div class="exhead">
+        <input type="text" class="rname" value="${ex.name}" style="font-weight:700;border:none;background:transparent;padding:0;font-size:14.5px;">
+        <button class="iconbtn" title="삭제">✕</button>
+      </div>
+      <div class="row" style="margin-top:6px;">
+        <div class="field"><label>세트</label><input type="number" class="rsets" value="${ex.sets}"></div>
+        <div class="field"><label>목표 횟수</label><input type="number" class="rreps" value="${ex.targetReps}"></div>
+        <div class="field"><label>목표 무게(kg, 유산소는 분)</label><input type="number" step="0.5" class="rweight" value="${ex.targetWeight}"></div>
+      </div>
+    `;
+    block.querySelector('.iconbtn').addEventListener('click', ()=>{
+      day.exercises.splice(idx,1);
+      renderRoutineDayExercises();
+    });
+    wrap.appendChild(block);
+  });
+}
+
+function collectRoutineExerciseInputs(){
+  const day = state.routine[state.routineEditingDay];
+  const blocks = document.querySelectorAll('#routineExerciseList .exercise-block');
+  blocks.forEach(block=>{
+    const idx = Number(block.dataset.idx);
+    day.exercises[idx].name = block.querySelector('.rname').value;
+    day.exercises[idx].sets = Number(block.querySelector('.rsets').value)||1;
+    day.exercises[idx].targetReps = Number(block.querySelector('.rreps').value)||0;
+    day.exercises[idx].targetWeight = Number(block.querySelector('.rweight').value)||0;
+    if(!day.exercises[idx].id) day.exercises[idx].id = 'ex_'+uid();
+  });
+}
+
+/* ============================================================
+   목표 탭
+============================================================ */
+function bindGoalsHandlers(){
+  document.getElementById('btnSaveGoals').addEventListener('click', async ()=>{
+    state.goals = {
+      startWeight: numOrNull('goalStartWeight'),
+      targetWeight: numOrNull('goalTargetWeight'),
+      targetBodyFat: numOrNull('goalBodyFat'),
+      targetCalories: numOrNull('goalCalories'),
+      memo: document.getElementById('goalMemo').value,
+    };
+    try{
+      const result = await gh.putFile('config/goals.json', state.goals, state.goalsSha, 'update goals');
+      state.goalsSha = result.content.sha;
+      showToast('목표 저장 완료');
+    }catch(e){ showToast('오류: ' + e.message); }
+  });
+}
+function numOrNull(id){ const v = document.getElementById(id).value; return v===''?null:Number(v); }
+
+async function loadGoalsTab(){
+  document.getElementById('goalStartWeight').value = state.goals.startWeight ?? '';
+  document.getElementById('goalTargetWeight').value = state.goals.targetWeight ?? '';
+  document.getElementById('goalBodyFat').value = state.goals.targetBodyFat ?? '';
+  document.getElementById('goalCalories').value = state.goals.targetCalories ?? '';
+  document.getElementById('goalMemo').value = state.goals.memo ?? '';
+
+  renderRecords();
+  await renderWeightTrend();
+}
+
+function renderRecords(){
+  const wrap = document.getElementById('recordsList');
+  const entries = Object.entries(state.records||{});
+  if(!entries.length){
+    wrap.innerHTML = `<div class="empty"><span class="big">🏆</span>아직 기록이 없습니다.</div>`;
+    return;
+  }
+  wrap.innerHTML = '';
+  entries.sort((a,b)=>a[1].name.localeCompare(b[1].name)).forEach(([id, r])=>{
+    const row = document.createElement('div');
+    row.className = 'suggest-item';
+    row.innerHTML = `<span>${r.name}</span><span><b>${r.reps}회</b>${r.weight?` / ${r.weight}kg`:''} <span class="muted">(${r.date})</span></span>`;
+    wrap.appendChild(row);
+  });
+}
+
+async function renderWeightTrend(){
+  const wrap = document.getElementById('weightChartWrap');
+  try{
+    const dirs = await gh.listDir('logs');
+    const files = dirs.filter(f=>f.name.endsWith('.json')).sort((a,b)=>a.name.localeCompare(b.name));
+    const recent = files.slice(-20);
+    const points = [];
+    for(const f of recent){
+      const file = await gh.getFile('logs/'+f.name);
+      if(file && file.data.bodyWeight!=null){
+        points.push({date:file.data.date, weight:file.data.bodyWeight});
+      }
+    }
+    if(points.length < 2){
+      wrap.innerHTML = `<div class="empty"><span class="big">📉</span>체중 기록이 2일 이상 쌓이면 그래프가 나타납니다.</div>`;
+      return;
+    }
+    wrap.innerHTML = buildSparkline(points);
+  }catch(e){
+    wrap.innerHTML = `<div class="empty">그래프를 불러오지 못했습니다: ${e.message}</div>`;
+  }
+}
+
+function buildSparkline(points){
+  const w = 640, h = 120, pad = 16;
+  const weights = points.map(p=>p.weight);
+  const min = Math.min(...weights), max = Math.max(...weights);
+  const range = (max-min) || 1;
+  const stepX = (w - pad*2) / (points.length-1);
+  const coords = points.map((p,i)=>{
+    const x = pad + i*stepX;
+    const y = pad + (h-pad*2) * (1 - (p.weight-min)/range);
+    return [x,y];
+  });
+  const path = coords.map((c,i)=> (i===0?'M':'L') + c[0].toFixed(1) + ',' + c[1].toFixed(1)).join(' ');
+  const dots = coords.map((c,i)=>`<circle cx="${c[0].toFixed(1)}" cy="${c[1].toFixed(1)}" r="3" fill="#C1432E"><title>${points[i].date}: ${points[i].weight}kg</title></circle>`).join('');
+  return `<svg class="spark" viewBox="0 0 ${w} ${h}">
+    <path d="${path}" fill="none" stroke="#1C2B39" stroke-width="2"/>
+    ${dots}
+  </svg>
+  <div class="muted" style="display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:11px;">
+    <span>${points[0].date} · ${points[0].weight}kg</span>
+    <span>${points[points.length-1].date} · ${points[points.length-1].weight}kg</span>
+  </div>`;
+}
+
+/* ============================================================
+   기록(히스토리) 탭
+============================================================ */
+function bindHistoryHandlers(){
+  document.getElementById('btnLoadMoreHist').addEventListener('click', loadMoreHistory);
+  document.getElementById('btnEditHistDay').addEventListener('click', ()=>{
+    if(!state.historyOpenDate) return;
+    document.getElementById('dateInput').value = state.historyOpenDate;
+    state.currentDate = state.historyOpenDate;
+    switchTab('today');
+    loadTodayTab();
+  });
+}
+
+async function loadHistoryTab(){
+  if(state.historyDates.length===0){
+    try{
+      const dirs = await gh.listDir('logs');
+      state.historyDates = dirs.filter(f=>f.name.endsWith('.json')).map(f=>f.name.replace('.json','')).sort().reverse();
+      state.historyLoaded = [];
+    }catch(e){ showToast('기록 목록 조회 실패: ' + e.message); }
+  }
+  document.getElementById('histCountBadge').textContent = `${state.historyDates.length}건`;
+  await loadMoreHistory();
+}
+
+async function loadMoreHistory(){
+  const wrap = document.getElementById('historyList');
+  const remaining = state.historyDates.filter(d=>!state.historyLoaded.includes(d));
+  const batch = remaining.slice(0, 10);
+  if(batch.length===0 && state.historyLoaded.length===0){
+    wrap.innerHTML = `<div class="empty"><span class="big">📓</span>저장된 기록이 없습니다.</div>`;
+    return;
+  }
+  if(wrap.querySelector('.empty')) wrap.innerHTML='';
+  for(const date of batch){
+    const file = await gh.getFile(`logs/${date}.json`);
+    if(!file) continue;
+    state.historyLoaded.push(date);
+    const log = file.data;
+    const kcal = log.diet?.totalCalories ?? 0;
+    const exCount = log.exercises?.length ?? 0;
+    const item = document.createElement('div');
+    item.className = 'hist-item';
+    item.innerHTML = `<div><div class="d">${date} (${WEEKDAY_LABEL[log.weekday]||''})</div><div class="meta">${exCount}개 종목 · ${kcal}kcal${log.bodyWeight?` · ${log.bodyWeight}kg`:''}</div></div><span class="muted">›</span>`;
+    item.addEventListener('click', ()=>openHistoryDetail(log));
+    wrap.appendChild(item);
+  }
+  document.getElementById('btnLoadMoreHist').style.display = (state.historyLoaded.length>=state.historyDates.length) ? 'none':'inline-block';
+}
+
+function openHistoryDetail(log){
+  state.historyOpenDate = log.date;
+  const card = document.getElementById('histDetailCard');
+  card.classList.remove('hidden');
+  document.getElementById('histDetailTitle').innerHTML = `${log.date} <span class="badge">${WEEKDAY_LABEL[log.weekday]||''}요일</span>`;
+  const body = document.getElementById('histDetailBody');
+  let html = '';
+  if(log.bodyWeight) html += `<p class="muted">체중: ${log.bodyWeight}kg</p>`;
+  if(log.memo) html += `<p class="muted">메모: ${log.memo}</p>`;
+  (log.exercises||[]).forEach(ex=>{
+    const setsStr = ex.sets.map(s=>`${s.reps}회${s.weight?`/${s.weight}${ex.unit||'kg'}`:''}`).join(', ');
+    html += `<div class="suggest-item"><span>${ex.name}</span><span class="muted">${setsStr}</span></div>`;
+  });
+  if(log.diet?.meals?.length){
+    html += `<div class="divider"></div><p class="muted">식단 (${log.diet.totalCalories}kcal)</p>`;
+    log.diet.meals.forEach(m=>{ html += `<div class="suggest-item"><span>${m.name||'-'}</span><span class="muted">${m.kcal}kcal</span></div>`; });
+  }
+  body.innerHTML = html || '<p class="muted">내용 없음</p>';
+  card.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+/* ============================================================
+   시작
+============================================================ */
+init();
+</script>
+</body>
+</html>
