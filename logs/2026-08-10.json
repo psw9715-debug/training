@@ -1,0 +1,80 @@
+{
+  "date": "2026-08-10",
+  "weekday": "mon",
+  "bodyWeight": 79,
+  "memo": "",
+  "exercises": [
+    {
+      "id": "bench",
+      "name": "벤치프레스",
+      "unit": "kg",
+      "targetReps": 8,
+      "targetWeight": 40,
+      "sets": [
+        {
+          "reps": 15,
+          "weight": 35
+        },
+        {
+          "reps": 13,
+          "weight": 40
+        },
+        {
+          "reps": 10,
+          "weight": 45
+        },
+        {
+          "reps": 8,
+          "weight": 50
+        }
+      ]
+    },
+    {
+      "id": "incline_db",
+      "name": "인클라인 덤벨프레스",
+      "unit": "kg",
+      "targetReps": 10,
+      "targetWeight": 16,
+      "sets": [
+        {
+          "reps": 0,
+          "weight": 16
+        },
+        {
+          "reps": 0,
+          "weight": 16
+        },
+        {
+          "reps": 0,
+          "weight": 16
+        }
+      ]
+    },
+    {
+      "id": "triceps_pushdown",
+      "name": "트라이셉 푸시다운",
+      "unit": "kg",
+      "targetReps": 12,
+      "targetWeight": 15,
+      "sets": [
+        {
+          "reps": 0,
+          "weight": 15
+        },
+        {
+          "reps": 0,
+          "weight": 15
+        },
+        {
+          "reps": 0,
+          "weight": 15
+        }
+      ]
+    }
+  ],
+  "diet": {
+    "meals": [],
+    "totalCalories": 0
+  },
+  "savedAt": "2026-08-09T20:56:43.006Z"
+}
