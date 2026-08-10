@@ -1,0 +1,80 @@
+[
+  {
+    "id": "bench",
+    "name": "벤치",
+    "bodyPart": "가슴",
+    "type": "strength"
+  },
+  {
+    "id": "cable_crossover",
+    "name": "케이블 크로스오버",
+    "bodyPart": "가슴",
+    "type": "strength"
+  },
+  {
+    "id": "butterfly",
+    "name": "버터플라이",
+    "bodyPart": "가슴",
+    "type": "strength"
+  },
+  {
+    "id": "lat_pulldown",
+    "name": "렛풀다운",
+    "bodyPart": "등",
+    "type": "strength"
+  },
+  {
+    "id": "long_pull",
+    "name": "롱풀",
+    "bodyPart": "등",
+    "type": "strength"
+  },
+  {
+    "id": "shoulder_press",
+    "name": "숄더프레스",
+    "bodyPart": "어깨",
+    "type": "strength"
+  },
+  {
+    "id": "arm_curl",
+    "name": "암컬",
+    "bodyPart": "팔",
+    "type": "strength"
+  },
+  {
+    "id": "situp",
+    "name": "싯업",
+    "bodyPart": "복근",
+    "type": "strength"
+  },
+  {
+    "id": "smith_machine",
+    "name": "스미스머신",
+    "bodyPart": "하체",
+    "type": "strength"
+  },
+  {
+    "id": "leg_extension",
+    "name": "레그 익스텐션",
+    "bodyPart": "하체",
+    "type": "strength"
+  },
+  {
+    "id": "leg_curl",
+    "name": "레그 컬",
+    "bodyPart": "하체",
+    "type": "strength"
+  },
+  {
+    "id": "seated_leg_press",
+    "name": "시티드 레그프레스",
+    "bodyPart": "하체",
+    "type": "strength"
+  },
+  {
+    "id": "running",
+    "name": "러닝",
+    "bodyPart": "유산소",
+    "type": "cardio"
+  }
+]
