@@ -344,7 +344,8 @@ const DEFAULT_LIBRARY = [
   {id:'leg_extension', name:'레그 익스텐션', bodyPart:'하체', type:'strength'},
   {id:'leg_curl', name:'레그 컬', bodyPart:'하체', type:'strength'},
   {id:'seated_leg_press', name:'시티드 레그프레스', bodyPart:'하체', type:'strength'},
-  {id:'running', name:'러닝', bodyPart:'유산소', type:'cardio'},
+  {id:'running', name:'러닝', bodyPart:'유산소', type:'cardio', distanceUnit:'km', met:9.0},
+  {id:'swimming', name:'수영', bodyPart:'유산소', type:'cardio', distanceUnit:'m', met:7.0},
 ];
 
 const GROUPS = {
@@ -361,8 +362,8 @@ const LEVEL_PRESETS = {
   5:{freq:'주 5~6회', days:{ mon:{label:'상체A',group:'upperA'}, tue:{label:'하체',group:'lower'}, wed:{label:'상체B',group:'upperB'}, thu:{label:'하체',group:'lower'}, fri:{label:'상체A · 러닝',group:'upperA',extra:['running']}, sat:{label:'러닝(선택)',group:null,extra:['running']} }},
 };
 
-const RUN_KCAL_PER_KG_KM = 1.0;
 const DEFAULT_STRENGTH_MET = 5.0;
+const DEFAULT_CARDIO_MET = 8.0;
 const DEFAULT_MIN_PER_SET = 2.5;
 
 /* ============================================================
@@ -375,6 +376,12 @@ function weekdayOf(isoDate){ const d=new Date(isoDate+'T00:00:00'); return WEEKD
 function b64EncodeUnicode(str){ return btoa(unescape(encodeURIComponent(str))); }
 function b64DecodeUnicode(str){ return decodeURIComponent(escape(atob(str))); }
 function formatPace(minPerKm){ if(!isFinite(minPerKm)||minPerKm<=0) return '-'; const m=Math.floor(minPerKm); const s=Math.round((minPerKm-m)*60); return `${m}:${String(s).padStart(2,'0')}`; }
+function paceLabel(duration, distance, distanceUnit){
+  const d=Number(distance), t=Number(duration);
+  if(!(d>0) || !(t>0)) return '-';
+  if(distanceUnit==='m'){ const per100 = t/(d/100); return formatPace(per100)+'/100m'; }
+  return formatPace(t/d)+'/km';
+}
 function showToast(msg){
   const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
   clearTimeout(showToast._tm); showToast._tm=setTimeout(()=>t.classList.remove('show'),2800);
@@ -390,7 +397,11 @@ function computeCaloriesForEntries(entries, weight){
   let strengthKcal=0, cardioKcal=0;
   entries.forEach(en=>{
     if(en.type==='cardio'){
-      if(en.distance>0) cardioKcal += RUN_KCAL_PER_KG_KM*weight*en.distance;
+      if(en.duration>0){
+        const lib = findLibItem(en.exerciseId);
+        const cmet = lib?.met || DEFAULT_CARDIO_MET;
+        cardioKcal += cmet*weight*(en.duration/60);
+      }
     } else {
       const setsCount = (en.sets||[]).filter(s=>Number(s.reps)>0).length;
       if(setsCount>0){ const hours=(setsCount*minPerSet)/60; strengthKcal += met*weight*hours; }
@@ -663,9 +674,11 @@ function renderEntryCard(en){
 
   if(en.expanded){
     if(en.type==='cardio'){
+      const lib = findLibItem(en.exerciseId);
+      const unit = lib?.distanceUnit || 'km';
       body.innerHTML = `
         <div class="cardiorow2">
-          <div class="field" style="margin-bottom:0;"><label>거리(km)</label><input type="number" step="0.1" class="cdDist" value="${en.distance??''}"></div>
+          <div class="field" style="margin-bottom:0;"><label>거리(${unit})</label><input type="number" step="${unit==='m'?'50':'0.1'}" class="cdDist" value="${en.distance??''}"></div>
           <div class="field" style="margin-bottom:0;"><label>시간(분)</label><input type="number" step="1" class="cdDur" value="${en.duration??''}"></div>
         </div>
         <div class="vol-line" data-role="pace">페이스: -</div>
@@ -675,8 +688,8 @@ function renderEntryCard(en){
         </div>
       `;
       const dEl=body.querySelector('.cdDist'), tEl=body.querySelector('.cdDur'), paceEl=body.querySelector('[data-role="pace"]');
-      const upd=()=>{ en.distance=dEl.value; en.duration=tEl.value; const d=Number(dEl.value),t=Number(tEl.value);
-        paceEl.textContent = (d>0&&t>0) ? `페이스: ${formatPace(t/d)}/km` : '페이스: -'; updateCalorieBadge(); };
+      const upd=()=>{ en.distance=dEl.value; en.duration=tEl.value;
+        paceEl.textContent = `페이스: ${paceLabel(tEl.value, dEl.value, unit)}`; updateCalorieBadge(); };
       dEl.addEventListener('input',upd); tEl.addEventListener('input',upd); upd();
     } else {
       const rowsWrap = document.createElement('div');
@@ -702,9 +715,11 @@ function renderEntryCard(en){
     }
   } else {
     if(en.type==='cardio'){
+      const lib = findLibItem(en.exerciseId);
+      const unit = lib?.distanceUnit || 'km';
       const d=Number(en.distance)||0, t=Number(en.duration)||0;
       if(d>0||t>0){
-        body.innerHTML = `<div class="chip-row"><span class="chip">${en.distance||0}km · ${en.duration||0}분${d>0&&t>0?` (${formatPace(t/d)}/km)`:''}</span></div>`;
+        body.innerHTML = `<div class="chip-row"><span class="chip">${en.distance||0}${unit} · ${en.duration||0}분${d>0&&t>0?` (${paceLabel(t,d,unit)})`:''}</span></div>`;
       } else {
         body.innerHTML = `<div class="empty" style="padding:10px;">탭해서 입력하세요</div>`;
       }
@@ -835,8 +850,14 @@ function openPickerSheet(mode, weekday){
     items.forEach(it=>{
       const chip = document.createElement('button');
       chip.className='chip-btn'; chip.textContent=it.name;
-      const already = mode==='routine' && (state.routine[weekday]?.exerciseIds||[]).includes(it.id);
+      const already = mode==='routine'
+        ? (state.routine[weekday]?.exerciseIds||[]).includes(it.id)
+        : state.entries.some(en=>en.exerciseId===it.id && en.adHoc);
       if(already) chip.classList.add('selected');
+      if(mode!=='routine'){
+        const existing = state.entries.find(en=>en.exerciseId===it.id && en.adHoc);
+        if(existing) chip.dataset.instanceId = existing.instanceId;
+      }
       chip.addEventListener('click', ()=>{
         if(mode==='routine'){
           const list = state.routine[weekday].exerciseIds;
@@ -844,9 +865,17 @@ function openPickerSheet(mode, weekday){
           else { list.push(it.id); chip.classList.add('selected'); }
           renderAssignedList();
         } else {
-          state.entries.push(buildEntryFromTemplate(it.id, null, true));
+          if(chip.dataset.instanceId){
+            state.entries = state.entries.filter(en=>en.instanceId!==chip.dataset.instanceId);
+            delete chip.dataset.instanceId;
+            chip.classList.remove('selected');
+          } else {
+            const newEntry = buildEntryFromTemplate(it.id, null, true);
+            state.entries.push(newEntry);
+            chip.dataset.instanceId = newEntry.instanceId;
+            chip.classList.add('selected');
+          }
           renderEntryList();
-          chip.classList.add('selected');
         }
       });
       grp.appendChild(chip);
@@ -1041,7 +1070,7 @@ function renderRecords(){
   wrap.innerHTML='';
   entries.sort((a,b)=>(a[1].name||'').localeCompare(b[1].name||'')).forEach(([id,r])=>{
     const row=document.createElement('div'); row.className='suggest-item';
-    if(r.type==='cardio') row.innerHTML = `<span>${r.name}</span><span><b>${r.distance}km</b> / ${r.duration}분 (${formatPace(r.pace)}/km) <span class="muted">(${r.date})</span></span>`;
+    if(r.type==='cardio'){ const unit=findLibItem(id)?.distanceUnit||'km'; row.innerHTML = `<span>${r.name}</span><span><b>${r.distance}${unit}</b> / ${r.duration}분 (${paceLabel(r.duration,r.distance,unit)}) <span class="muted">(${r.date})</span></span>`; }
     else row.innerHTML = `<span>${r.name}</span><span><b>${r.weight}kg</b> × ${r.reps}회 <span class="muted">(${r.date})</span></span>`;
     wrap.appendChild(row);
   });
@@ -1218,8 +1247,8 @@ function gatherExportText(){
   if(cardioEn.length){
     lines.push('■ 유산소');
     cardioEn.forEach(en=>{
-      const pace = en.distance>0 ? formatPace(en.duration/en.distance) : '-';
-      lines.push(`- [${en.exerciseId}] ${en.name}: ${en.distance}km / ${en.duration}분 (${pace}/km)`);
+      const unit = findLibItem(en.exerciseId)?.distanceUnit || 'km';
+      lines.push(`- [${en.exerciseId}] ${en.name}: ${en.distance}${unit} / ${en.duration}분 (${paceLabel(en.duration,en.distance,unit)})`);
     });
     lines.push('');
   }
@@ -1289,7 +1318,7 @@ function openHistoryDetail(log){
   if(log.calories) html+=`<p class="muted">소모 칼로리(추정): 약 ${log.calories.total}kcal</p>`;
   (log.entries||[]).forEach(en=>{
     let line;
-    if(en.type==='cardio'){ const pace = en.distance>0?formatPace(en.duration/en.distance):'-'; line=`${en.distance}km / ${en.duration}분 (${pace}/km)`; }
+    if(en.type==='cardio'){ const unit=findLibItem(en.exerciseId)?.distanceUnit||'km'; line=`${en.distance}${unit} / ${en.duration}분 (${paceLabel(en.duration,en.distance,unit)})`; }
     else line = (en.sets||[]).map(s=>`${s.weight}×${s.reps}${s.failed?'✕':''}`).join(', ');
     html += `<div class="suggest-item"><span>${en.name}</span><span class="muted" style="font-size:11px;">${line}</span></div>`;
   });
