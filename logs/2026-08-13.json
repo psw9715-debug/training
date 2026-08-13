@@ -1,0 +1,24 @@
+{
+  "date": "2026-08-13",
+  "weekday": "thu",
+  "bodyWeight": 79.5,
+  "rpe": null,
+  "memo": "",
+  "entries": [
+    {
+      "instanceId": "7lznd7q",
+      "exerciseId": "ex_kjnajp5",
+      "name": "수영",
+      "type": "cardio",
+      "adHoc": true,
+      "distance": 1.5,
+      "duration": 60
+    }
+  ],
+  "calories": {
+    "strength": 0,
+    "cardio": 636,
+    "total": 636
+  },
+  "savedAt": "2026-08-13T14:16:55.907Z"
+}
