@@ -4,5 +4,21 @@
     "weight": 50,
     "date": "2026-08-10",
     "name": "벤치프레스"
+  },
+  "running": {
+    "type": "cardio",
+    "name": "러닝",
+    "distance": 4.5,
+    "duration": 30,
+    "pace": 6.666666666666667,
+    "date": "2026-08-10"
+  },
+  "ex_kjnajp5": {
+    "type": "cardio",
+    "name": "수영",
+    "distance": 1,
+    "duration": 60,
+    "pace": 60,
+    "date": "2026-08-10"
   }
 }
