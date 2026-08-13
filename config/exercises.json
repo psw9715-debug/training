@@ -76,5 +76,11 @@
     "name": "러닝",
     "bodyPart": "유산소",
     "type": "cardio"
+  },
+  {
+    "id": "ex_kjnajp5",
+    "name": "수영",
+    "bodyPart": "유산소",
+    "type": "cardio"
   }
 ]
