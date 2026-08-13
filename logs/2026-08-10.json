@@ -2,79 +2,32 @@
   "date": "2026-08-10",
   "weekday": "mon",
   "bodyWeight": 79,
+  "rpe": null,
   "memo": "",
-  "exercises": [
+  "entries": [
     {
-      "id": "bench",
-      "name": "벤치프레스",
-      "unit": "kg",
-      "targetReps": 8,
-      "targetWeight": 40,
-      "sets": [
-        {
-          "reps": 15,
-          "weight": 35
-        },
-        {
-          "reps": 13,
-          "weight": 40
-        },
-        {
-          "reps": 10,
-          "weight": 45
-        },
-        {
-          "reps": 8,
-          "weight": 50
-        }
-      ]
+      "instanceId": "gj2wgyi",
+      "exerciseId": "running",
+      "name": "러닝",
+      "type": "cardio",
+      "adHoc": true,
+      "distance": 4.5,
+      "duration": 30
     },
     {
-      "id": "incline_db",
-      "name": "인클라인 덤벨프레스",
-      "unit": "kg",
-      "targetReps": 10,
-      "targetWeight": 16,
-      "sets": [
-        {
-          "reps": 0,
-          "weight": 16
-        },
-        {
-          "reps": 0,
-          "weight": 16
-        },
-        {
-          "reps": 0,
-          "weight": 16
-        }
-      ]
-    },
-    {
-      "id": "triceps_pushdown",
-      "name": "트라이셉 푸시다운",
-      "unit": "kg",
-      "targetReps": 12,
-      "targetWeight": 15,
-      "sets": [
-        {
-          "reps": 0,
-          "weight": 15
-        },
-        {
-          "reps": 0,
-          "weight": 15
-        },
-        {
-          "reps": 0,
-          "weight": 15
-        }
-      ]
+      "instanceId": "gapzeze",
+      "exerciseId": "ex_kjnajp5",
+      "name": "수영",
+      "type": "cardio",
+      "adHoc": true,
+      "distance": 1,
+      "duration": 60
     }
   ],
-  "diet": {
-    "meals": [],
-    "totalCalories": 0
+  "calories": {
+    "strength": 0,
+    "cardio": 948,
+    "total": 948
   },
-  "savedAt": "2026-08-09T20:56:43.006Z"
+  "savedAt": "2026-08-13T14:15:58.950Z"
 }
