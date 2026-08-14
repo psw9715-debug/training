@@ -1,7 +1,7 @@
 {
   "date": "2026-08-15",
   "weekday": "sat",
-  "bodyWeight": null,
+  "bodyWeight": 79,
   "rpe": null,
   "memo": "",
   "entries": [
@@ -71,9 +71,9 @@
     }
   ],
   "calories": {
-    "strength": 0,
+    "strength": 181,
     "cardio": 0,
-    "total": 0
+    "total": 181
   },
-  "savedAt": "2026-08-14T19:14:19.642Z"
+  "savedAt": "2026-08-14T19:14:33.628Z"
 }
