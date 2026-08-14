@@ -20,5 +20,12 @@
     "duration": 60,
     "pace": 40,
     "date": "2026-08-11"
+  },
+  "lat_pulldown": {
+    "type": "strength",
+    "name": "렛풀다운",
+    "weight": 55,
+    "reps": 1,
+    "date": "2026-08-15"
   }
 }
