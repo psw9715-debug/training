@@ -68,5 +68,35 @@
         "failed": false
       }
     ]
+  },
+  "shoulder_press": {
+    "type": "strength",
+    "sets": [
+      {
+        "weight": 0,
+        "reps": 12,
+        "failed": false
+      },
+      {
+        "weight": 5,
+        "reps": 10,
+        "failed": false
+      },
+      {
+        "weight": 10,
+        "reps": 8,
+        "failed": false
+      },
+      {
+        "weight": 5,
+        "reps": 10,
+        "failed": false
+      },
+      {
+        "weight": 0,
+        "reps": 12,
+        "failed": false
+      }
+    ]
   }
 }
