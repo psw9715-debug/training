@@ -6,83 +6,44 @@
   "memo": "",
   "entries": [
     {
-      "instanceId": "sdpzzau",
-      "exerciseId": "lat_pulldown",
-      "name": "렛풀다운",
+      "instanceId": "my5zflk",
+      "exerciseId": "shoulder_press",
+      "name": "숄더프레스",
       "type": "strength",
       "adHoc": true,
       "sets": [
         {
-          "weight": 20,
+          "weight": 0,
           "reps": 12,
           "failed": false
         },
         {
-          "weight": 25,
+          "weight": 5,
           "reps": 10,
           "failed": false
         },
         {
-          "weight": 30,
+          "weight": 10,
           "reps": 8,
           "failed": false
         },
         {
-          "weight": 35,
-          "reps": 6,
+          "weight": 5,
+          "reps": 10,
           "failed": false
         },
         {
-          "weight": 40,
-          "reps": 4,
-          "failed": false
-        },
-        {
-          "weight": 45,
-          "reps": 2,
-          "failed": false
-        },
-        {
-          "weight": 50,
-          "reps": 1,
-          "failed": false
-        },
-        {
-          "weight": 55,
-          "reps": 1,
-          "failed": false
-        },
-        {
-          "weight": 50,
-          "reps": 2,
-          "failed": false
-        },
-        {
-          "weight": 45,
-          "reps": 3,
-          "failed": false
-        },
-        {
-          "weight": 40,
-          "reps": 4,
+          "weight": 0,
+          "reps": 12,
           "failed": false
         }
       ]
-    },
-    {
-      "instanceId": "8w0mjno",
-      "exerciseId": "ex_kjnajp5",
-      "name": "수영",
-      "type": "cardio",
-      "adHoc": true,
-      "distance": 1.5,
-      "duration": 60
     }
   ],
   "calories": {
-    "strength": 181,
-    "cardio": 632,
-    "total": 813
+    "strength": 82,
+    "cardio": 0,
+    "total": 82
   },
-  "savedAt": "2026-08-14T19:25:35.899Z"
+  "savedAt": "2026-08-14T19:27:10.581Z"
 }
