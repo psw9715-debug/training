@@ -1,0 +1,79 @@
+{
+  "date": "2026-08-15",
+  "weekday": "sat",
+  "bodyWeight": null,
+  "rpe": null,
+  "memo": "",
+  "entries": [
+    {
+      "instanceId": "sdpzzau",
+      "exerciseId": "lat_pulldown",
+      "name": "렛풀다운",
+      "type": "strength",
+      "adHoc": true,
+      "sets": [
+        {
+          "weight": 20,
+          "reps": 12,
+          "failed": false
+        },
+        {
+          "weight": 25,
+          "reps": 10,
+          "failed": false
+        },
+        {
+          "weight": 30,
+          "reps": 8,
+          "failed": false
+        },
+        {
+          "weight": 35,
+          "reps": 6,
+          "failed": false
+        },
+        {
+          "weight": 40,
+          "reps": 4,
+          "failed": false
+        },
+        {
+          "weight": 45,
+          "reps": 2,
+          "failed": false
+        },
+        {
+          "weight": 50,
+          "reps": 1,
+          "failed": false
+        },
+        {
+          "weight": 55,
+          "reps": 1,
+          "failed": false
+        },
+        {
+          "weight": 50,
+          "reps": 2,
+          "failed": false
+        },
+        {
+          "weight": 45,
+          "reps": 3,
+          "failed": false
+        },
+        {
+          "weight": 40,
+          "reps": 4,
+          "failed": false
+        }
+      ]
+    }
+  ],
+  "calories": {
+    "strength": 0,
+    "cardio": 0,
+    "total": 0
+  },
+  "savedAt": "2026-08-14T19:14:19.642Z"
+}
