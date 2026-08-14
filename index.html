@@ -611,7 +611,7 @@ async function loadTodayTab(){
     });
   }
 
-  document.getElementById('bodyWeightInput').value = savedLog?.bodyWeight ?? '';
+  document.getElementById('bodyWeightInput').value = savedLog?.bodyWeight ?? state.goals?.lastBodyWeight ?? '';
   document.getElementById('rpeInput').value = savedLog?.rpe ?? '';
   document.getElementById('memoInput').value = savedLog?.memo ?? '';
   renderEntryList();
@@ -705,10 +705,19 @@ function renderEntryCard(en){
       actions.querySelector('.btnAddSet').addEventListener('click', ()=>{
         const sets = en.sets;
         const last = sets[sets.length-1] || {weight:0,reps:10};
-        const prev = sets[sets.length-2] || last;
-        const dw = Number(last.weight)-Number(prev.weight);
-        const dr = Number(last.reps)-Number(prev.reps);
-        sets.push({ weight: Number(last.weight)+ (isFinite(dw)?dw:0), reps: Math.max(1, Number(last.reps)+(isFinite(dr)?dr:0)), failed:false });
+        // 증감 "단위"는 항상 맨 처음 두 줄(사다리의 첫 스텝) 기준으로 고정
+        const base0 = sets[0] || last;
+        const base1 = sets[1] || last;
+        let stepW = Math.abs(Number(base1.weight)-Number(base0.weight));
+        let stepR = Math.abs(Number(base1.reps)-Number(base0.reps));
+        if(!stepW) stepW = 2.5;
+        if(!stepR) stepR = 1;
+        // 방향은 "지금까지 찍은 최고 무게보다 마지막 줄이 낮은가"로 판단 (낮으면 하강 중)
+        const peakBefore = Math.max(...sets.slice(0, sets.length-1).map(s=>Number(s.weight)||0), 0);
+        const descending = Number(last.weight) < peakBefore;
+        const nextWeight = descending ? Math.max(0, Number(last.weight)-stepW) : Number(last.weight)+stepW;
+        const nextReps = descending ? Number(last.reps)+stepR : Math.max(1, Number(last.reps)-stepR);
+        sets.push({ weight: nextWeight, reps: nextReps, failed:false });
         renderEntryList();
       });
       body.appendChild(actions);
@@ -820,6 +829,14 @@ async function saveTodayLog(){
     const recResult = await gh.putFile('config/records.json', state.records, state.recordsSha, `records update ${date}`);
     state.recordsSha = recResult.content.sha;
 
+    if(bodyWeight!=null && bodyWeight!==state.goals.lastBodyWeight){
+      state.goals.lastBodyWeight = bodyWeight;
+      try{
+        const goalsResult = await gh.putFile('config/goals.json', state.goals, state.goalsSha, `last weight update ${date}`);
+        state.goalsSha = goalsResult.content.sha;
+      }catch(e){ /* 체중 이어받기는 부가기능이라 실패해도 저장 자체는 계속 진행 */ }
+    }
+
     document.getElementById('saveHint').textContent='저장 완료 ✓';
     showToast('오늘 운동 저장 완료');
   }catch(e){ document.getElementById('saveHint').textContent='오류: '+e.message; }
@@ -861,22 +878,19 @@ function openPickerSheet(mode, weekday){
       chip.addEventListener('click', ()=>{
         if(mode==='routine'){
           const list = state.routine[weekday].exerciseIds;
-          if(list.includes(it.id)){ state.routine[weekday].exerciseIds = list.filter(x=>x!==it.id); chip.classList.remove('selected'); }
-          else { list.push(it.id); chip.classList.add('selected'); }
+          if(list.includes(it.id)){ state.routine[weekday].exerciseIds = list.filter(x=>x!==it.id); }
+          else { list.push(it.id); }
           renderAssignedList();
         } else {
           if(chip.dataset.instanceId){
             state.entries = state.entries.filter(en=>en.instanceId!==chip.dataset.instanceId);
-            delete chip.dataset.instanceId;
-            chip.classList.remove('selected');
           } else {
             const newEntry = buildEntryFromTemplate(it.id, null, true);
             state.entries.push(newEntry);
-            chip.dataset.instanceId = newEntry.instanceId;
-            chip.classList.add('selected');
           }
           renderEntryList();
         }
+        closeSheet();
       });
       grp.appendChild(chip);
     });
@@ -1280,14 +1294,13 @@ function gatherExportText(){
 ============================================================ */
 function bindHistoryHandlers(){ document.getElementById('btnLoadMoreHist').addEventListener('click', loadMoreHistory); }
 async function loadHistoryTab(){
-  if(state.historyDates.length===0){
-    try{
-      const dirs = await gh.listDir('logs');
-      state.historyDates = dirs.filter(f=>f.name.endsWith('.json')).map(f=>f.name.replace('.json','')).sort().reverse();
-      state.historyLoaded=[];
-    }catch(e){ showToast('기록 목록 조회 실패: '+e.message); }
-  }
+  try{
+    const dirs = await gh.listDir('logs');
+    state.historyDates = dirs.filter(f=>f.name.endsWith('.json')).map(f=>f.name.replace('.json','')).sort().reverse();
+    state.historyLoaded=[];
+  }catch(e){ showToast('기록 목록 조회 실패: '+e.message); }
   document.getElementById('histCountBadge').textContent = `${state.historyDates.length}건`;
+  document.getElementById('historyList').innerHTML='';
   await loadMoreHistory();
 }
 async function loadMoreHistory(){
