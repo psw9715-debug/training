@@ -27,5 +27,12 @@
     "weight": 55,
     "reps": 1,
     "date": "2026-08-15"
+  },
+  "shoulder_press": {
+    "type": "strength",
+    "name": "숄더프레스",
+    "weight": 10,
+    "reps": 8,
+    "date": "2026-08-15"
   }
 }
