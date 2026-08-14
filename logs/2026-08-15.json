@@ -68,12 +68,21 @@
           "failed": false
         }
       ]
+    },
+    {
+      "instanceId": "8w0mjno",
+      "exerciseId": "ex_kjnajp5",
+      "name": "수영",
+      "type": "cardio",
+      "adHoc": true,
+      "distance": 1.5,
+      "duration": 60
     }
   ],
   "calories": {
     "strength": 181,
-    "cardio": 0,
-    "total": 181
+    "cardio": 632,
+    "total": 813
   },
-  "savedAt": "2026-08-14T19:14:33.628Z"
+  "savedAt": "2026-08-14T19:25:35.899Z"
 }
