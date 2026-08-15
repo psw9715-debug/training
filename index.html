@@ -1,4 +1,5 @@
 <!doctype html>
+<!-- 훈련일지 v1.6 · 빌드 2026-08-15 16:20 -->
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -173,6 +174,7 @@ nav.bottomnav button.active{color:var(--ink);background:var(--paper);}
 <header class="top">
   <div class="stamp-title"><span class="dot"></span>훈련일지</div>
   <div class="subtitle" id="statusLine">GitHub 연결 대기 중...</div>
+  <div class="subtitle" id="versionLine" style="margin-top:2px;"></div>
 </header>
 
 <main>
@@ -208,7 +210,10 @@ nav.bottomnav button.active{color:var(--ink);background:var(--paper);}
   <div class="card">
     <h2>오늘의 종목 <span class="badge" id="calorieBadge">- kcal</span></h2>
     <div id="entryList"></div>
-    <button class="btn ghost small" id="btnAddAdhoc">+ 종목 추가 (오늘만)</button>
+    <div class="btn-row" style="margin-top:8px;">
+      <button class="btn ghost small" id="btnAddAdhoc">+ 종목 추가 (오늘만)</button>
+      <button class="btn ghost small hidden" id="btnDeleteLog" style="color:var(--red);border-color:var(--red);">이 날짜 기록 삭제</button>
+    </div>
   </div>
 
   <div class="card">
@@ -400,6 +405,14 @@ nav.bottomnav button.active{color:var(--ink);background:var(--paper);}
 
 <script>
 /* ============================================================
+   버전 정보 - 파일을 새로 만들 때마다 이 값을 갱신하세요.
+   화면 상단(훈련일지 옆)에 표시되어, 어느 버전이 실제로 올라가 있는지
+   바로 눈으로 구분할 수 있게 해줍니다.
+============================================================ */
+const APP_VERSION = 'v1.6';
+const APP_BUILD = '2026-08-15 16:20';
+
+/* ============================================================
    상수
 ============================================================ */
 const WEEKDAYS = ['sun','mon','tue','wed','thu','fri','sat'];
@@ -543,6 +556,13 @@ const gh = {
     if(r.status===404) return [];
     if(!r.ok) throw new Error(`목록 조회 실패 (${path}): ${r.status}`);
     return r.json();
+  },
+  async deleteFile(path, sha, message){
+    const r=await fetch(this.api(`/repos/${this.cfg.owner}/${this.cfg.repo}/contents/${path}`),{
+      method:'DELETE', headers:{...this.headers(),'Content-Type':'application/json'},
+      body:JSON.stringify({ message: message||`delete ${path}`, sha })});
+    if(!r.ok){ const j=await r.json().catch(()=>({})); throw new Error(`삭제 실패 (${path}): `+(j.message||r.status)); }
+    return r.json();
   }
 };
 
@@ -569,6 +589,7 @@ const state = {
    초기화
 ============================================================ */
 async function init(){
+  document.getElementById('versionLine').textContent = `${APP_VERSION} · ${APP_BUILD}`;
   bindTabNav(); bindSettingsHandlers(); bindTodayHandlers(); bindRoutineHandlers();
   bindGoalsHandlers(); bindAiCoachHandlers(); bindHistoryHandlers();
   document.getElementById('dateInput').value = state.currentDate;
@@ -688,9 +709,38 @@ function bindTodayHandlers(){
   document.getElementById('dateInput').addEventListener('change', async (e)=>{ state.currentDate=e.target.value; await loadTodayTab(); });
   document.getElementById('btnSaveLog').addEventListener('click', saveTodayLog);
   document.getElementById('btnAddAdhoc').addEventListener('click', ()=>openPickerSheet('today', null));
+  document.getElementById('btnDeleteLog').addEventListener('click', handleDeleteLogClick);
   ['rpeInput','muscleMassInput','fatMassInput','memoInput'].forEach(id=>{
     document.getElementById(id).addEventListener('input', saveDraftDebounced);
   });
+}
+
+let _deleteConfirmTm;
+function handleDeleteLogClick(){
+  const btn = document.getElementById('btnDeleteLog');
+  if(btn.dataset.armed === '1'){
+    clearTimeout(_deleteConfirmTm);
+    deleteTodayLog();
+    return;
+  }
+  btn.dataset.armed = '1';
+  btn.textContent = '정말 삭제할까요? (다시 누르면 삭제)';
+  _deleteConfirmTm = setTimeout(()=>{ btn.dataset.armed='0'; btn.textContent='이 날짜 기록 삭제'; }, 4000);
+}
+async function deleteTodayLog(){
+  const date = state.currentDate;
+  const btn = document.getElementById('btnDeleteLog');
+  btn.disabled = true; btn.textContent = '삭제 중...';
+  try{
+    await gh.deleteFile(`logs/${date}.json`, state.currentLogSha, `delete log ${date}`);
+    state.currentLogSha = null;
+    clearDraft(date);
+    showToast('이 날짜 기록을 삭제했어요');
+    await loadTodayTab();
+  }catch(e){
+    showToast('삭제 실패: '+e.message);
+    btn.disabled=false; btn.dataset.armed='0'; btn.textContent='이 날짜 기록 삭제';
+  }
 }
 
 function draftKey(date){ return `training-log:draft:${date}`; }
@@ -755,6 +805,9 @@ async function loadTodayTab(){
   } else {
     clearDraft(date); // 이미 GitHub에 저장된 날짜는 임시본이 필요 없음
   }
+  const delBtn = document.getElementById('btnDeleteLog');
+  delBtn.classList.toggle('hidden', !state.currentLogSha);
+  delBtn.disabled = false; delBtn.dataset.armed='0'; delBtn.textContent='이 날짜 기록 삭제';
   renderEntryList();
 }
 
@@ -957,7 +1010,11 @@ async function saveTodayLog(){
   const memo = document.getElementById('memoInput').value;
 
   const completedEntries = state.entries.filter(en=>en.completed);
-  if(!completedEntries.length){ showToast('완료 체크된 종목이 없습니다'); return; }
+  if(!completedEntries.length){
+    if(state.currentLogSha) showToast('완료 체크된 종목이 없어요. 이 날짜 기록을 지우려면 위의 "이 날짜 기록 삭제" 버튼을 눌러주세요');
+    else showToast('완료 체크된 종목이 없습니다');
+    return;
+  }
 
   const logEntries = completedEntries.map(en=>{
     if(en.type==='cardio') return { instanceId:en.instanceId, exerciseId:en.exerciseId, name:en.name, type:'cardio', adHoc:en.adHoc,
