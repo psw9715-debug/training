@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- 훈련일지 v1.6 · 빌드 2026-08-15 16:20 -->
+<!-- 훈련일지 v1.7 · 빌드 2026-08-15 17:10 -->
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -132,6 +132,11 @@ a{color:var(--blue);}
 .chip-btn{ display:inline-block; font-family:'Noto Sans KR',sans-serif; font-size:13px; padding:9px 13px;
   border:1.5px solid var(--paper-line); border-radius:20px; background:#fff; margin:0 6px 6px 0; cursor:pointer; }
 .chip-btn.selected{ border-color:var(--green); background:#E6F3EC; color:var(--green); font-weight:700; }
+.chip-wrap{ position:relative; display:inline-block; margin:0 6px 6px 0; }
+.chip-wrap .chip-btn{ margin:0; }
+.chip-del{ position:absolute; top:-6px; right:-6px; width:19px;height:19px; border-radius:50%;
+  background:var(--red); color:#fff; font-size:10px; line-height:19px; text-align:center;
+  border:2px solid var(--paper); padding:0; cursor:pointer; }
 
 /* level presets */
 .level-btn{ display:flex; align-items:center; justify-content:space-between; width:100%; text-align:left;
@@ -409,15 +414,30 @@ nav.bottomnav button.active{color:var(--ink);background:var(--paper);}
    화면 상단(훈련일지 옆)에 표시되어, 어느 버전이 실제로 올라가 있는지
    바로 눈으로 구분할 수 있게 해줍니다.
 ============================================================ */
-const APP_VERSION = 'v1.6';
-const APP_BUILD = '2026-08-15 16:20';
+const APP_VERSION = 'v1.7';
+const APP_BUILD = '2026-08-15 17:10';
 
 /* ============================================================
    상수
 ============================================================ */
 const WEEKDAYS = ['sun','mon','tue','wed','thu','fri','sat'];
 const WEEKDAY_LABEL = {sun:'일',mon:'월',tue:'화',wed:'수',thu:'목',fri:'금',sat:'토'};
-const BODY_PARTS = ['가슴','등','어깨','팔','복근','하체','유산소'];
+const BODY_PARTS = ['가슴','등','어깨','팔','복근','하체','유산소','기타'];
+const BODYPART_HINTS = {
+  '가슴':['벤치','체스트','플라이','크로스오버','딥스','펙덱','버터플라이'],
+  '등':['랫','풀다운','로우','풀업','데드','롱풀','시티드로우'],
+  '어깨':['숄더','프레스','레터럴','레이즈','오버헤드'],
+  '팔':['컬','트라이셉','이두','삼두','익스텐션'],
+  '복근':['싯업','크런치','플랭크','에브','복근'],
+  '하체':['레그','스쿼트','런지','카프','스미스','힙','글루트'],
+  '유산소':['러닝','사이클','수영','로잉','일립티컬','걷기','런닝'],
+};
+function guessBodyPart(name){
+  for(const [part, keywords] of Object.entries(BODYPART_HINTS)){
+    if(keywords.some(k=>name.includes(k))) return part;
+  }
+  return null;
+}
 
 const DEFAULT_LIBRARY = [
   {id:'bench', name:'벤치', bodyPart:'가슴', type:'strength'},
@@ -1125,6 +1145,8 @@ function openPickerSheet(mode, weekday){
     const grp = document.createElement('div'); grp.className='sheet-group';
     grp.innerHTML = `<div class="sheet-group-label">${bp}</div>`;
     items.forEach(it=>{
+      const chipWrap = document.createElement('span');
+      chipWrap.className = 'chip-wrap';
       const chip = document.createElement('button');
       chip.className='chip-btn'; chip.textContent=it.name;
       const already = mode==='routine'
@@ -1152,7 +1174,23 @@ function openPickerSheet(mode, weekday){
         }
         closeSheet();
       });
-      grp.appendChild(chip);
+      const delBadge = document.createElement('button');
+      delBadge.className = 'chip-del';
+      delBadge.textContent = '✕';
+      delBadge.title = '이 종목 완전히 삭제';
+      delBadge.addEventListener('click', (e)=>{
+        e.stopPropagation();
+        if(delBadge.dataset.armed==='1'){
+          clearTimeout(delBadge._tm);
+          deleteLibraryItem(it.id, it.name, mode, weekday);
+        } else {
+          delBadge.dataset.armed='1'; delBadge.textContent='✓';
+          delBadge._tm = setTimeout(()=>{ delBadge.dataset.armed='0'; delBadge.textContent='✕'; }, 2500);
+        }
+      });
+      chipWrap.appendChild(chip);
+      chipWrap.appendChild(delBadge);
+      grp.appendChild(chipWrap);
     });
     body.appendChild(grp);
   });
@@ -1164,17 +1202,54 @@ function openPickerSheet(mode, weekday){
 }
 function closeSheet(){ document.getElementById('sheetRoot').innerHTML=''; }
 
+async function deleteLibraryItem(id, name, mode, weekday){
+  state.library = state.library.filter(x=>x.id!==id);
+  let routineChanged = false;
+  WEEKDAYS.forEach(wd=>{
+    const list = state.routine[wd]?.exerciseIds;
+    if(list && list.includes(id)){ state.routine[wd].exerciseIds = list.filter(x=>x!==id); routineChanged = true; }
+  });
+  try{
+    const libResult = await gh.putFile('config/exercises.json', state.library, state.librarySha, `remove exercise ${name}`);
+    state.librarySha = libResult.content.sha;
+    if(routineChanged){
+      const routineResult = await gh.putFile('config/routine.json', state.routine, state.routineSha, `remove ${name} from routine`);
+      state.routineSha = routineResult.content.sha;
+    }
+    state.entries = state.entries.filter(en=>en.exerciseId!==id);
+    showToast(`"${name}" 삭제됨`);
+    openPickerSheet(mode, weekday); // 목록 새로고침
+    renderEntryList();
+  }catch(e){ showToast('삭제 실패: '+e.message); }
+}
+
 function openNewExerciseForm(mode, weekday){
+  const PART_EXAMPLES = {
+    '가슴':'벤치, 플라이 등', '등':'렛풀다운, 로우 등', '어깨':'숄더프레스, 레터럴 등',
+    '팔':'암컬, 트라이셉 등', '복근':'싯업, 크런치 등', '하체':'스쿼트, 레그프레스 등',
+    '유산소':'러닝, 수영 등', '기타':'잘 모르겠으면 여기',
+  };
   const body = document.getElementById('sheetBody');
   const form = document.createElement('div');
   form.style.cssText='border-top:1px dashed var(--paper-line);margin-top:10px;padding-top:10px;';
   form.innerHTML = `
-    <div class="field"><label>종목 이름</label><input type="text" id="newExName"></div>
-    <div class="field"><label>부위</label><select id="newExPart">${BODY_PARTS.map(b=>`<option value="${b}">${b}</option>`).join('')}</select></div>
+    <div class="field"><label>종목 이름</label><input type="text" id="newExName" placeholder="예: 케이블 로우"></div>
+    <div class="field"><label>부위 <span style="font-weight:400;color:var(--ink-faint);">(이름 입력하면 자동 추측)</span></label>
+      <select id="newExPart">${BODY_PARTS.map(b=>`<option value="${b}">${b} — ${PART_EXAMPLES[b]}</option>`).join('')}</select>
+    </div>
     <div class="field"><label>유형</label><select id="newExType"><option value="strength">근력</option><option value="cardio">유산소</option></select></div>
     <button class="btn small" id="newExSave">추가</button>
   `;
   body.appendChild(form);
+  const nameEl = document.getElementById('newExName');
+  const partEl = document.getElementById('newExPart');
+  let partTouched = false;
+  partEl.addEventListener('change', ()=>{ partTouched = true; });
+  nameEl.addEventListener('input', ()=>{
+    if(partTouched) return; // 사용자가 이미 직접 골랐으면 자동 추측이 덮어쓰지 않음
+    const guess = guessBodyPart(nameEl.value);
+    if(guess) partEl.value = guess;
+  });
   document.getElementById('newExSave').addEventListener('click', async ()=>{
     const name = document.getElementById('newExName').value.trim();
     if(!name){ showToast('이름을 입력해주세요'); return; }
