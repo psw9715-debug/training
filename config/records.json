@@ -31,8 +31,29 @@
   "shoulder_press": {
     "type": "strength",
     "name": "숄더프레스",
-    "weight": 10,
-    "reps": 8,
-    "date": "2026-08-15"
+    "weight": 30,
+    "reps": 1,
+    "date": "2026-08-17"
+  },
+  "butterfly": {
+    "type": "strength",
+    "name": "버터플라이",
+    "weight": 35,
+    "reps": 1,
+    "date": "2026-08-17"
+  },
+  "ex_rul7vvd": {
+    "type": "strength",
+    "name": "시티드 체스트프레스",
+    "weight": 35,
+    "reps": 1,
+    "date": "2026-08-17"
+  },
+  "arm_curl": {
+    "type": "strength",
+    "name": "암컬",
+    "weight": 35,
+    "reps": 1,
+    "date": "2026-08-17"
   }
 }
