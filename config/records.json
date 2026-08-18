@@ -38,9 +38,9 @@
   "butterfly": {
     "type": "strength",
     "name": "버터플라이",
-    "weight": 35,
+    "weight": 50,
     "reps": 1,
-    "date": "2026-08-17"
+    "date": "2026-08-18"
   },
   "ex_rul7vvd": {
     "type": "strength",
@@ -69,6 +69,13 @@
     "distance": 1000,
     "duration": 50,
     "pace": 0.05,
+    "date": "2026-08-18"
+  },
+  "ex_312xm4p": {
+    "type": "strength",
+    "name": "시티드 체스트프레스",
+    "weight": 20,
+    "reps": 10,
     "date": "2026-08-18"
   }
 }
