@@ -293,5 +293,35 @@
         "failed": false
       }
     ]
+  },
+  "ex_m3he3gn": {
+    "type": "strength",
+    "sets": [
+      {
+        "weight": 0,
+        "reps": 10,
+        "failed": false
+      },
+      {
+        "weight": 0,
+        "reps": 10,
+        "failed": false
+      },
+      {
+        "weight": 0,
+        "reps": 10,
+        "failed": false
+      },
+      {
+        "weight": 0,
+        "reps": 10,
+        "failed": false
+      },
+      {
+        "weight": 0,
+        "reps": 10,
+        "failed": false
+      }
+    ]
   }
 }
