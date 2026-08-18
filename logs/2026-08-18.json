@@ -8,15 +8,6 @@
   "memo": "",
   "entries": [
     {
-      "instanceId": "61g0q4r",
-      "exerciseId": "swimming",
-      "name": "수영",
-      "type": "cardio",
-      "adHoc": true,
-      "distance": 1000,
-      "duration": 50
-    },
-    {
       "instanceId": "2xgi55u",
       "exerciseId": "lat_pulldown",
       "name": "렛풀다운",
@@ -389,12 +380,21 @@
           "failed": false
         }
       ]
+    },
+    {
+      "instanceId": "vq5i27o",
+      "exerciseId": "swimming",
+      "name": "수영",
+      "type": "cardio",
+      "adHoc": true,
+      "distance": 1500,
+      "duration": 70
     }
   ],
   "calories": {
     "strength": 1061,
-    "cardio": 464,
-    "total": 1526
+    "cardio": 650,
+    "total": 1711
   },
-  "savedAt": "2026-08-18T08:32:40.005Z"
+  "savedAt": "2026-08-18T13:44:43.141Z"
 }
