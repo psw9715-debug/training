@@ -77,5 +77,12 @@
     "weight": 45,
     "reps": 1,
     "date": "2026-08-18"
+  },
+  "ex_po3k9ch": {
+    "type": "strength",
+    "name": "싯업",
+    "weight": 0,
+    "reps": 10,
+    "date": "2026-08-18"
   }
 }
