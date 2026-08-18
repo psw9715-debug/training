@@ -111,5 +111,12 @@
     "bodyPart": "기타",
     "type": "strength",
     "repsOnly": true
+  },
+  {
+    "id": "ex_po3k9ch",
+    "name": "싯업",
+    "bodyPart": "복근",
+    "type": "strength",
+    "repsOnly": true
   }
 ]
