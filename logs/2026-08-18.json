@@ -273,14 +273,64 @@
           "weight": 20,
           "reps": 10,
           "failed": false
+        },
+        {
+          "weight": 25,
+          "reps": 8,
+          "failed": false
+        },
+        {
+          "weight": 30,
+          "reps": 6,
+          "failed": false
+        },
+        {
+          "weight": 35,
+          "reps": 4,
+          "failed": false
+        },
+        {
+          "weight": 40,
+          "reps": 2,
+          "failed": false
+        },
+        {
+          "weight": 45,
+          "reps": 1,
+          "failed": false
+        },
+        {
+          "weight": 40,
+          "reps": 2,
+          "failed": false
+        },
+        {
+          "weight": 35,
+          "reps": 4,
+          "failed": false
+        },
+        {
+          "weight": 30,
+          "reps": 6,
+          "failed": false
+        },
+        {
+          "weight": 25,
+          "reps": 8,
+          "failed": false
+        },
+        {
+          "weight": 20,
+          "reps": 10,
+          "failed": false
         }
       ]
     }
   ],
   "calories": {
-    "strength": 715,
+    "strength": 881,
     "cardio": 466,
-    "total": 1180
+    "total": 1347
   },
-  "savedAt": "2026-08-18T08:00:59.596Z"
+  "savedAt": "2026-08-18T08:07:16.372Z"
 }
