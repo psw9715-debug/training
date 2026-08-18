@@ -62,5 +62,13 @@
     "weight": 0,
     "reps": 10,
     "date": "2026-08-17"
+  },
+  "swimming": {
+    "type": "cardio",
+    "name": "수영",
+    "distance": 1000,
+    "duration": 50,
+    "pace": 0.05,
+    "date": "2026-08-18"
   }
 }
