@@ -2,9 +2,9 @@
   "date": "2026-08-17",
   "weekday": "mon",
   "bodyWeight": 79.8,
-  "muscleMass": null,
-  "fatMass": null,
-  "rpe": null,
+  "muscleMass": 33.6,
+  "fatMass": 25.7,
+  "rpe": 2,
   "memo": "",
   "entries": [
     {
@@ -311,12 +311,46 @@
           "failed": false
         }
       ]
+    },
+    {
+      "instanceId": "est487e",
+      "exerciseId": "ex_m3he3gn",
+      "name": "백 익스텐션",
+      "type": "strength",
+      "adHoc": true,
+      "sets": [
+        {
+          "weight": 0,
+          "reps": 10,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 10,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 10,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 10,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 10,
+          "failed": false
+        }
+      ]
     }
   ],
   "calories": {
-    "strength": 865,
+    "strength": 948,
     "cardio": 0,
-    "total": 865
+    "total": 948
   },
-  "savedAt": "2026-08-17T15:26:12.323Z"
+  "savedAt": "2026-08-18T02:30:08.256Z"
 }
