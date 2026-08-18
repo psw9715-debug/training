@@ -42,12 +42,6 @@
     "type": "strength"
   },
   {
-    "id": "back_extension",
-    "name": "백 익스텐션",
-    "bodyPart": "등",
-    "type": "strength"
-  },
-  {
     "id": "shoulder_press",
     "name": "숄더프레스",
     "bodyPart": "어깨",
