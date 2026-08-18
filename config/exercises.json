@@ -54,12 +54,6 @@
     "type": "strength"
   },
   {
-    "id": "situp",
-    "name": "싯업",
-    "bodyPart": "복근",
-    "type": "strength"
-  },
-  {
     "id": "squat",
     "name": "스쿼트",
     "bodyPart": "하체",
