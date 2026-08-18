@@ -143,58 +143,68 @@
     "type": "strength",
     "sets": [
       {
-        "weight": 10,
-        "reps": 10,
-        "failed": false
-      },
-      {
-        "weight": 15,
-        "reps": 8,
-        "failed": false
-      },
-      {
         "weight": 20,
-        "reps": 6,
+        "reps": 12,
         "failed": false
       },
       {
         "weight": 25,
-        "reps": 4,
+        "reps": 10,
         "failed": false
       },
       {
         "weight": 30,
-        "reps": 2,
+        "reps": 8,
         "failed": false
       },
       {
         "weight": 35,
-        "reps": 1,
-        "failed": false
-      },
-      {
-        "weight": 30,
-        "reps": 2,
-        "failed": false
-      },
-      {
-        "weight": 25,
-        "reps": 4,
-        "failed": false
-      },
-      {
-        "weight": 20,
         "reps": 6,
         "failed": false
       },
       {
-        "weight": 15,
+        "weight": 40,
+        "reps": 4,
+        "failed": false
+      },
+      {
+        "weight": 45,
+        "reps": 2,
+        "failed": false
+      },
+      {
+        "weight": 50,
+        "reps": 1,
+        "failed": false
+      },
+      {
+        "weight": 45,
+        "reps": 2,
+        "failed": false
+      },
+      {
+        "weight": 40,
+        "reps": 4,
+        "failed": false
+      },
+      {
+        "weight": 35,
+        "reps": 6,
+        "failed": false
+      },
+      {
+        "weight": 30,
         "reps": 8,
         "failed": false
       },
       {
-        "weight": 10,
+        "weight": 25,
         "reps": 10,
+        "failed": false
+      },
+      {
+        "weight": 20,
+        "reps": 12,
         "failed": false
       }
     ]
@@ -328,5 +338,15 @@
     "type": "cardio",
     "distance": 1000,
     "duration": 50
+  },
+  "ex_312xm4p": {
+    "type": "strength",
+    "sets": [
+      {
+        "weight": 20,
+        "reps": 10,
+        "failed": false
+      }
+    ]
   }
 }
