@@ -259,6 +259,31 @@
           "weight": 0,
           "reps": 10,
           "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 10,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 10,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 10,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 10,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 10,
+          "failed": false
         }
       ]
     },
@@ -328,9 +353,9 @@
     }
   ],
   "calories": {
-    "strength": 881,
+    "strength": 964,
     "cardio": 466,
-    "total": 1347
+    "total": 1430
   },
-  "savedAt": "2026-08-18T08:07:16.372Z"
+  "savedAt": "2026-08-18T08:24:08.950Z"
 }
