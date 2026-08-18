@@ -350,12 +350,51 @@
           "failed": false
         }
       ]
+    },
+    {
+      "instanceId": "mrfro3e",
+      "exerciseId": "ex_po3k9ch",
+      "name": "싯업",
+      "type": "strength",
+      "adHoc": true,
+      "sets": [
+        {
+          "weight": 0,
+          "reps": 10,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 10,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 10,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 10,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 10,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 10,
+          "failed": false
+        }
+      ]
     }
   ],
   "calories": {
-    "strength": 964,
+    "strength": 1064,
     "cardio": 466,
-    "total": 1430
+    "total": 1530
   },
-  "savedAt": "2026-08-18T08:24:41.675Z"
+  "savedAt": "2026-08-18T08:28:05.177Z"
 }
