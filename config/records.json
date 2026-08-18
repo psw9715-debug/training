@@ -66,9 +66,9 @@
   "swimming": {
     "type": "cardio",
     "name": "수영",
-    "distance": 1000,
-    "duration": 50,
-    "pace": 0.05,
+    "distance": 1500,
+    "duration": 70,
+    "pace": 0.04666666666666667,
     "date": "2026-08-18"
   },
   "ex_312xm4p": {
