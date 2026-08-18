@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- 훈련일지 v1.8 · 빌드 2026-08-18 12:50 -->
+<!-- 훈련일지 v1.9 · 빌드 2026-08-18 13:20 -->
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -21,7 +21,7 @@ body{
   background: linear-gradient(var(--paper-line) 1px, transparent 1px);
   background-size: 100% 32px; background-color:var(--paper);
   color:var(--ink); font-family:'Noto Sans KR',sans-serif;
-  min-height:100vh; padding-bottom: calc(150px + env(safe-area-inset-bottom));
+  min-height:100vh; padding-bottom: calc(76px + env(safe-area-inset-bottom));
   -webkit-font-smoothing:antialiased;
 }
 header.top{ padding: calc(16px + env(safe-area-inset-top)) 16px 8px; max-width:480px;margin:0 auto; }
@@ -60,9 +60,8 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--blue);outline-of
 .btn.small{padding:8px 12px;font-size:12px;min-height:38px;}
 .btn:disabled{opacity:0.45;cursor:not-allowed;}
 .btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;} .btn-row .btn{flex:1;}
-.fixed-actions{ position: fixed; left:16px; right:16px; max-width:448px; margin:0 auto;
-  bottom: calc(64px + env(safe-area-inset-bottom)); background:var(--card); padding:10px 8px;
-  border-radius:8px; border:2px solid var(--ink); box-shadow:0 -2px 10px rgba(0,0,0,0.14); z-index:40; }
+.save-actions{ background:var(--card); padding:10px 8px;
+  border-radius:8px; border:2px solid var(--ink); box-shadow:3px 3px 0 var(--paper-line); margin-top:14px; }
 .seg-tabs{display:flex;gap:5px;margin-bottom:14px;background:var(--paper);padding:4px;border-radius:8px;border:1.5px solid var(--paper-line);}
 .seg-tabs button{flex:1;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:11.5px;padding:8px 3px;border:none;border-radius:6px;background:transparent;color:var(--ink-soft);}
 .seg-tabs button.active{background:var(--ink);color:var(--paper);}
@@ -108,16 +107,17 @@ a{color:var(--blue);}
 .chip.pr{ background:#F3E3C9; color:var(--amber); font-weight:700; }
 .chip.failed{ opacity:0.5; text-decoration:line-through; }
 .vol-line{ font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-faint); margin-top:6px; }
-.setrow2{ display:grid; grid-template-columns:18px 1.4fr 12px 1.1fr 40px 40px; gap:4px; align-items:center; margin-bottom:8px; }
-.setrow2.repsonly{ grid-template-columns:18px 1fr 26px 40px 40px; }
-.setrow2 input{ padding:11px 4px; font-size:15px; min-height:44px; text-align:center; }
-.weightstepper, .repstepper{ display:flex; gap:3px; }
-.weightstepper input, .repstepper input{ flex:1; min-width:0; padding-left:2px; padding-right:2px; }
-.stepbtn{ width:24px; height:44px; flex-shrink:0; border:1.5px solid var(--paper-line); border-radius:6px; background:#fff; font-size:15px; color:var(--ink-soft); line-height:1; padding:0; }
-.setrow2 .setnum{ font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-faint);text-align:center; }
-.setrow2 .xsym{ text-align:center; color:var(--ink-faint); font-size:12px; }
-.failchk{ width:40px;height:44px; border:1.5px solid var(--paper-line); border-radius:6px; background:#fff; font-size:13px; color:var(--ink-faint); }
-.delsetbtn{ width:40px;height:44px; border:1.5px solid var(--paper-line); border-radius:6px; background:#fff; font-size:14px; color:var(--red); }
+.setblock{ border:1.5px dashed var(--paper-line); border-radius:8px; padding:8px; margin-bottom:8px; background:#fff; }
+.setline{ display:flex; align-items:center; gap:6px; }
+.setline + .setline{ margin-top:6px; }
+.setblock .setnum{ width:18px; flex-shrink:0; text-align:center; font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-faint); }
+.setblock .spacer{ width:18px; flex-shrink:0; }
+.weightstepper, .repstepper{ display:flex; gap:4px; flex:1; min-width:0; }
+.weightstepper input, .repstepper input{ flex:1; min-width:0; padding:11px 4px; font-size:16px; min-height:44px; text-align:center; border:1.5px solid var(--paper-line); border-radius:6px; background:#fff; }
+.stepbtn{ width:34px; height:44px; flex-shrink:0; border:1.5px solid var(--paper-line); border-radius:6px; background:#fff; font-size:17px; color:var(--ink-soft); line-height:1; padding:0; }
+.unit-label{ width:16px; flex-shrink:0; text-align:center; color:var(--ink-faint); font-size:12px; font-family:'IBM Plex Mono',monospace; }
+.failchk{ width:40px;height:44px; border:1.5px solid var(--paper-line); border-radius:6px; background:#fff; font-size:13px; color:var(--ink-faint); flex-shrink:0; }
+.delsetbtn{ width:40px;height:44px; border:1.5px solid var(--paper-line); border-radius:6px; background:#fff; font-size:14px; color:var(--red); flex-shrink:0; }
 .failchk.on{ background:var(--red); border-color:var(--red); color:#fff; }
 .ex-actions{ display:flex; gap:8px; margin-top:8px; }
 .ex-actions button{ flex:1; }
@@ -236,7 +236,7 @@ nav.bottomnav button.active{color:var(--ink);background:var(--paper);}
     <div class="field"><label>메모</label><input type="text" id="memoInput" placeholder="컨디션, 특이사항"></div>
   </div>
 
-  <div class="btn-row fixed-actions" style="flex-direction:column;">
+  <div class="btn-row save-actions" style="flex-direction:column;">
     <button class="btn" id="btnSaveLog">오늘 운동 저장</button>
     <div class="muted" id="saveHint" style="text-align:center;margin-top:4px;font-size:11px;"></div>
   </div>
@@ -257,7 +257,7 @@ nav.bottomnav button.active{color:var(--ink);background:var(--paper);}
       <div class="field"><label>이 요일 이름</label><input type="text" id="dayLabelInput"></div>
       <div id="assignedList"></div>
       <button class="btn ghost small" id="btnOpenPickerRoutine">+ 종목 추가</button>
-      <div class="btn-row fixed-actions"><button class="btn" id="btnSaveRoutine">루틴 저장</button></div>
+      <div class="btn-row save-actions"><button class="btn" id="btnSaveRoutine">루틴 저장</button></div>
     </div>
   </div>
 
@@ -416,8 +416,8 @@ nav.bottomnav button.active{color:var(--ink);background:var(--paper);}
    화면 상단(훈련일지 옆)에 표시되어, 어느 버전이 실제로 올라가 있는지
    바로 눈으로 구분할 수 있게 해줍니다.
 ============================================================ */
-const APP_VERSION = 'v1.8';
-const APP_BUILD = '2026-08-18 12:50';
+const APP_VERSION = 'v1.9';
+const APP_BUILD = '2026-08-18 13:20';
 
 /* ============================================================
    상수
@@ -1040,24 +1040,25 @@ function renderEntryCard(en){
 
 function buildSetRow(en, s, i, isRepsOnly, exWeightStep){
   const row = document.createElement('div');
-  row.className = 'setrow2' + (isRepsOnly ? ' repsonly' : '');
+  row.className = 'setblock' + (isRepsOnly ? ' repsonly' : '');
   const wStep = exWeightStep || DEFAULT_WEIGHT_STEP;
 
   if(isRepsOnly){
     row.innerHTML = `
-      <span class="setnum">${i+1}</span>
-      <div class="repstepper">
-        <button class="stepbtn" data-d="-1" title="-1회">−</button>
-        <input type="text" inputmode="numeric" pattern="[0-9]*" placeholder="회" class="swReps" value="${s.reps??''}">
-        <button class="stepbtn" data-d="1" title="+1회">+</button>
+      <div class="setline">
+        <span class="setnum">${i+1}</span>
+        <div class="repstepper">
+          <button class="stepbtn" data-d="-1" title="-1회">−</button>
+          <input type="text" inputmode="numeric" pattern="[0-9]*" placeholder="회" class="swReps" value="${s.reps??''}">
+          <button class="stepbtn" data-d="1" title="+1회">+</button>
+        </div>
+        <span class="unit-label">회</span>
+        <button class="failchk ${s.failed?'on':''}" title="실패 표시">✕</button>
+        <button class="delsetbtn" title="이 세트 삭제">🗑</button>
       </div>
-      <span class="xsym">회</span>
-      <button class="failchk ${s.failed?'on':''}" title="실패 표시">✕</button>
-      <button class="delsetbtn" title="이 세트 삭제">🗑</button>
     `;
     const repsInput = row.querySelector('.swReps');
     repsInput.addEventListener('input', e=>{ s.reps = e.target.value; updateCalorieBadge(); });
-    repsInput.addEventListener('focus', e=>{ setTimeout(()=>e.target.scrollIntoView({behavior:'smooth', block:'center'}), 250); });
     row.querySelectorAll('.stepbtn').forEach(btn=>{
       btn.addEventListener('click', ()=>{
         const d = Number(btn.dataset.d);
@@ -1067,27 +1068,31 @@ function buildSetRow(en, s, i, isRepsOnly, exWeightStep){
     });
   } else {
     row.innerHTML = `
-      <span class="setnum">${i+1}</span>
-      <div class="weightstepper">
-        <button class="stepbtn" data-d="-${wStep}" title="-${wStep}kg">−</button>
-        <input type="text" inputmode="decimal" pattern="[0-9]*\\.?[0-9]*" placeholder="kg" class="swWeight" value="${s.weight??''}">
-        <button class="stepbtn" data-d="${wStep}" title="+${wStep}kg">+</button>
+      <div class="setline">
+        <span class="setnum">${i+1}</span>
+        <div class="weightstepper">
+          <button class="stepbtn" data-d="-${wStep}" title="-${wStep}kg">−</button>
+          <input type="text" inputmode="decimal" pattern="[0-9]*\\.?[0-9]*" placeholder="kg" class="swWeight" value="${s.weight??''}">
+          <button class="stepbtn" data-d="${wStep}" title="+${wStep}kg">+</button>
+        </div>
+        <span class="unit-label">kg</span>
       </div>
-      <span class="xsym">×</span>
-      <div class="repstepper">
-        <button class="stepbtn" data-d="-1" title="-1회">−</button>
-        <input type="text" inputmode="numeric" pattern="[0-9]*" placeholder="회" class="swReps" value="${s.reps??''}">
-        <button class="stepbtn" data-d="1" title="+1회">+</button>
+      <div class="setline">
+        <span class="spacer"></span>
+        <div class="repstepper">
+          <button class="stepbtn" data-d="-1" title="-1회">−</button>
+          <input type="text" inputmode="numeric" pattern="[0-9]*" placeholder="회" class="swReps" value="${s.reps??''}">
+          <button class="stepbtn" data-d="1" title="+1회">+</button>
+        </div>
+        <span class="unit-label">회</span>
+        <button class="failchk ${s.failed?'on':''}" title="실패 표시">✕</button>
+        <button class="delsetbtn" title="이 세트 삭제">🗑</button>
       </div>
-      <button class="failchk ${s.failed?'on':''}" title="실패 표시">✕</button>
-      <button class="delsetbtn" title="이 세트 삭제">🗑</button>
     `;
     const weightInput = row.querySelector('.swWeight');
     weightInput.addEventListener('input', e=>{ s.weight = e.target.value; updateCalorieBadge(); });
-    weightInput.addEventListener('focus', e=>{ setTimeout(()=>e.target.scrollIntoView({behavior:'smooth', block:'center'}), 250); });
     const repsInput = row.querySelector('.swReps');
     repsInput.addEventListener('input', e=>{ s.reps = e.target.value; updateCalorieBadge(); });
-    repsInput.addEventListener('focus', e=>{ setTimeout(()=>e.target.scrollIntoView({behavior:'smooth', block:'center'}), 250); });
     row.querySelector('.weightstepper').querySelectorAll('.stepbtn').forEach(btn=>{
       btn.addEventListener('click', ()=>{
         const d = Number(btn.dataset.d);
@@ -2118,8 +2123,24 @@ function openHistoryDetail(log){
   card.scrollIntoView({behavior:'smooth', block:'nearest'});
 }
 
+/* ============================================================
+   iOS 스크롤 스냅백 방지
+   포커스된 입력칸이 있으면 iOS 사파리가 스크롤해도 그 칸으로 다시
+   돌아가려는 습성이 있어서, 드래그 후 화면 이동이 크면 포커스를 풀어줌.
+============================================================ */
+let _touchStartScrollY = null;
+document.addEventListener('touchstart', ()=>{ _touchStartScrollY = window.scrollY; }, {passive:true});
+document.addEventListener('touchend', ()=>{
+  const active = document.activeElement;
+  if(active && (active.tagName==='INPUT' || active.tagName==='TEXTAREA')){
+    if(_touchStartScrollY!=null && Math.abs(window.scrollY - _touchStartScrollY) > 30){
+      active.blur();
+    }
+  }
+}, {passive:true});
+
 init();
 </script>
 </body>
 </html>
-
+i
