@@ -423,5 +423,40 @@
         "failed": false
       }
     ]
+  },
+  "ex_po3k9ch": {
+    "type": "strength",
+    "sets": [
+      {
+        "weight": 0,
+        "reps": 10,
+        "failed": false
+      },
+      {
+        "weight": 0,
+        "reps": 10,
+        "failed": false
+      },
+      {
+        "weight": 0,
+        "reps": 10,
+        "failed": false
+      },
+      {
+        "weight": 0,
+        "reps": 10,
+        "failed": false
+      },
+      {
+        "weight": 0,
+        "reps": 10,
+        "failed": false
+      },
+      {
+        "weight": 0,
+        "reps": 10,
+        "failed": false
+      }
+    ]
   }
 }
