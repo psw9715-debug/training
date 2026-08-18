@@ -55,5 +55,12 @@
     "weight": 35,
     "reps": 1,
     "date": "2026-08-17"
+  },
+  "ex_m3he3gn": {
+    "type": "strength",
+    "name": "백 익스텐션",
+    "weight": 0,
+    "reps": 10,
+    "date": "2026-08-17"
   }
 }
