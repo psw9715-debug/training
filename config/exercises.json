@@ -116,5 +116,12 @@
     "name": "시티드 체스트프레스",
     "bodyPart": "가슴",
     "type": "strength"
+  },
+  {
+    "id": "ex_m3he3gn",
+    "name": "백 익스텐션",
+    "bodyPart": "기타",
+    "type": "strength",
+    "repsOnly": true
   }
 ]
