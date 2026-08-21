@@ -1,0 +1,26 @@
+{
+  "date": "2026-08-21",
+  "weekday": "fri",
+  "bodyWeight": 79.6,
+  "muscleMass": 33.2,
+  "fatMass": 26.3,
+  "rpe": null,
+  "memo": "",
+  "entries": [
+    {
+      "instanceId": "98cfzb7",
+      "exerciseId": "swimming",
+      "name": "수영",
+      "type": "cardio",
+      "adHoc": true,
+      "distance": 1000,
+      "duration": 50
+    }
+  ],
+  "calories": {
+    "strength": 0,
+    "cardio": 464,
+    "total": 464
+  },
+  "savedAt": "2026-08-21T06:31:57.285Z"
+}
