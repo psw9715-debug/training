@@ -361,8 +361,8 @@
   },
   "swimming": {
     "type": "cardio",
-    "distance": 1500,
-    "duration": 70
+    "distance": 1000,
+    "duration": 50
   },
   "ex_312xm4p": {
     "type": "strength",
