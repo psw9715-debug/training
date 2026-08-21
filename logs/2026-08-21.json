@@ -1,10 +1,10 @@
 {
   "date": "2026-08-21",
   "weekday": "fri",
-  "bodyWeight": 79.6,
-  "muscleMass": 33.2,
-  "fatMass": 26.3,
-  "rpe": null,
+  "bodyWeight": 778.8,
+  "muscleMass": 32.8,
+  "fatMass": 26.6,
+  "rpe": 3,
   "memo": "",
   "entries": [
     {
@@ -350,12 +350,76 @@
           "failed": false
         }
       ]
+    },
+    {
+      "instanceId": "riz4f3l",
+      "exerciseId": "arm_curl",
+      "name": "암컬",
+      "type": "strength",
+      "adHoc": true,
+      "sets": [
+        {
+          "weight": 10,
+          "reps": 10,
+          "failed": false
+        },
+        {
+          "weight": 15,
+          "reps": 8,
+          "failed": false
+        },
+        {
+          "weight": 20,
+          "reps": 6,
+          "failed": false
+        },
+        {
+          "weight": 25,
+          "reps": 4,
+          "failed": false
+        },
+        {
+          "weight": 30,
+          "reps": 2,
+          "failed": false
+        },
+        {
+          "weight": 35,
+          "reps": 1,
+          "failed": false
+        },
+        {
+          "weight": 30,
+          "reps": 2,
+          "failed": false
+        },
+        {
+          "weight": 25,
+          "reps": 4,
+          "failed": false
+        },
+        {
+          "weight": 20,
+          "reps": 6,
+          "failed": false
+        },
+        {
+          "weight": 15,
+          "reps": 8,
+          "failed": false
+        },
+        {
+          "weight": 10,
+          "reps": 10,
+          "failed": false
+        }
+      ]
     }
   ],
   "calories": {
-    "strength": 962,
-    "cardio": 464,
-    "total": 1426
+    "strength": 11195,
+    "cardio": 4543,
+    "total": 15738
   },
-  "savedAt": "2026-08-21T07:47:39.260Z"
+  "savedAt": "2026-08-21T08:12:50.596Z"
 }
