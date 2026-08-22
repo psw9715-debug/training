@@ -1,7 +1,7 @@
 {
   "date": "2026-08-23",
   "weekday": "sun",
-  "bodyWeight": 778.8,
+  "bodyWeight": 78.8,
   "muscleMass": 32.8,
   "fatMass": 26.6,
   "rpe": null,
@@ -19,8 +19,8 @@
   ],
   "calories": {
     "strength": 0,
-    "cardio": 5841,
-    "total": 5841
+    "cardio": 591,
+    "total": 591
   },
-  "savedAt": "2026-08-22T22:35:41.548Z"
+  "savedAt": "2026-08-22T22:36:02.413Z"
 }
