@@ -1,7 +1,7 @@
 {
   "date": "2026-08-21",
   "weekday": "fri",
-  "bodyWeight": 778.8,
+  "bodyWeight": 78.8,
   "muscleMass": 32.8,
   "fatMass": 26.6,
   "rpe": 3,
@@ -417,9 +417,9 @@
     }
   ],
   "calories": {
-    "strength": 11195,
-    "cardio": 4543,
-    "total": 15738
+    "strength": 1133,
+    "cardio": 460,
+    "total": 1592
   },
-  "savedAt": "2026-08-21T08:12:50.596Z"
+  "savedAt": "2026-08-22T22:36:46.959Z"
 }
