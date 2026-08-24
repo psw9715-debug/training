@@ -1,0 +1,293 @@
+{
+  "date": "2026-08-24",
+  "weekday": "mon",
+  "bodyWeight": 79.9,
+  "muscleMass": 33.5,
+  "fatMass": 26,
+  "rpe": 3,
+  "memo": "",
+  "entries": [
+    {
+      "instanceId": "6dnbl1b",
+      "exerciseId": "lat_pulldown",
+      "name": "렛풀다운",
+      "type": "strength",
+      "adHoc": true,
+      "sets": [
+        {
+          "weight": 20,
+          "reps": 12,
+          "failed": false
+        },
+        {
+          "weight": 25,
+          "reps": 10,
+          "failed": false
+        },
+        {
+          "weight": 30,
+          "reps": 8,
+          "failed": false
+        },
+        {
+          "weight": 35,
+          "reps": 6,
+          "failed": false
+        },
+        {
+          "weight": 40,
+          "reps": 4,
+          "failed": false
+        },
+        {
+          "weight": 45,
+          "reps": 2,
+          "failed": false
+        },
+        {
+          "weight": 50,
+          "reps": 1,
+          "failed": false
+        },
+        {
+          "weight": 45,
+          "reps": 2,
+          "failed": false
+        },
+        {
+          "weight": 40,
+          "reps": 4,
+          "failed": false
+        },
+        {
+          "weight": 35,
+          "reps": 6,
+          "failed": false
+        },
+        {
+          "weight": 30,
+          "reps": 8,
+          "failed": false
+        },
+        {
+          "weight": 25,
+          "reps": 10,
+          "failed": false
+        },
+        {
+          "weight": 20,
+          "reps": 12,
+          "failed": false
+        }
+      ]
+    },
+    {
+      "instanceId": "cau6fh3",
+      "exerciseId": "butterfly",
+      "name": "버터플라이",
+      "type": "strength",
+      "adHoc": true,
+      "sets": [
+        {
+          "weight": 20,
+          "reps": 12,
+          "failed": false
+        },
+        {
+          "weight": 25,
+          "reps": 10,
+          "failed": false
+        },
+        {
+          "weight": 30,
+          "reps": 8,
+          "failed": false
+        },
+        {
+          "weight": 35,
+          "reps": 6,
+          "failed": false
+        },
+        {
+          "weight": 40,
+          "reps": 4,
+          "failed": false
+        },
+        {
+          "weight": 45,
+          "reps": 2,
+          "failed": false
+        },
+        {
+          "weight": 50,
+          "reps": 1,
+          "failed": false
+        },
+        {
+          "weight": 45,
+          "reps": 2,
+          "failed": false
+        },
+        {
+          "weight": 40,
+          "reps": 4,
+          "failed": false
+        },
+        {
+          "weight": 35,
+          "reps": 6,
+          "failed": false
+        },
+        {
+          "weight": 30,
+          "reps": 8,
+          "failed": false
+        },
+        {
+          "weight": 25,
+          "reps": 10,
+          "failed": false
+        },
+        {
+          "weight": 20,
+          "reps": 12,
+          "failed": false
+        }
+      ]
+    },
+    {
+      "instanceId": "pqm8ood",
+      "exerciseId": "shoulder_press",
+      "name": "숄더프레스",
+      "type": "strength",
+      "adHoc": true,
+      "sets": [
+        {
+          "weight": 5,
+          "reps": 10,
+          "failed": false
+        },
+        {
+          "weight": 10,
+          "reps": 8,
+          "failed": false
+        },
+        {
+          "weight": 15,
+          "reps": 6,
+          "failed": false
+        },
+        {
+          "weight": 20,
+          "reps": 4,
+          "failed": false
+        },
+        {
+          "weight": 25,
+          "reps": 2,
+          "failed": false
+        },
+        {
+          "weight": 30,
+          "reps": 1,
+          "failed": false
+        },
+        {
+          "weight": 25,
+          "reps": 2,
+          "failed": false
+        },
+        {
+          "weight": 20,
+          "reps": 4,
+          "failed": false
+        },
+        {
+          "weight": 15,
+          "reps": 6,
+          "failed": false
+        },
+        {
+          "weight": 10,
+          "reps": 8,
+          "failed": false
+        },
+        {
+          "weight": 5,
+          "reps": 10,
+          "failed": false
+        }
+      ]
+    },
+    {
+      "instanceId": "wc6c9pa",
+      "exerciseId": "ex_312xm4p",
+      "name": "시티드 체스트프레스",
+      "type": "strength",
+      "adHoc": true,
+      "sets": [
+        {
+          "weight": 20,
+          "reps": 10,
+          "failed": false
+        },
+        {
+          "weight": 25,
+          "reps": 8,
+          "failed": false
+        },
+        {
+          "weight": 30,
+          "reps": 6,
+          "failed": false
+        },
+        {
+          "weight": 35,
+          "reps": 4,
+          "failed": false
+        },
+        {
+          "weight": 40,
+          "reps": 2,
+          "failed": false
+        },
+        {
+          "weight": 45,
+          "reps": 1,
+          "failed": false
+        },
+        {
+          "weight": 40,
+          "reps": 2,
+          "failed": false
+        },
+        {
+          "weight": 35,
+          "reps": 4,
+          "failed": false
+        },
+        {
+          "weight": 30,
+          "reps": 6,
+          "failed": false
+        },
+        {
+          "weight": 25,
+          "reps": 8,
+          "failed": false
+        },
+        {
+          "weight": 20,
+          "reps": 10,
+          "failed": false
+        }
+      ]
+    }
+  ],
+  "calories": {
+    "strength": 799,
+    "cardio": 0,
+    "total": 799
+  },
+  "savedAt": "2026-08-24T06:46:55.381Z"
+}
