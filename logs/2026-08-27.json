@@ -1,0 +1,35 @@
+{
+  "date": "2026-08-27",
+  "weekday": "thu",
+  "bodyWeight": 79.9,
+  "muscleMass": 33.5,
+  "fatMass": 26,
+  "rpe": null,
+  "memo": "",
+  "entries": [
+    {
+      "instanceId": "o9cua05",
+      "exerciseId": "swimming",
+      "name": "수영",
+      "type": "cardio",
+      "adHoc": true,
+      "distance": 1000,
+      "duration": 50
+    },
+    {
+      "instanceId": "os6w34a",
+      "exerciseId": "running",
+      "name": "러닝",
+      "type": "cardio",
+      "adHoc": true,
+      "distance": 4.5,
+      "duration": 50
+    }
+  ],
+  "calories": {
+    "strength": 0,
+    "cardio": 1065,
+    "total": 1065
+  },
+  "savedAt": "2026-08-28T10:43:54.488Z"
+}
