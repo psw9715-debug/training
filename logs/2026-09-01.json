@@ -256,12 +256,71 @@
           "failed": false
         }
       ]
+    },
+    {
+      "instanceId": "qq241ww",
+      "exerciseId": "ex_cdjmplq",
+      "name": "이클라인 벤치",
+      "type": "strength",
+      "adHoc": true,
+      "sets": [
+        {
+          "weight": 15,
+          "reps": 10,
+          "failed": false
+        },
+        {
+          "weight": 15,
+          "reps": 10,
+          "failed": false
+        },
+        {
+          "weight": 15,
+          "reps": 10,
+          "failed": false
+        },
+        {
+          "weight": 15,
+          "reps": 10,
+          "failed": false
+        },
+        {
+          "weight": 15,
+          "reps": 10,
+          "failed": false
+        },
+        {
+          "weight": 15,
+          "reps": 10,
+          "failed": false
+        },
+        {
+          "weight": 15,
+          "reps": 10,
+          "failed": false
+        },
+        {
+          "weight": 15,
+          "reps": 10,
+          "failed": false
+        },
+        {
+          "weight": 15,
+          "reps": 10,
+          "failed": false
+        },
+        {
+          "weight": 15,
+          "reps": 10,
+          "failed": false
+        }
+      ]
     }
   ],
   "calories": {
-    "strength": 678,
+    "strength": 844,
     "cardio": 463,
-    "total": 1141
+    "total": 1307
   },
-  "savedAt": "2026-09-01T08:00:45.817Z"
+  "savedAt": "2026-09-01T21:25:21.442Z"
 }
