@@ -428,5 +428,60 @@
         "failed": false
       }
     ]
+  },
+  "ex_cdjmplq": {
+    "type": "strength",
+    "sets": [
+      {
+        "weight": 15,
+        "reps": 10,
+        "failed": false
+      },
+      {
+        "weight": 15,
+        "reps": 10,
+        "failed": false
+      },
+      {
+        "weight": 15,
+        "reps": 10,
+        "failed": false
+      },
+      {
+        "weight": 15,
+        "reps": 10,
+        "failed": false
+      },
+      {
+        "weight": 15,
+        "reps": 10,
+        "failed": false
+      },
+      {
+        "weight": 15,
+        "reps": 10,
+        "failed": false
+      },
+      {
+        "weight": 15,
+        "reps": 10,
+        "failed": false
+      },
+      {
+        "weight": 15,
+        "reps": 10,
+        "failed": false
+      },
+      {
+        "weight": 15,
+        "reps": 10,
+        "failed": false
+      },
+      {
+        "weight": 15,
+        "reps": 10,
+        "failed": false
+      }
+    ]
   }
 }
