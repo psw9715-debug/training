@@ -112,5 +112,12 @@
     "bodyPart": "복근",
     "type": "strength",
     "repsOnly": true
+  },
+  {
+    "id": "ex_cdjmplq",
+    "name": "이클라인 벤치",
+    "bodyPart": "가슴",
+    "type": "strength",
+    "weightStep": 5
   }
 ]
