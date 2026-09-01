@@ -1,0 +1,267 @@
+{
+  "date": "2026-09-01",
+  "weekday": "tue",
+  "bodyWeight": 78.8,
+  "muscleMass": 32.8,
+  "fatMass": 26.6,
+  "rpe": null,
+  "memo": "",
+  "entries": [
+    {
+      "instanceId": "yhv6lul",
+      "exerciseId": "swimming",
+      "name": "수영",
+      "type": "cardio",
+      "adHoc": true,
+      "distance": 1000,
+      "duration": 50
+    },
+    {
+      "instanceId": "yqr8t4t",
+      "exerciseId": "lat_pulldown",
+      "name": "렛풀다운",
+      "type": "strength",
+      "adHoc": true,
+      "sets": [
+        {
+          "weight": 20,
+          "reps": 12,
+          "failed": false
+        },
+        {
+          "weight": 25,
+          "reps": 10,
+          "failed": false
+        },
+        {
+          "weight": 30,
+          "reps": 8,
+          "failed": false
+        },
+        {
+          "weight": 35,
+          "reps": 6,
+          "failed": false
+        },
+        {
+          "weight": 40,
+          "reps": 4,
+          "failed": false
+        },
+        {
+          "weight": 45,
+          "reps": 2,
+          "failed": false
+        },
+        {
+          "weight": 50,
+          "reps": 1,
+          "failed": false
+        },
+        {
+          "weight": 45,
+          "reps": 2,
+          "failed": false
+        },
+        {
+          "weight": 40,
+          "reps": 4,
+          "failed": false
+        },
+        {
+          "weight": 35,
+          "reps": 6,
+          "failed": false
+        },
+        {
+          "weight": 30,
+          "reps": 8,
+          "failed": false
+        },
+        {
+          "weight": 25,
+          "reps": 10,
+          "failed": false
+        },
+        {
+          "weight": 20,
+          "reps": 12,
+          "failed": false
+        }
+      ]
+    },
+    {
+      "instanceId": "btdqep3",
+      "exerciseId": "ex_m3he3gn",
+      "name": "백 익스텐션",
+      "type": "strength",
+      "adHoc": true,
+      "sets": [
+        {
+          "weight": 0,
+          "reps": 10,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 10,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 10,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 10,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 10,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 10,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 10,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 10,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 10,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 10,
+          "failed": false
+        }
+      ]
+    },
+    {
+      "instanceId": "zyjuufu",
+      "exerciseId": "shoulder_press",
+      "name": "숄더프레스",
+      "type": "strength",
+      "adHoc": true,
+      "sets": [
+        {
+          "weight": 5,
+          "reps": 10,
+          "failed": false
+        },
+        {
+          "weight": 10,
+          "reps": 8,
+          "failed": false
+        },
+        {
+          "weight": 15,
+          "reps": 6,
+          "failed": false
+        },
+        {
+          "weight": 20,
+          "reps": 4,
+          "failed": false
+        },
+        {
+          "weight": 25,
+          "reps": 2,
+          "failed": false
+        },
+        {
+          "weight": 30,
+          "reps": 1,
+          "failed": false
+        },
+        {
+          "weight": 25,
+          "reps": 2,
+          "failed": false
+        },
+        {
+          "weight": 20,
+          "reps": 4,
+          "failed": false
+        },
+        {
+          "weight": 15,
+          "reps": 6,
+          "failed": false
+        },
+        {
+          "weight": 10,
+          "reps": 8,
+          "failed": false
+        },
+        {
+          "weight": 5,
+          "reps": 10,
+          "failed": false
+        }
+      ]
+    },
+    {
+      "instanceId": "lid2rdg",
+      "exerciseId": "butterfly",
+      "name": "버터플라이",
+      "type": "strength",
+      "adHoc": true,
+      "sets": [
+        {
+          "weight": 20,
+          "reps": 12,
+          "failed": false
+        },
+        {
+          "weight": 25,
+          "reps": 10,
+          "failed": false
+        },
+        {
+          "weight": 30,
+          "reps": 8,
+          "failed": false
+        },
+        {
+          "weight": 35,
+          "reps": 6,
+          "failed": false
+        },
+        {
+          "weight": 40,
+          "reps": 4,
+          "failed": false
+        },
+        {
+          "weight": 45,
+          "reps": 2,
+          "failed": false
+        },
+        {
+          "weight": 50,
+          "reps": 1,
+          "failed": false
+        }
+      ]
+    }
+  ],
+  "calories": {
+    "strength": 673,
+    "cardio": 460,
+    "total": 1133
+  },
+  "savedAt": "2026-09-01T07:39:00.496Z"
+}
