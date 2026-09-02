@@ -483,5 +483,25 @@
         "failed": false
       }
     ]
+  },
+  "ex_4woxit3": {
+    "type": "strength",
+    "sets": [
+      {
+        "weight": 0,
+        "reps": 20,
+        "failed": false
+      },
+      {
+        "weight": 0,
+        "reps": 20,
+        "failed": false
+      },
+      {
+        "weight": 0,
+        "reps": 20,
+        "failed": false
+      }
+    ]
   }
 }
