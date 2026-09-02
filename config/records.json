@@ -91,5 +91,12 @@
     "weight": 15,
     "reps": 10,
     "date": "2026-09-01"
+  },
+  "ex_4woxit3": {
+    "type": "strength",
+    "name": "스쿼트",
+    "weight": 0,
+    "reps": 20,
+    "date": "2026-09-02"
   }
 }
