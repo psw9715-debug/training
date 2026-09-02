@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- 훈련일지 v1.9 · 빌드 2026-08-18 13:20 -->
+<!-- 훈련일지 v1.10 · 빌드 2026-09-02 21:00 -->
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -203,6 +203,14 @@ nav.bottomnav button.active{color:var(--ink);background:var(--paper);}
     <div class="btn-row"><button class="btn" id="btnConnect">연결 / 저장소 준비</button></div>
     <div class="btn-row"><button class="btn ghost" id="btnForget">저장된 정보 삭제</button></div>
     <div class="small-note" id="connectMsg"></div>
+  </div>
+
+  <div class="card">
+    <h2>앱 업데이트</h2>
+    <p class="muted">현재 버전 <span id="settingsVersionLine">-</span></p>
+    <div class="btn-row"><button class="btn ghost" id="btnHardReload">최신 버전 불러오기</button></div>
+    <div class="small-note">화면이 예전 버전처럼 보이면 눌러주세요. 로그인 정보는 유지됩니다.</div>
+    <div class="small-note" id="reloadMsg"></div>
   </div>
 </section>
 
@@ -416,8 +424,8 @@ nav.bottomnav button.active{color:var(--ink);background:var(--paper);}
    화면 상단(훈련일지 옆)에 표시되어, 어느 버전이 실제로 올라가 있는지
    바로 눈으로 구분할 수 있게 해줍니다.
 ============================================================ */
-const APP_VERSION = 'v1.9';
-const APP_BUILD = '2026-08-18 13:20';
+const APP_VERSION = 'v1.10';
+const APP_BUILD = '2026-09-02 21:00';
 
 /* ============================================================
    상수
@@ -617,6 +625,8 @@ const state = {
 ============================================================ */
 async function init(){
   document.getElementById('versionLine').textContent = `${APP_VERSION} · ${APP_BUILD}`;
+  const svl = document.getElementById('settingsVersionLine');
+  if(svl) svl.textContent = `${APP_VERSION} · ${APP_BUILD}`;
   bindTabNav(); bindSettingsHandlers(); bindTodayHandlers(); bindRoutineHandlers();
   bindGoalsHandlers(); bindAiCoachHandlers(); bindHistoryHandlers();
   document.getElementById('dateInput').value = state.currentDate;
@@ -695,11 +705,31 @@ function bindSettingsHandlers(){
       tokenEl.focus(); tokenEl.select();
     }
   });
+  document.getElementById('btnHardReload').addEventListener('click', async ()=>{
+    const btn = document.getElementById('btnHardReload');
+    const msg = document.getElementById('reloadMsg');
+    btn.disabled = true; msg.textContent = '최신 버전을 확인하는 중...';
+    try{ await purgeAppCaches(); }catch(e){ /* 캐시 정리 실패해도 재로드는 진행 */ }
+    // localStorage는 같은 오리진에서 쿼리스트링이 달라져도 유지되므로 토큰은 그대로 남습니다.
+    location.replace(location.pathname + '?v=' + Date.now());
+  });
   document.getElementById('btnForget').addEventListener('click', async ()=>{
     await clearConfig();
     document.getElementById('cfgOwner').value=''; document.getElementById('cfgRepo').value=''; document.getElementById('cfgToken').value='';
     setConnected(false); document.getElementById('connectMsg').textContent='저장된 정보를 삭제했습니다.';
   });
+}
+
+// 앞으로 Service Worker나 Cache API를 쓰게 되면 여기서 같이 지웁니다. (지금은 둘 다 없음)
+async function purgeAppCaches(){
+  if(typeof caches !== 'undefined' && caches.keys){
+    const keys = await caches.keys();
+    await Promise.all(keys.map(k=>caches.delete(k)));
+  }
+  if(navigator.serviceWorker && navigator.serviceWorker.getRegistrations){
+    const regs = await navigator.serviceWorker.getRegistrations();
+    await Promise.all(regs.map(r=>r.unregister()));
+  }
 }
 
 async function ensureBootstrapped(){
