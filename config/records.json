@@ -24,23 +24,23 @@
   "lat_pulldown": {
     "type": "strength",
     "name": "렛풀다운",
-    "weight": 55,
+    "weight": 70,
     "reps": 1,
-    "date": "2026-08-15"
+    "date": "2026-09-07"
   },
   "shoulder_press": {
     "type": "strength",
     "name": "숄더프레스",
-    "weight": 30,
+    "weight": 35,
     "reps": 1,
-    "date": "2026-08-17"
+    "date": "2026-09-07"
   },
   "butterfly": {
     "type": "strength",
     "name": "버터플라이",
-    "weight": 50,
+    "weight": 70,
     "reps": 1,
-    "date": "2026-08-18"
+    "date": "2026-09-07"
   },
   "ex_rul7vvd": {
     "type": "strength",
@@ -74,9 +74,9 @@
   "ex_312xm4p": {
     "type": "strength",
     "name": "시티드 체스트프레스",
-    "weight": 45,
+    "weight": 55,
     "reps": 1,
-    "date": "2026-08-18"
+    "date": "2026-09-07"
   },
   "ex_po3k9ch": {
     "type": "strength",
