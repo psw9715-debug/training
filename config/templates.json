@@ -48,33 +48,23 @@
         "failed": false
       },
       {
-        "weight": 45,
-        "reps": 2,
+        "weight": 55,
+        "reps": 1,
         "failed": false
       },
       {
-        "weight": 40,
-        "reps": 4,
+        "weight": 60,
+        "reps": 1,
         "failed": false
       },
       {
-        "weight": 35,
-        "reps": 6,
+        "weight": 65,
+        "reps": 1,
         "failed": false
       },
       {
-        "weight": 30,
-        "reps": 8,
-        "failed": false
-      },
-      {
-        "weight": 25,
-        "reps": 10,
-        "failed": false
-      },
-      {
-        "weight": 20,
-        "reps": 12,
+        "weight": 70,
+        "reps": 1,
         "failed": false
       }
     ]
@@ -113,28 +103,8 @@
         "failed": false
       },
       {
-        "weight": 25,
-        "reps": 2,
-        "failed": false
-      },
-      {
-        "weight": 20,
-        "reps": 4,
-        "failed": false
-      },
-      {
-        "weight": 15,
-        "reps": 6,
-        "failed": false
-      },
-      {
-        "weight": 10,
-        "reps": 8,
-        "failed": false
-      },
-      {
-        "weight": 5,
-        "reps": 10,
+        "weight": 35,
+        "reps": 1,
         "failed": false
       }
     ]
@@ -174,6 +144,26 @@
       },
       {
         "weight": 50,
+        "reps": 1,
+        "failed": false
+      },
+      {
+        "weight": 55,
+        "reps": 1,
+        "failed": false
+      },
+      {
+        "weight": 60,
+        "reps": 1,
+        "failed": false
+      },
+      {
+        "weight": 65,
+        "reps": 1,
+        "failed": false
+      },
+      {
+        "weight": 70,
         "reps": 1,
         "failed": false
       }
@@ -368,28 +358,13 @@
         "failed": false
       },
       {
-        "weight": 40,
-        "reps": 2,
+        "weight": 50,
+        "reps": 1,
         "failed": false
       },
       {
-        "weight": 35,
-        "reps": 4,
-        "failed": false
-      },
-      {
-        "weight": 30,
-        "reps": 6,
-        "failed": false
-      },
-      {
-        "weight": 25,
-        "reps": 8,
-        "failed": false
-      },
-      {
-        "weight": 20,
-        "reps": 10,
+        "weight": 55,
+        "reps": 1,
         "failed": false
       }
     ]
