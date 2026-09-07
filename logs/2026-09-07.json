@@ -227,12 +227,21 @@
           "failed": false
         }
       ]
+    },
+    {
+      "instanceId": "ou07i81",
+      "exerciseId": "swimming",
+      "name": "수영",
+      "type": "cardio",
+      "adHoc": true,
+      "distance": 1000,
+      "duration": 50
     }
   ],
   "calories": {
     "strength": 618,
-    "cardio": 0,
-    "total": 618
+    "cardio": 468,
+    "total": 1086
   },
-  "savedAt": "2026-09-07T07:06:21.584Z"
+  "savedAt": "2026-09-07T07:06:36.273Z"
 }
