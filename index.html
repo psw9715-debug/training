@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- 훈련일지 v1.11 · 빌드 2026-09-14 -->
+<!-- 훈련일지 v1.12 · 빌드 2026-09-14 -->
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -290,8 +290,8 @@ nav.bottomnav button.active{color:var(--ink);background:var(--paper);}
     </div>
     <div class="dial-row">
       <span class="dl">준비 시간<br><span class="muted" style="font-size:11px;">첫 세트 안내 후 시작까지</span></span>
-      <input type="range" id="vdPrep" min="5" max="30" step="1">
-      <span class="dv" id="vdPrepV">10초</span>
+      <input type="range" id="vdPrep" min="5" max="90" step="5">
+      <span class="dv" id="vdPrepV">30초</span>
     </div>
     <div class="dial-row">
       <span class="dl">세트 휴식<br><span class="muted" style="font-size:11px;">다음 세트 안내를 포함한 시간</span></span>
@@ -302,9 +302,9 @@ nav.bottomnav button.active{color:var(--ink);background:var(--paper);}
     <div class="divider"></div>
     <div class="sheet-group-label">목소리</div>
     <div id="voiceList"><p class="muted">목록을 불러오는 중...</p></div>
-    <div class="small-note">▶ 를 누르면 샘플을 들려줍니다. 목록은 이 아이폰에 설치된 한국어 음성만 나옵니다
-      (설정 &gt; 손쉬운 사용 &gt; 음성 콘텐츠 에서 더 받을 수 있습니다).</div>
-    <div class="btn-row"><button class="btn ghost small" id="btnVoiceSample">전체 흐름 샘플 듣기</button></div>
+    <div class="small-note">▶ 를 누르면 실제 흐름 그대로 들려줍니다 (세트 안내 → 카운트 세 번). 재생 중에 다시 누르면 멈춥니다.
+      목록은 이 아이폰에 설치된 한국어 음성만 나옵니다 — <b>설정 &gt; 손쉬운 사용 &gt; 음성 콘텐츠 &gt; 음성 &gt; 한국어</b>
+      에서 '향상됨' 또는 '프리미엄' 을 내려받으면 목록도 늘고 품질도 크게 좋아집니다.</div>
   </div>
 
   <div class="card">
@@ -554,7 +554,7 @@ nav.bottomnav button.active{color:var(--ink);background:var(--paper);}
    화면 상단(훈련일지 옆)에 표시되어, 어느 버전이 실제로 올라가 있는지
    바로 눈으로 구분할 수 있게 해줍니다.
 ============================================================ */
-const APP_VERSION = 'v1.11';
+const APP_VERSION = 'v1.12';
 const APP_BUILD = '2026-09-14';
 
 /* ============================================================
@@ -602,7 +602,7 @@ const DEFAULT_WEIGHT_STEP = 5;
 const REP_LEVEL_STEP = 2;
 
 /* 음성 가이드 전역 기본값. 종목별로 따로 정하지 않은 값은 전부 여기를 따른다. */
-const VOICE_DEFAULTS = { repTermSec:3, prepSec:10, restSec:30, warnAt:[10,5] };
+const VOICE_DEFAULTS = { repTermSec:3, prepSec:30, restSec:30, warnAt:[10,5] };
 
 const GROUPS = {
   full: ['bench','lat_pulldown','squat','shoulder_press','running'],
@@ -1198,7 +1198,7 @@ function renderEntryCard(en){
       const totalReps = (en.sets||[]).reduce((sum,s)=>sum+(Number(s.reps)||0),0);
       const statTxt = isRepsOnly ? (totalReps>0?`총 ${totalReps}회`:'') : (vol>0?`총 볼륨 ${Math.round(vol)}kg`:'');
       const est = estimateVoiceSeconds(en);
-      const statLine = [statTxt, est? `🔊 약 ${fmtDur(est)}`:''].filter(Boolean);
+      const statLine = [statTxt, est? `약 ${fmtDur(est)}`:''].filter(Boolean);
       body.innerHTML = `<div class="chip-row">${chips || '<span class="muted">탭해서 입력하세요</span>'}</div>`
         + (statLine.length? `<div class="vol-line">${statLine.join(' · ')}</div>` : '');
     }
@@ -1298,7 +1298,13 @@ function updateCalorieBadge(){
   const weight = Number(document.getElementById('bodyWeightInput').value)||0;
   const relevant = state.entries.filter(e=>e.completed || (e.sets&&e.sets.some(s=>s.weight||s.reps)) || e.distance || e.duration);
   const {total} = computeCaloriesForEntries(relevant, weight);
-  document.getElementById('calorieBadge').textContent = weight>0 ? `약 ${total} kcal` : '체중 입력 필요';
+  // 음성 가이드로 진행할 때의 합산 소요 시간. 미리 보면 오늘 얼마나 걸릴지,
+  // 하고 나서 보면 얼마나 했는지 가늠이 된다.
+  const mins = state.entries.reduce((t,en)=>t+estimateVoiceSeconds(en), 0);
+  const parts = [];
+  if(mins > 0) parts.push(`약 ${fmtDur(mins)}`);
+  parts.push(weight>0 ? `약 ${total} kcal` : '체중 입력 필요');
+  document.getElementById('calorieBadge').textContent = parts.join(' · ');
   saveDraftDebounced();
 }
 
@@ -1746,7 +1752,7 @@ function renderLibraryManage(){
     const own = it.voice && Object.keys(it.voice).length;
     const tags = it.type==='cardio'
       ? '유산소'
-      : `${it.repsOnly?'맨몸':(it.weightStep??DEFAULT_WEIGHT_STEP)+'kg'} · 🔊 ${cfg.repTermSec}/${cfg.restSec}초${own?' *':''}`;
+      : `${it.repsOnly?'맨몸':(it.weightStep??DEFAULT_WEIGHT_STEP)+'kg'} · ${cfg.repTermSec}/${cfg.restSec}초${own?' *':''}`;
     row.innerHTML = `<span class="nm">${esc(it.name)} <span class="muted">(${esc(it.bodyPart)})</span></span>
       <span class="tags">${esc(tags)}</span>
       <button class="iconbtn" aria-label="삭제">✕</button>`;
@@ -2595,7 +2601,6 @@ function bindVoiceHandlers(){
       saveVoiceDefaultsDebounced();
     });
   });
-  document.getElementById('btnVoiceSample').addEventListener('click', ()=>playVoiceSample(null));
   document.getElementById('btnOpenCatalog').addEventListener('click', openCatalogSheet);
 }
 function voiceDefBadgeText(){
@@ -2725,7 +2730,7 @@ function openLibraryDetailSheet(it){
       <div class="sheet-group">
         <div class="sheet-group-label">음성 가이드</div>
         ${dial('repTermSec','안내 간격','횟수를 읽고 나서 쉬는 시간',1,10,1)}
-        ${dial('prepSec','준비 시간','첫 세트 안내 후 시작까지',5,30,1)}
+        ${dial('prepSec','준비 시간','첫 세트 안내 후 시작까지',5,90,5)}
         ${dial('restSec','세트 휴식','다음 세트 안내를 포함한 시간',10,180,5)}
         <div class="btn-row" style="margin-top:0;">
           <button class="btn ghost small" id="ldPreview">▶ 미리듣기</button>
