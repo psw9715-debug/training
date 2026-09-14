@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0">
-<title>훈련일지 · 음성 가이드 체험</title>
+<title>훈련일지 · 음성 가이드</title>
 <meta name="description" content="무게·횟수·세트를 읽어주는 운동 음성 가이드. 이어폰을 끼고 들어보세요.">
 <meta property="og:title" content="훈련일지 · 음성 가이드">
 <meta property="og:description" content="무게·횟수·세트를 읽어줍니다. 이어폰을 끼고 🔊 를 눌러보세요.">
@@ -39,49 +39,28 @@ header.top{ padding: calc(18px + env(safe-area-inset-top)) 16px 4px; max-width:4
 main{max-width:480px;margin:0 auto;padding:0 16px 24px;}
 .card{ background:var(--card); border:2px solid var(--ink); border-radius:8px; padding:16px;
   margin-top:14px; box-shadow:3px 3px 0 var(--paper-line); }
-.card h2{ font-family:'Space Grotesk',sans-serif; font-size:15px;margin:0 0 12px;
-  display:flex;align-items:center;justify-content:space-between; gap:8px; }
-.card h2 .badge{ font-family:'IBM Plex Mono',monospace;font-size:10.5px;font-weight:600;
-  color:var(--ink-soft);border:1px solid var(--paper-line);padding:2px 8px;border-radius:12px; white-space:nowrap; }
+.card h2{ font-family:'Space Grotesk',sans-serif; font-size:15px;margin:0 0 12px; }
 .muted{color:var(--ink-soft);font-size:12.5px;line-height:1.6;}
 .hidden{display:none !important;}
 .small-note{font-size:11px;color:var(--ink-faint);margin-top:8px;line-height:1.6;}
-.divider{height:1px;background:var(--paper-line);margin:14px 0;}
-.seg-tabs{display:flex;gap:5px;background:var(--paper);padding:4px;border-radius:8px;border:1.5px solid var(--paper-line);}
-.seg-tabs button{flex:1;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:11.5px;padding:9px 3px;border:none;border-radius:6px;background:transparent;color:var(--ink-soft);}
-.seg-tabs button.active{background:var(--ink);color:var(--paper);}
 .chip-row{ display:flex;flex-wrap:wrap;gap:6px; }
 .chip{ font-family:'IBM Plex Mono',monospace;font-size:11px; background:var(--paper); border-radius:6px; padding:3px 7px; color:var(--ink-soft); }
 .chip.peak{ background:#F3E3C9; color:var(--amber); font-weight:700; }
 .vol-line{ font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-faint); margin-top:8px; }
 .ex-card{ border:2px dashed var(--paper-line); border-radius:8px; margin-bottom:10px; background:#fff; overflow:hidden; }
+.ex-card:last-child{ margin-bottom:0; }
 .ex-card-header{ display:flex; align-items:center; gap:8px; padding:12px; cursor:pointer; }
 .ex-name{ font-weight:700; font-size:14.5px; flex:1; }
 .ex-chevron{ font-size:11px; color:var(--ink-faint); font-family:'IBM Plex Mono',monospace; }
 .ex-body{ padding:0 12px 12px; }
-.ex-voice{ width:36px;height:36px;flex-shrink:0; border:1.5px solid var(--paper-line); border-radius:8px;
-  background:#fff; font-size:16px; line-height:1; padding:0; color:var(--ink-soft); }
+.ex-voice{ width:38px;height:38px;flex-shrink:0; border:1.5px solid var(--paper-line); border-radius:8px;
+  background:#fff; font-size:17px; line-height:1; padding:0; color:var(--ink-soft); }
 .ex-voice:active{ background:var(--paper); }
 .toast{ position:fixed;bottom:calc(24px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);
   background:var(--ink);color:var(--paper);padding:11px 18px;border-radius:8px;
   font-family:'IBM Plex Mono',monospace;font-size:12.5px;box-shadow:0 4px 14px rgba(0,0,0,0.25);
   z-index:999;opacity:0;pointer-events:none;transition:opacity 0.25s, transform 0.25s; max-width:88vw;text-align:center; }
 .toast.show{opacity:1;transform:translateX(-50%) translateY(-4px);}
-.steps{ counter-reset:st; padding:0; margin:0; list-style:none; }
-.steps li{ counter-increment:st; position:relative; padding:0 0 12px 30px; font-size:13px; line-height:1.65; }
-.steps li:before{ content:counter(st); position:absolute; left:0; top:1px; width:20px;height:20px;
-  border-radius:50%; background:var(--ink); color:var(--paper); font-family:'IBM Plex Mono',monospace;
-  font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center; }
-.script{ font-family:'IBM Plex Mono',monospace; font-size:11.5px; line-height:1.9; color:var(--ink-soft);
-  background:var(--paper); border-radius:8px; padding:12px; border:1px dashed var(--paper-line);
-  overflow-x:auto; white-space:pre; }
-.script b{ color:var(--ink); }
-.voice-pick{ display:flex; align-items:center; gap:8px; padding:10px 4px; border-bottom:1px dashed var(--paper-line); }
-.voice-pick .vn{ flex:1; font-size:13.5px; }
-.voice-pick .vplay{ width:40px;height:40px;flex-shrink:0;border:1.5px solid var(--paper-line);
-  border-radius:8px;background:#fff;font-size:13px;padding:0; }
-.voice-pick input[type=radio]{ width:auto; }
-
 /* ============================================================
    음성 가이드 오버레이
    화면을 계속 켜둔 채(Wake Lock) 재생하므로 어두운 배경을 쓴다.
@@ -130,62 +109,22 @@ main{max-width:480px;margin:0 auto;padding:0 16px 24px;}
 
 <header class="top">
   <div class="stamp-title"><span class="dot"></span>훈련일지</div>
-  <div class="subtitle">음성 가이드 체험판 · 이어폰을 끼고 들어보세요</div>
+  <div class="subtitle">음성 가이드 · 이어폰을 끼고 🔊 를 눌러보세요</div>
 </header>
 
 <main>
 
 <div class="card">
-  <h2>이게 뭐냐면</h2>
-  <p class="muted">헬스장에서 <b>“이번 세트가 몇 킬로에 몇 회였더라”</b> 를 계속 까먹습니다.
-    그래서 무게·횟수·세트를 <b>음성으로 읽어주게</b> 만들었습니다. 이어폰만 끼고 있으면
-    폰을 볼 필요 없이 운동에만 집중할 수 있습니다.</p>
-  <ol class="steps" style="margin-top:12px;">
-    <li><b>“렛풀다운, 첫번째 세트, 이십킬로, 십이회, 준비하세요”</b> — 무엇을 할지 알려주고</li>
-    <li><b>“하나 … 둘 … 셋”</b> — 한 회씩 3초 간격으로 세어주고</li>
-    <li><b>“십초” “오초”</b> — 쉬는 동안 다음 세트를 미리 알려줍니다</li>
-  </ol>
-  <div class="script"><b>"렛풀다운, 첫번째 세트,
- 이십킬로, 십이회, 준비하세요"</b>
-   준비 30초 … "십초" "오초"
-<b>"하나"</b> ─3초─ <b>"둘"</b> ─3초─ … <b>"열둘"</b>
-
-<b>"두번째 세트, 이십오킬로,
- 십회, 준비하세요"</b>
-   휴식 30초 … "십초" "오초"
-<b>"하나"</b> ─3초─ <b>"둘"</b> ─3초─ …
-
-<b>"수고하셨습니다"</b></div>
-</div>
-
-<div class="card">
-  <h2>체험 속도 <span class="badge" id="speedBadge">-</span></h2>
-  <div class="seg-tabs">
-    <button data-speed="real" class="active">실제 설정</button>
-    <button data-speed="fast">빠르게 맛보기</button>
-  </div>
-  <div class="small-note" id="speedNote"></div>
-</div>
-
-<div class="card">
-  <h2>해보기 <span class="badge" id="totalBadge">-</span></h2>
-  <p class="muted">🔊 를 누르면 시작합니다. 종목 이름을 누르면 세트 구성이 보입니다.</p>
-  <div id="exList" style="margin-top:12px;"></div>
-</div>
-
-<div class="card">
-  <h2>목소리</h2>
-  <div id="voiceList"><p class="muted">불러오는 중...</p></div>
-  <div class="small-note">▶ 를 누르면 실제 흐름 그대로 들려줍니다. 재생 중에 다시 누르면 멈춥니다.<br>
-    아이폰에서 목록이 하나뿐이라면 <b>설정 &gt; 손쉬운 사용 &gt; 음성 콘텐츠 &gt; 음성 &gt; 한국어</b> 에서
-    ‘향상됨’ 이나 ‘프리미엄’ 을 내려받아 보세요. 목록도 늘고 품질도 확 달라집니다.</div>
+  <div id="exList"></div>
 </div>
 
 <div class="card">
   <h2>체험판입니다</h2>
-  <p class="muted">여기서는 미리 넣어둔 세 종목만 들어볼 수 있습니다.
-    실제 앱에서는 종목을 직접 만들고, 무게·횟수·세트를 자기 몸에 맞게 짜고,
-    안내 간격과 휴식 시간을 종목마다 따로 정할 수 있습니다.
+  <p class="muted">무게·횟수·세트를 음성으로 읽어줍니다. 이어폰만 끼고 있으면
+    폰을 볼 필요 없이 운동에만 집중할 수 있습니다.
+    여기서는 미리 넣어둔 세 종목만 들어볼 수 있습니다.</p>
+  <p class="muted" style="margin-top:10px;">실제 앱에서는 종목을 직접 만들고, 무게·횟수·세트를
+    자기 몸에 맞게 짜고, 안내 간격과 휴식 시간을 종목마다 따로 정할 수 있습니다.
     한 번 기록해두면 다음에 같은 종목을 불러올 때 그대로 다시 나옵니다.</p>
   <div class="small-note">이 페이지는 아무것도 저장하지 않습니다. 마이크도 쓰지 않고, 소리만 냅니다.</div>
 </div>
@@ -219,23 +158,23 @@ main{max-width:480px;margin:0 auto;padding:0 16px 24px;}
 
 <script>
 /* ============================================================
-   체험판. 엔진(발화·타이밍·오버레이)은 본 앱 index.html 에서 그대로
-   가져온 것이라 들리는 소리와 간격이 실제와 동일하다. 저장·편집·
-   종목 추가처럼 계정이 필요한 부분만 걷어냈다.
+   체험판. 발화·타이밍·오버레이는 본 앱 index.html 에서 그대로 가져온
+   것이라 들리는 소리와 간격이 실제와 같다. 저장·편집·종목 추가처럼
+   계정이 필요한 부분만 걷어냈고, 목소리는 유나로 고정했다.
+   준비 시간만 15초로 줄였다 (본 앱 기본은 30초).
 ============================================================ */
-const VOICE_DEFAULTS = { repTermSec:3, prepSec:30, restSec:30, warnAt:[10,5] };
-const FAST_DEFAULTS  = { repTermSec:3, prepSec:10, restSec:15, warnAt:[10,5] };
+const VOICE_DEFAULTS = { repTermSec:3, prepSec:15, restSec:30, warnAt:[10,5] };
 const DEFAULT_WEIGHT_STEP = 5;
 
 const DEMO_LIB = [
-  { id:'lat_pulldown', name:'렛풀다운', bodyPart:'등',   type:'strength', weightStep:5 },
-  { id:'squat',        name:'스쿼트',   bodyPart:'하체', type:'strength', repsOnly:true },
+  { id:'lat_pulldown', name:'렛풀다운',   bodyPart:'등',   type:'strength', weightStep:5 },
   { id:'bench',        name:'벤치프레스', bodyPart:'가슴', type:'strength', weightStep:5 },
+  { id:'squat',        name:'스쿼트',     bodyPart:'하체', type:'strength', repsOnly:true },
 ];
 const DEMO_TEMPLATES = {
   lat_pulldown: { type:'strength', sets: [{"weight": 20, "reps": 12, "failed": false}, {"weight": 25, "reps": 10, "failed": false}, {"weight": 30, "reps": 8, "failed": false}, {"weight": 35, "reps": 6, "failed": false}, {"weight": 40, "reps": 4, "failed": false}, {"weight": 45, "reps": 2, "failed": false}, {"weight": 50, "reps": 1, "failed": false}, {"weight": 55, "reps": 1, "failed": false}, {"weight": 60, "reps": 1, "failed": false}, {"weight": 55, "reps": 1, "failed": false}, {"weight": 50, "reps": 1, "failed": false}, {"weight": 45, "reps": 2, "failed": false}, {"weight": 40, "reps": 4, "failed": false}, {"weight": 35, "reps": 6, "failed": false}, {"weight": 30, "reps": 8, "failed": false}, {"weight": 25, "reps": 10, "failed": false}, {"weight": 20, "reps": 12, "failed": false}] },
-  squat:        { type:'strength', sets: [{"weight": 0, "reps": 20, "failed": false}, {"weight": 0, "reps": 20, "failed": false}, {"weight": 0, "reps": 20, "failed": false}, {"weight": 0, "reps": 20, "failed": false}, {"weight": 0, "reps": 20, "failed": false}] },
   bench:        { type:'strength', sets: [{"weight": 20, "reps": 12, "failed": false}, {"weight": 25, "reps": 10, "failed": false}, {"weight": 30, "reps": 8, "failed": false}, {"weight": 35, "reps": 6, "failed": false}, {"weight": 40, "reps": 4, "failed": false}, {"weight": 45, "reps": 2, "failed": false}, {"weight": 50, "reps": 1, "failed": false}, {"weight": 55, "reps": 1, "failed": false}, {"weight": 60, "reps": 1, "failed": false}, {"weight": 55, "reps": 1, "failed": false}, {"weight": 50, "reps": 1, "failed": false}, {"weight": 45, "reps": 2, "failed": false}, {"weight": 40, "reps": 4, "failed": false}, {"weight": 35, "reps": 6, "failed": false}, {"weight": 30, "reps": 8, "failed": false}, {"weight": 25, "reps": 10, "failed": false}, {"weight": 20, "reps": 12, "failed": false}] },
+  squat:        { type:'strength', sets: [{"weight": 0, "reps": 20, "failed": false}, {"weight": 0, "reps": 20, "failed": false}, {"weight": 0, "reps": 20, "failed": false}, {"weight": 0, "reps": 20, "failed": false}, {"weight": 0, "reps": 20, "failed": false}] },
 };
 
 const state = { voiceDefaults:{...VOICE_DEFAULTS}, library:DEMO_LIB, templates:DEMO_TEMPLATES };
@@ -245,6 +184,7 @@ function showToast(msg){
   const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
   clearTimeout(showToast._tm); showToast._tm=setTimeout(()=>t.classList.remove('show'),2600);
 }
+function stopVoiceSample(){}
 function renderEntryList(){ renderDemo(); }
 
 const NK_ONES = ['','하나','둘','셋','넷','다섯','여섯','일곱','여덟','아홉'];
@@ -260,7 +200,6 @@ function voSub(t){ document.getElementById('voSub').textContent = t || ''; }
 const VOICE_URI_KEY = 'training-log:voiceURI';
 const vs = { active:false, paused:false, abort:false, entry:null, lib:null, cfg:null, sets:[], tm:null, wakeLock:null };
 const VO_CIRC = 2 * Math.PI * 92;
-let _sampleRunning = false, _sampleAbort = false;
 function nativeKo(n){
   n = Math.floor(Number(n)||0);
   if(n < 1) return '영';
@@ -497,74 +436,20 @@ function releaseWakeLock(){
   try{ if(vs.wakeLock) vs.wakeLock.release(); }catch(e){}
   vs.wakeLock = null;
 }
-function stopVoiceSample(){
-  if(!_sampleRunning) return;
-  _sampleAbort = true;
-  try{ speechSynthesis.cancel(); }catch(e){}
-}
-async function playVoiceSample(uriOverride, exercise){
-  if(vs.active){ showToast('재생 중에는 미리듣기를 할 수 없어요'); return; }
-  if(_sampleRunning){ stopVoiceSample(); return; }
-  _sampleRunning = true; _sampleAbort = false;
-  try{
-    try{ speechSynthesis.cancel(); }catch(e){}
-    // '' 는 시스템 기본(목소리 지정 안 함), undefined 는 저장된 설정 그대로
-    const vo = (uriOverride === null || uriOverride === undefined) ? undefined : (uriOverride ? voiceEngine.byUri(uriOverride) : null);
-    const cfg = exercise ? voiceCfgFor(exercise.id) : (state.voiceDefaults || VOICE_DEFAULTS);
-    let intro = '렛풀다운, 첫번째 세트, 이십킬로, 십이회, 준비하세요';
-    if(exercise){
-      const first = ((state.templates[exercise.id]||{}).sets||[])[0] || { weight: exercise.repsOnly?0:20, reps:12 };
-      intro = buildSetAnnounce(exercise.name, exercise, 0, first, true);
-    }
-    await speakAsync(intro, vo);
-    for(let k=1; k<=3 && !_sampleAbort; k++){
-      await speakAsync(nativeKo(k), vo);
-      if(_sampleAbort) break;
-      await new Promise(r=>setTimeout(r, (cfg.repTermSec||3)*1000));
-    }
-  } finally { _sampleRunning = false; _sampleAbort = false; }
-}
-function renderVoiceList(){
-  const wrap = document.getElementById('voiceList');
-  if(!wrap) return;
-  const list = voiceEngine.load();
-  if(!list.length){
-    wrap.innerHTML = '<p class="muted">이 기기에서 쓸 수 있는 한국어 음성을 찾지 못했습니다. 시스템 기본 음성으로 재생됩니다.</p>';
-    return;
-  }
-  let cur = null;
-  try{ cur = localStorage.getItem(VOICE_URI_KEY); }catch(e){}
-  wrap.innerHTML = list.map(v=>`
-    <label class="voice-pick">
-      <input type="radio" name="voicePick" value="${esc(v.voiceURI)}" ${cur===v.voiceURI?'checked':''}>
-      <span class="vn">${esc(v.name)}<br><span class="muted" style="font-size:10.5px;">${esc(v.lang)}</span></span>
-      <button type="button" class="vplay" data-uri="${esc(v.voiceURI)}">▶</button>
-    </label>`).join('')
-    + `<label class="voice-pick">
-      <input type="radio" name="voicePick" value="" ${!cur?'checked':''}>
-      <span class="vn">기본 (시스템에 맡김)</span>
-      <button type="button" class="vplay" data-uri="">▶</button>
-    </label>`;
-  wrap.querySelectorAll('input[name="voicePick"]').forEach(r=>{
-    r.addEventListener('change', ()=>{
-      try{ r.value ? localStorage.setItem(VOICE_URI_KEY, r.value) : localStorage.removeItem(VOICE_URI_KEY); }catch(e){}
-      showToast('목소리를 바꿨어요');
-    });
-  });
-  wrap.querySelectorAll('.vplay').forEach(b=>{
-    b.addEventListener('click', (e)=>{ e.preventDefault(); e.stopPropagation(); playVoiceSample(b.dataset.uri); });
-  });
-}
+/* 체험판은 유나 목소리를 기본으로 쓴다. 없으면 이 기기의 한국어 음성 아무거나. */
+voiceEngine.selected = function(){
+  const list = this.voices;
+  return list.find(v=>/yuna|유나/i.test(v.name)) || list[0] || null;
+};
 document.addEventListener('visibilitychange', ()=>{
   if(document.visibilityState === 'visible' && vs.active && !vs.wakeLock) acquireWakeLock();
 });
 if(window.speechSynthesis){
   voiceEngine.load();
-  speechSynthesis.onvoiceschanged = ()=>{ voiceEngine.load(); renderVoiceList(); };
+  speechSynthesis.onvoiceschanged = ()=>voiceEngine.load();
 }
 
 
-/* ---- 체험판 화면 ---- */
 const entries = DEMO_LIB.map(lib=>({
   instanceId: lib.id, exerciseId: lib.id, name: lib.name, type:'strength',
   sets: JSON.parse(JSON.stringify(DEMO_TEMPLATES[lib.id].sets)), expanded:false,
@@ -577,7 +462,6 @@ function renderDemo(){
     const lib = findLibItem(en.exerciseId);
     const card = document.createElement('div');
     card.className = 'ex-card';
-    const est = estimateVoiceSeconds(en);
     const peak = Math.max(...en.sets.map(s=>Number(s.weight)||0));
     const chips = en.sets.map(s=>{
       const label = lib.repsOnly ? `${s.reps}회` : `${s.weight}×${s.reps}`;
@@ -585,12 +469,7 @@ function renderDemo(){
       return `<span class="chip${hot?' peak':''}">${label}</span>`;
     }).join('');
     const totalReps = en.sets.reduce((t,s)=>t+(Number(s.reps)||0),0);
-    const vol = lib.repsOnly ? 0 : en.sets.reduce((t,s)=>t+(Number(s.weight)||0)*(Number(s.reps)||0),0);
-    const stat = [
-      `${en.sets.length}세트 ${totalReps}회`,
-      vol>0 ? `총 볼륨 ${Math.round(vol)}kg` : '',
-      `약 ${fmtDur(est)}`,
-    ].filter(Boolean).join(' · ');
+    const stat = `${en.sets.length}세트 ${totalReps}회 · 약 ${fmtDur(estimateVoiceSeconds(en))}`;
     card.innerHTML = `
       <div class="ex-card-header">
         <span class="ex-name">${esc(en.name)}</span>
@@ -610,29 +489,11 @@ function renderDemo(){
     });
     wrap.appendChild(card);
   });
-  const total = entries.reduce((t,en)=>t+estimateVoiceSeconds(en), 0);
-  document.getElementById('totalBadge').textContent = `전부 다 하면 약 ${fmtDur(total)}`;
 }
 
-function setSpeed(mode){
-  state.voiceDefaults = { ...(mode==='fast' ? FAST_DEFAULTS : VOICE_DEFAULTS) };
-  const g = state.voiceDefaults;
-  document.getElementById('speedBadge').textContent = `간격 ${g.repTermSec}초 · 휴식 ${g.restSec}초`;
-  document.getElementById('speedNote').innerHTML = mode==='fast'
-    ? '준비와 휴식을 짧게 줄였습니다. 흐름 전체를 빨리 들어보기 좋습니다. <b>카운트 간격 3초는 그대로</b>입니다.'
-    : '실제 앱의 기본값입니다. 준비 30초, 세트 사이 휴식 30초라 기다리는 구간이 깁니다.';
-  document.querySelectorAll('.seg-tabs button').forEach(b=>b.classList.toggle('active', b.dataset.speed===mode));
-  renderDemo();
-}
-
-document.querySelectorAll('.seg-tabs button').forEach(b=>{
-  b.addEventListener('click', ()=>setSpeed(b.dataset.speed));
-});
 document.getElementById('voClose').addEventListener('click', endVoiceSession);
 document.getElementById('voPause').addEventListener('click', toggleVoicePause);
-
-setSpeed('real');
-renderVoiceList();
+renderDemo();
 </script>
 </body>
 </html>
