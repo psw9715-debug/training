@@ -36,12 +36,6 @@
     "type": "strength"
   },
   {
-    "id": "pullup",
-    "name": "풀업",
-    "bodyPart": "등",
-    "type": "strength"
-  },
-  {
     "id": "shoulder_press",
     "name": "숄더프레스",
     "bodyPart": "어깨",
@@ -51,12 +45,6 @@
     "id": "arm_curl",
     "name": "암컬",
     "bodyPart": "팔",
-    "type": "strength"
-  },
-  {
-    "id": "squat",
-    "name": "스쿼트",
-    "bodyPart": "하체",
     "type": "strength"
   },
   {

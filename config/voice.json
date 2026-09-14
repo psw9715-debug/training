@@ -1,0 +1,9 @@
+{
+  "repTermSec": 3,
+  "prepSec": 10,
+  "restSec": 30,
+  "warnAt": [
+    10,
+    5
+  ]
+}
