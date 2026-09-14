@@ -54,12 +54,6 @@
     "type": "strength"
   },
   {
-    "id": "squat",
-    "name": "스쿼트",
-    "bodyPart": "하체",
-    "type": "strength"
-  },
-  {
     "id": "leg_extension",
     "name": "레그 익스텐션",
     "bodyPart": "하체",
