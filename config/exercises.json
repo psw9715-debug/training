@@ -36,12 +36,6 @@
     "type": "strength"
   },
   {
-    "id": "pullup",
-    "name": "풀업",
-    "bodyPart": "등",
-    "type": "strength"
-  },
-  {
     "id": "shoulder_press",
     "name": "숄더프레스",
     "bodyPart": "어깨",
