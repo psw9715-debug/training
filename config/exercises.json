@@ -119,5 +119,12 @@
     "bodyPart": "가슴",
     "type": "strength",
     "weightStep": 5
+  },
+  {
+    "id": "ex_4woxit3",
+    "name": "스쿼트",
+    "bodyPart": "하체",
+    "type": "strength",
+    "repsOnly": true
   }
 ]

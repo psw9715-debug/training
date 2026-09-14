@@ -1,0 +1,35 @@
+{
+  "date": "2026-09-04",
+  "weekday": "fri",
+  "bodyWeight": 79.4,
+  "muscleMass": 33.2,
+  "fatMass": 26.2,
+  "rpe": null,
+  "memo": "",
+  "entries": [
+    {
+      "instanceId": "vpyj2cd",
+      "exerciseId": "swimming",
+      "name": "수영",
+      "type": "cardio",
+      "adHoc": true,
+      "distance": 1000,
+      "duration": 50
+    },
+    {
+      "instanceId": "2hm10vi",
+      "exerciseId": "running",
+      "name": "러닝",
+      "type": "cardio",
+      "adHoc": true,
+      "distance": 4.5,
+      "duration": 50
+    }
+  ],
+  "calories": {
+    "strength": 0,
+    "cardio": 1059,
+    "total": 1059
+  },
+  "savedAt": "2026-09-05T23:46:23.097Z"
+}
