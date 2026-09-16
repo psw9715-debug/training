@@ -1,6 +1,6 @@
 {
   "repTermSec": 3,
-  "prepSec": 30,
+  "prepSec": 10,
   "restSec": 30,
   "warnAt": [
     10,
