@@ -98,5 +98,19 @@
     "weight": 0,
     "reps": 20,
     "date": "2026-09-02"
+  },
+  "seated_leg_press": {
+    "type": "strength",
+    "name": "시티드 레그프레스",
+    "weight": 90,
+    "reps": 1,
+    "date": "2026-09-17"
+  },
+  "cable_crossover": {
+    "type": "strength",
+    "name": "케이블 크로스오버",
+    "weight": 30,
+    "reps": 4,
+    "date": "2026-09-17"
   }
 }
