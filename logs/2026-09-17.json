@@ -1,0 +1,330 @@
+{
+  "date": "2026-09-17",
+  "weekday": "thu",
+  "bodyWeight": 81.1,
+  "muscleMass": 33.9,
+  "fatMass": 26.3,
+  "rpe": 3,
+  "memo": "식사 떡볶이",
+  "entries": [
+    {
+      "instanceId": "b2f9d5y",
+      "exerciseId": "lat_pulldown",
+      "name": "렛풀다운",
+      "type": "strength",
+      "adHoc": true,
+      "sets": [
+        {
+          "weight": 20,
+          "reps": 12,
+          "failed": false
+        },
+        {
+          "weight": 25,
+          "reps": 10,
+          "failed": false
+        },
+        {
+          "weight": 30,
+          "reps": 8,
+          "failed": false
+        },
+        {
+          "weight": 35,
+          "reps": 6,
+          "failed": false
+        },
+        {
+          "weight": 40,
+          "reps": 4,
+          "failed": false
+        },
+        {
+          "weight": 45,
+          "reps": 2,
+          "failed": false
+        },
+        {
+          "weight": 50,
+          "reps": 1,
+          "failed": false
+        },
+        {
+          "weight": 55,
+          "reps": 1,
+          "failed": false
+        },
+        {
+          "weight": 60,
+          "reps": 1,
+          "failed": false
+        },
+        {
+          "weight": 65,
+          "reps": 1,
+          "failed": false
+        },
+        {
+          "weight": 70,
+          "reps": 1,
+          "failed": false
+        }
+      ]
+    },
+    {
+      "instanceId": "y5g8xgs",
+      "exerciseId": "butterfly",
+      "name": "버터플라이",
+      "type": "strength",
+      "adHoc": true,
+      "sets": [
+        {
+          "weight": 20,
+          "reps": 12,
+          "failed": false
+        },
+        {
+          "weight": 25,
+          "reps": 10,
+          "failed": false
+        },
+        {
+          "weight": 30,
+          "reps": 8,
+          "failed": false
+        },
+        {
+          "weight": 35,
+          "reps": 6,
+          "failed": false
+        },
+        {
+          "weight": 40,
+          "reps": 4,
+          "failed": false
+        },
+        {
+          "weight": 45,
+          "reps": 2,
+          "failed": false
+        },
+        {
+          "weight": 50,
+          "reps": 1,
+          "failed": false
+        },
+        {
+          "weight": 55,
+          "reps": 1,
+          "failed": false
+        },
+        {
+          "weight": 60,
+          "reps": 1,
+          "failed": false
+        },
+        {
+          "weight": 65,
+          "reps": 1,
+          "failed": false
+        }
+      ]
+    },
+    {
+      "instanceId": "s7k330m",
+      "exerciseId": "shoulder_press",
+      "name": "숄더프레스",
+      "type": "strength",
+      "adHoc": true,
+      "sets": [
+        {
+          "weight": 5,
+          "reps": 10,
+          "failed": false
+        },
+        {
+          "weight": 10,
+          "reps": 8,
+          "failed": false
+        },
+        {
+          "weight": 15,
+          "reps": 6,
+          "failed": false
+        },
+        {
+          "weight": 20,
+          "reps": 4,
+          "failed": false
+        },
+        {
+          "weight": 25,
+          "reps": 2,
+          "failed": false
+        },
+        {
+          "weight": 30,
+          "reps": 1,
+          "failed": false
+        },
+        {
+          "weight": 35,
+          "reps": 1,
+          "failed": false
+        }
+      ]
+    },
+    {
+      "instanceId": "tcmlm14",
+      "exerciseId": "ex_312xm4p",
+      "name": "시티드 체스트프레스",
+      "type": "strength",
+      "adHoc": true,
+      "sets": [
+        {
+          "weight": 20,
+          "reps": 10,
+          "failed": false
+        },
+        {
+          "weight": 25,
+          "reps": 8,
+          "failed": false
+        },
+        {
+          "weight": 30,
+          "reps": 6,
+          "failed": false
+        },
+        {
+          "weight": 35,
+          "reps": 4,
+          "failed": false
+        },
+        {
+          "weight": 40,
+          "reps": 2,
+          "failed": false
+        },
+        {
+          "weight": 45,
+          "reps": 1,
+          "failed": false
+        },
+        {
+          "weight": 50,
+          "reps": 1,
+          "failed": false
+        },
+        {
+          "weight": 55,
+          "reps": 1,
+          "failed": false
+        }
+      ]
+    },
+    {
+      "instanceId": "3gdtue3",
+      "exerciseId": "seated_leg_press",
+      "name": "시티드 레그프레스",
+      "type": "strength",
+      "adHoc": true,
+      "sets": [
+        {
+          "weight": 50,
+          "reps": 10,
+          "failed": false
+        },
+        {
+          "weight": 55,
+          "reps": 8,
+          "failed": false
+        },
+        {
+          "weight": 60,
+          "reps": 6,
+          "failed": false
+        },
+        {
+          "weight": 65,
+          "reps": 4,
+          "failed": false
+        },
+        {
+          "weight": 70,
+          "reps": 2,
+          "failed": false
+        },
+        {
+          "weight": 75,
+          "reps": 1,
+          "failed": false
+        },
+        {
+          "weight": 80,
+          "reps": 1,
+          "failed": false
+        },
+        {
+          "weight": 85,
+          "reps": 1,
+          "failed": false
+        },
+        {
+          "weight": 90,
+          "reps": 1,
+          "failed": false
+        }
+      ]
+    },
+    {
+      "instanceId": "uv81jvs",
+      "exerciseId": "cable_crossover",
+      "name": "케이블 크로스오버",
+      "type": "strength",
+      "adHoc": true,
+      "sets": [
+        {
+          "weight": 10,
+          "reps": 12,
+          "failed": false
+        },
+        {
+          "weight": 15,
+          "reps": 10,
+          "failed": false
+        },
+        {
+          "weight": 20,
+          "reps": 8,
+          "failed": false
+        },
+        {
+          "weight": 25,
+          "reps": 6,
+          "failed": false
+        },
+        {
+          "weight": 30,
+          "reps": 4,
+          "failed": false
+        }
+      ]
+    },
+    {
+      "instanceId": "5lq4diw",
+      "exerciseId": "swimming",
+      "name": "수영",
+      "type": "cardio",
+      "adHoc": true,
+      "distance": 1000,
+      "duration": 50
+    }
+  ],
+  "calories": {
+    "strength": 845,
+    "cardio": 473,
+    "total": 1318
+  },
+  "savedAt": "2026-09-17T14:09:00.237Z"
+}
