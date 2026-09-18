@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- 훈련일지 v1.12 · 빌드 2026-09-14 -->
+<!-- 훈련일지 v1.13 · 빌드 2026-09-18 -->
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -206,7 +206,16 @@ a{color:var(--blue);}
 .vo.phase-prep{ --vo-accent:#8A97A0; }
 .vo.phase-count{ --vo-accent:#7FD1A0; }
 .vo.phase-rest{ --vo-accent:#E0A44A; }
+.vo.phase-hold{ --vo-accent:#79B4E8; }
+.vo.phase-hold .vo-big{ font-size:min(27vw,98px); }
 .vo.phase-done{ --vo-accent:#7FD1A0; }
+
+/* 자세 안내 */
+.form-guide{ border:1px dashed var(--paper-line); border-left:3px solid var(--amber);
+  border-radius:8px; padding:9px 10px; margin-bottom:10px;
+  font-size:12px; line-height:1.7; color:var(--ink-soft); background:var(--paper); }
+.form-guide b{ color:var(--amber); font-family:'IBM Plex Mono',monospace; font-size:10.5px;
+  display:block; margin-bottom:3px; letter-spacing:0.5px; }
 
 /* 종목 카드의 음성 버튼 */
 .ex-voice{ width:32px;height:32px;flex-shrink:0; border:1.5px solid var(--paper-line); border-radius:8px;
@@ -554,8 +563,8 @@ nav.bottomnav button.active{color:var(--ink);background:var(--paper);}
    화면 상단(훈련일지 옆)에 표시되어, 어느 버전이 실제로 올라가 있는지
    바로 눈으로 구분할 수 있게 해줍니다.
 ============================================================ */
-const APP_VERSION = 'v1.12';
-const APP_BUILD = '2026-09-14';
+const APP_VERSION = 'v1.13';
+const APP_BUILD = '2026-09-18';
 
 /* ============================================================
    상수
@@ -600,6 +609,8 @@ const DEFAULT_LIBRARY = [
 ];
 const DEFAULT_WEIGHT_STEP = 5;
 const REP_LEVEL_STEP = 2;
+const TIME_LEVEL_STEP = 5;   // 버티기 종목의 단계 조정 폭(초)
+const DEFAULT_HOLD_SEC = 20; // 버티기 종목 새 세트의 기본 길이
 
 /* 음성 가이드 전역 기본값. 종목별로 따로 정하지 않은 값은 전부 여기를 따른다. */
 const VOICE_DEFAULTS = { repTermSec:3, prepSec:30, restSec:30, warnAt:[10,5] };
@@ -646,6 +657,28 @@ function showToast(msg){
   clearTimeout(showToast._tm); showToast._tm=setTimeout(()=>t.classList.remove('show'),2800);
 }
 function findLibItem(id){ return state.library.find(e=>e.id===id); }
+
+/* ------------------------------------------------------------
+   종목 유형
+     weight : 무게 × 횟수      (벤치, 렛풀다운 …)
+     reps   : 횟수만           (푸시업, 싯업 …)
+     time   : 시간을 버티기     (카프 레이즈 홀드, 플랭크 …)
+
+   'time' 종목은 세트의 reps 칸을 "초"로 쓴다. 저장 구조를 그대로 두어야
+   지난 기록·통계·내보내기가 전부 그대로 동작하기 때문이다. 화면과 음성
+   에서만 단위를 초로 바꿔 읽는다.
+------------------------------------------------------------ */
+function libOf(x){ return (typeof x === 'string') ? findLibItem(x) : x; }
+function exIsTimed(x){ return !!(libOf(x)||{}).timed; }
+function exNoWeight(x){ const l = libOf(x)||{}; return !!(l.repsOnly || l.timed); }
+function exUnit(x){ return exIsTimed(x) ? '초' : '회'; }
+function exMode(x){ const l = libOf(x)||{}; return l.timed ? 'time' : (l.repsOnly ? 'reps' : 'weight'); }
+function fmtSecKo(sec){
+  sec = Math.round(Number(sec)||0);
+  if(sec < 60) return `${sec}초`;
+  const m = Math.floor(sec/60), r = sec%60;
+  return r ? `${m}분 ${r}초` : `${m}분`;
+}
 
 function computeVolume(sets){ return (sets||[]).reduce((s,st)=>s+(Number(st.weight)||0)*(Number(st.reps)||0),0); }
 
@@ -1018,7 +1051,8 @@ function buildEntryFromTemplate(exerciseId, savedLog, adHoc){
       distance: tpl?.distance ?? '', duration: tpl?.duration ?? '',
       completed:false, expanded: !tpl };
   }
-  const sets = tpl?.sets ? JSON.parse(JSON.stringify(tpl.sets)) : [{weight:'',reps:'',failed:false}];
+  const sets = tpl?.sets ? JSON.parse(JSON.stringify(tpl.sets))
+             : (lib.timed ? [{weight:0, reps:DEFAULT_HOLD_SEC, failed:false}] : [{weight:'',reps:'',failed:false}]);
   return { instanceId, exerciseId, name:lib.name, type:'strength', adHoc: !!adHoc, sets, completed:false, expanded: !tpl };
 }
 function buildEntryFromSaved(se, adHoc){
@@ -1087,9 +1121,36 @@ function renderEntryCard(en){
       dEl.addEventListener('input',upd); tEl.addEventListener('input',upd); upd();
     } else {
       const lib = findLibItem(en.exerciseId);
-      const isRepsOnly = !!lib?.repsOnly;
+      const isRepsOnly = exNoWeight(lib);
+      const isTimedEx = exIsTimed(lib);
       const exWeightStep = lib?.weightStep || DEFAULT_WEIGHT_STEP;
       if(!en.levelMode) en.levelMode = isRepsOnly ? 'reps' : 'weight';
+
+      if(lib?.guide){
+        const g = document.createElement('div');
+        g.className = 'form-guide';
+        g.innerHTML = `<b>자세</b> ${esc(lib.guide)}`;
+        body.appendChild(g);
+      }
+
+      if(isTimedEx){
+        // 버티기 종목은 모든 세트를 한 번에 5초씩 올리고 내린다
+        const tw = document.createElement('div');
+        tw.style.cssText = 'border:1px dashed var(--paper-line);border-radius:8px;padding:8px;margin-bottom:10px;';
+        tw.innerHTML = `
+          <div class="muted" style="margin-bottom:6px;">전체 시간 조정 <span style="font-size:10px;">(모든 세트를 같이 올리거나 내려요)</span></div>
+          <div class="btn-row" style="margin-top:0;">
+            <button class="btn ghost small btnTimeDown">◀ ${TIME_LEVEL_STEP}초 줄이기</button>
+            <button class="btn ghost small btnTimeUp">${TIME_LEVEL_STEP}초 늘리기 ▶</button>
+          </div>`;
+        const shift = (d)=>{
+          en.sets.forEach(st=>{ st.reps = Math.max(5, (Number(st.reps)||0) + d*TIME_LEVEL_STEP); });
+          renderEntryList();
+        };
+        tw.querySelector('.btnTimeUp').addEventListener('click', ()=>shift(1));
+        tw.querySelector('.btnTimeDown').addEventListener('click', ()=>shift(-1));
+        body.appendChild(tw);
+      }
 
       if(!isRepsOnly){
         const levelWrap = document.createElement('div');
@@ -1133,14 +1194,19 @@ function renderEntryCard(en){
       const actions = document.createElement('div');
       actions.className='ex-actions'; actions.style.flexWrap='wrap';
       actions.innerHTML = `
-        <button class="btn ghost small btnAddSet" style="flex:2;">+ 세트 추가(패턴)</button>
-        <button class="btn ghost small btnCopySet" style="flex:1;">동일 복사</button>
+        <button class="btn ghost small btnAddSet" style="flex:2;">+ 세트 추가${isTimedEx?'':'(패턴)'}</button>
+        ${isTimedEx?'':'<button class="btn ghost small btnCopySet" style="flex:1;">동일 복사</button>'}
         <button class="btn ghost small btnDone" style="flex:1 1 100%;">완료로 표시</button>
         ${en.adHoc? '<button class="btn ghost small btnRemove">이 종목 빼기</button>' : ''}
       `;
       actions.querySelector('.btnAddSet').addEventListener('click', ()=>{
         const sets = en.sets;
         const last = sets[sets.length-1] || {weight:0,reps:10};
+        if(exIsTimed(en.exerciseId)){
+          sets.push({ weight:0, reps: Number(last.reps)||DEFAULT_HOLD_SEC, failed:false });
+          renderEntryList();
+          return;
+        }
         if(isRepsOnly){
           const base0 = sets[0] || last; const base1 = sets[1] || last;
           let stepR = Math.abs(Number(base1.reps)-Number(base0.reps)) || REP_LEVEL_STEP;
@@ -1166,7 +1232,7 @@ function renderEntryCard(en){
         sets.push({ weight: nextWeight, reps: nextReps, failed:false });
         renderEntryList();
       });
-      actions.querySelector('.btnCopySet').addEventListener('click', ()=>{
+      actions.querySelector('.btnCopySet')?.addEventListener('click', ()=>{
         const last = en.sets[en.sets.length-1] || {weight:0,reps:10};
         en.sets.push({ weight: last.weight, reps: last.reps, failed:false });
         renderEntryList();
@@ -1185,18 +1251,21 @@ function renderEntryCard(en){
       }
     } else {
       const lib = findLibItem(en.exerciseId);
-      const isRepsOnly = !!lib?.repsOnly;
+      const isRepsOnly = exNoWeight(lib);
+      const U = exUnit(lib);
       const rec = state.records[en.exerciseId];
       const chips = (en.sets||[]).map(s=>{
         const isPR = rec && rec.type==='strength' && !s.failed &&
           (isRepsOnly ? Number(s.reps)===rec.reps : (Number(s.weight)===rec.weight && Number(s.reps)===rec.reps));
         const cls = 'chip'+(isPR?' pr':'')+(s.failed?' failed':'');
-        const label = isRepsOnly ? `${s.reps||0}회` : `${s.weight||0}×${s.reps||0}`;
+        const label = isRepsOnly ? `${s.reps||0}${U}` : `${s.weight||0}×${s.reps||0}`;
         return `<span class="${cls}">${label}${isPR?' PR':''}</span>`;
       }).join('');
       const vol = isRepsOnly ? 0 : computeVolume(en.sets);
       const totalReps = (en.sets||[]).reduce((sum,s)=>sum+(Number(s.reps)||0),0);
-      const statTxt = isRepsOnly ? (totalReps>0?`총 ${totalReps}회`:'') : (vol>0?`총 볼륨 ${Math.round(vol)}kg`:'');
+      const statTxt = exIsTimed(lib)
+        ? (totalReps>0 ? `총 ${fmtSecKo(totalReps)} 버티기` : '')
+        : (isRepsOnly ? (totalReps>0?`총 ${totalReps}회`:'') : (vol>0?`총 볼륨 ${Math.round(vol)}kg`:''));
       const est = estimateVoiceSeconds(en);
       const statLine = [statTxt, est? `약 ${fmtDur(est)}`:''].filter(Boolean);
       body.innerHTML = `<div class="chip-row">${chips || '<span class="muted">탭해서 입력하세요</span>'}</div>`
@@ -1218,17 +1287,21 @@ function buildSetRow(en, s, i, isRepsOnly, exWeightStep){
   const row = document.createElement('div');
   row.className = 'setblock' + (isRepsOnly ? ' repsonly' : '');
   const wStep = exWeightStep || DEFAULT_WEIGHT_STEP;
+  const timed = exIsTimed(en.exerciseId);
+  const U = timed ? '초' : '회';
+  const nStep = timed ? TIME_LEVEL_STEP : 1;
+  const nMin  = timed ? 5 : 1;
 
   if(isRepsOnly){
     row.innerHTML = `
       <div class="setline">
         <span class="setnum">${i+1}</span>
         <div class="repstepper">
-          <button class="stepbtn" data-d="-1" title="-1회">−</button>
-          <input type="text" inputmode="numeric" pattern="[0-9]*" placeholder="회" class="swReps" value="${s.reps??''}">
-          <button class="stepbtn" data-d="1" title="+1회">+</button>
+          <button class="stepbtn" data-d="-1" title="-${nStep}${U}">−</button>
+          <input type="text" inputmode="numeric" pattern="[0-9]*" placeholder="${U}" class="swReps" value="${s.reps??''}">
+          <button class="stepbtn" data-d="1" title="+${nStep}${U}">+</button>
         </div>
-        <span class="unit-label">회</span>
+        <span class="unit-label">${U}</span>
         <button class="failchk ${s.failed?'on':''}" title="실패 표시">✕</button>
         <button class="delsetbtn" title="이 세트 삭제">🗑</button>
       </div>
@@ -1238,7 +1311,7 @@ function buildSetRow(en, s, i, isRepsOnly, exWeightStep){
     row.querySelectorAll('.stepbtn').forEach(btn=>{
       btn.addEventListener('click', ()=>{
         const d = Number(btn.dataset.d);
-        const next = Math.max(1, (Number(repsInput.value)||0) + d);
+        const next = Math.max(nMin, (Number(repsInput.value)||0) + d*nStep);
         repsInput.value = next; s.reps = next; updateCalorieBadge();
       });
     });
@@ -1529,10 +1602,14 @@ function openNewExerciseForm(mode, weekday){
     </div>
     <div class="field"><label>유형</label><select id="newExType"><option value="strength">근력</option><option value="cardio">유산소</option></select></div>
     <div class="field" id="newExStrengthOptions">
-      <label style="display:flex;align-items:center;gap:6px;font-family:'Noto Sans KR',sans-serif;font-size:13px;color:var(--ink);margin-bottom:8px;">
-        <input type="checkbox" id="newExRepsOnly" style="width:auto;"> 무게 없이 횟수만 (맨몸 운동)
-      </label>
+      <label>세는 방식</label>
+      <div class="seg-tabs" style="margin-bottom:8px;">
+        <button type="button" class="newExMode active" data-mode="weight">무게 × 횟수</button>
+        <button type="button" class="newExMode" data-mode="reps">횟수만</button>
+        <button type="button" class="newExMode" data-mode="time">시간 버티기</button>
+      </div>
       <div id="newExWeightStepWrap"><label>무게 증가 단위 (kg)</label><input type="number" id="newExWeightStep" value="5" step="0.5"></div>
+      <div class="small-note" id="newExModeNote"></div>
     </div>
     <button class="btn small" id="newExSave">추가</button>
   `;
@@ -1540,15 +1617,25 @@ function openNewExerciseForm(mode, weekday){
   const nameEl = document.getElementById('newExName');
   const partEl = document.getElementById('newExPart');
   const typeEl = document.getElementById('newExType');
-  const repsOnlyEl = document.getElementById('newExRepsOnly');
   const strengthOptsEl = document.getElementById('newExStrengthOptions');
   const weightStepWrapEl = document.getElementById('newExWeightStepWrap');
+  const modeNoteEl = document.getElementById('newExModeNote');
+  let newExMode = 'weight';
+  const MODE_NOTE = {
+    weight: '벤치프레스, 렛풀다운처럼 무게를 바꿔가며 횟수를 세는 종목입니다.',
+    reps:   '푸시업, 싯업처럼 맨몸으로 횟수만 세는 종목입니다.',
+    time:   '까치발 버티기, 플랭크처럼 자세를 잡고 시간을 버티는 종목입니다. 세트는 초 단위로 입력하고, 음성도 초로 안내합니다.',
+  };
   const syncOptionsVisibility = ()=>{
     strengthOptsEl.classList.toggle('hidden', typeEl.value==='cardio');
-    weightStepWrapEl.classList.toggle('hidden', repsOnlyEl.checked);
+    weightStepWrapEl.classList.toggle('hidden', newExMode !== 'weight');
+    modeNoteEl.textContent = MODE_NOTE[newExMode];
+    form.querySelectorAll('.newExMode').forEach(b=>b.classList.toggle('active', b.dataset.mode===newExMode));
   };
+  form.querySelectorAll('.newExMode').forEach(b=>{
+    b.addEventListener('click', ()=>{ newExMode = b.dataset.mode; syncOptionsVisibility(); });
+  });
   typeEl.addEventListener('change', syncOptionsVisibility);
-  repsOnlyEl.addEventListener('change', syncOptionsVisibility);
   syncOptionsVisibility();
   let partTouched = false;
   partEl.addEventListener('change', ()=>{ partTouched = true; });
@@ -1565,7 +1652,8 @@ function openNewExerciseForm(mode, weekday){
     const newId = 'ex_'+uid();
     const item = {id:newId,name,bodyPart,type};
     if(type==='strength'){
-      if(repsOnlyEl.checked) item.repsOnly = true;
+      if(newExMode==='time') item.timed = true;
+      else if(newExMode==='reps') item.repsOnly = true;
       else item.weightStep = Number(document.getElementById('newExWeightStep').value)||DEFAULT_WEIGHT_STEP;
     }
     state.library.push(item);
@@ -1733,9 +1821,9 @@ function renderRecords(){
     const row=document.createElement('div'); row.className='suggest-item';
     if(r.type==='cardio'){ const unit=findLibItem(id)?.distanceUnit||'km'; row.innerHTML = `<span>${esc(r.name)}</span><span><b>${r.distance}${unit}</b> / ${r.duration}분 (${paceLabel(r.duration,r.distance,unit)}) <span class="muted">(${r.date})</span></span>`; }
     else {
-      const isRepsOnly = !!findLibItem(id)?.repsOnly;
+      const isRepsOnly = exNoWeight(id);
       row.innerHTML = isRepsOnly
-        ? `<span>${esc(r.name)}</span><span><b>${r.reps}회</b> <span class="muted">(${r.date})</span></span>`
+        ? `<span>${esc(r.name)}</span><span><b>${r.reps}${exUnit(id)}</b> <span class="muted">(${r.date})</span></span>`
         : `<span>${esc(r.name)}</span><span><b>${r.weight}kg</b> × ${r.reps}회 <span class="muted">(${r.date})</span></span>`;
     }
     wrap.appendChild(row);
@@ -1752,7 +1840,9 @@ function renderLibraryManage(){
     const own = it.voice && Object.keys(it.voice).length;
     const tags = it.type==='cardio'
       ? '유산소'
-      : `${it.repsOnly?'맨몸':(it.weightStep??DEFAULT_WEIGHT_STEP)+'kg'} · ${cfg.repTermSec}/${cfg.restSec}초${own?' *':''}`;
+      : (it.timed
+          ? `버티기 · 휴식 ${cfg.restSec}초${own?' *':''}`
+          : `${it.repsOnly?'맨몸':(it.weightStep??DEFAULT_WEIGHT_STEP)+'kg'} · ${cfg.repTermSec}/${cfg.restSec}초${own?' *':''}`);
     row.innerHTML = `<span class="nm">${esc(it.name)} <span class="muted">(${esc(it.bodyPart)})</span></span>
       <span class="tags">${esc(tags)}</span>
       <button class="iconbtn" aria-label="삭제">✕</button>`;
@@ -1807,9 +1897,9 @@ async function renderExerciseTrend(){
       if(entry){
         if(entry.type==='cardio') rows.push({date:file.data.date, text:`${entry.distance}km / ${entry.duration}분`});
         else {
-          const isRepsOnly = !!findLibItem(id)?.repsOnly;
+          const isRepsOnly = exNoWeight(id);
           const text = isRepsOnly
-            ? `총 ${entry.sets.reduce((s,x)=>s+(Number(x.reps)||0),0)}회 (${entry.sets.length}세트)`
+            ? `총 ${entry.sets.reduce((s,x)=>s+(Number(x.reps)||0),0)}${exUnit(id)} (${entry.sets.length}세트)`
             : `총 볼륨 ${Math.round(computeVolume(entry.sets))}kg (${entry.sets.length}세트)`;
           rows.push({date:file.data.date, text});
         }
@@ -1940,12 +2030,14 @@ function gatherExportText(){
   if(strengthEn.length){
     lines.push('■ 근력운동 (피라미드 세트, id 포함)');
     strengthEn.forEach(en=>{
-      const isRepsOnly = !!findLibItem(en.exerciseId)?.repsOnly;
+      const isRepsOnly = exNoWeight(en.exerciseId);
+      const U = exUnit(en.exerciseId);
       const setsStr = (en.sets||[]).map(s=> isRepsOnly
-        ? `${s.reps}회${s.failed?'(실패)':''}`
+        ? `${s.reps}${U}${s.failed?'(실패)':''}`
         : `${s.weight}kg×${s.reps}회${s.failed?'(실패)':''}`
       ).join(' → ');
-      lines.push(`- [${en.exerciseId}]${isRepsOnly?'(맨몸/횟수만)':''} ${en.name}: ${setsStr}`);
+      const tag = exIsTimed(en.exerciseId) ? '(버티기/초)' : (isRepsOnly ? '(맨몸/횟수만)' : '');
+      lines.push(`- [${en.exerciseId}]${tag} ${en.name}: ${setsStr}`);
     });
     lines.push('');
   }
@@ -2174,8 +2266,9 @@ function renderReportHTML(start, end, logs){
 
   const exRows = Object.values(exerciseAgg).map((a,idx)=>{
     const exId = Object.keys(exerciseAgg)[idx];
-    const isRepsOnly = !!findLibItem(exId)?.repsOnly;
-    const detail = a.type==='cardio' ? `${a.distance.toFixed(1)} · ${a.duration}분` : (isRepsOnly ? `총 ${a.totalReps}회` : `총 볼륨 ${Math.round(a.volume)}kg`);
+    const isRepsOnly = exNoWeight(exId);
+    const detail = a.type==='cardio' ? `${a.distance.toFixed(1)} · ${a.duration}분`
+      : (exIsTimed(exId) ? `총 ${fmtSecKo(a.totalReps)}` : (isRepsOnly ? `총 ${a.totalReps}회` : `총 볼륨 ${Math.round(a.volume)}kg`));
     return `<tr><td>${esc(a.name)}</td><td>${a.sessions}회</td><td>${detail}</td></tr>`;
   }).join('');
 
@@ -2273,8 +2366,9 @@ function openHistoryDetail(log){
     let line;
     if(en.type==='cardio'){ const unit=findLibItem(en.exerciseId)?.distanceUnit||'km'; line=`${en.distance}${unit} / ${en.duration}분 (${paceLabel(en.duration,en.distance,unit)})`; }
     else{
-      const isRepsOnly = !!findLibItem(en.exerciseId)?.repsOnly;
-      line = (en.sets||[]).map(s=> isRepsOnly ? `${s.reps}회${s.failed?'✕':''}` : `${s.weight}×${s.reps}${s.failed?'✕':''}`).join(', ');
+      const isRepsOnly = exNoWeight(en.exerciseId);
+      const U = exUnit(en.exerciseId);
+      line = (en.sets||[]).map(s=> isRepsOnly ? `${s.reps}${U}${s.failed?'✕':''}` : `${s.weight}×${s.reps}${s.failed?'✕':''}`).join(', ');
     }
     html += `<div class="suggest-item"><span>${esc(en.name)}</span><span class="muted" style="font-size:11px;">${esc(line)}</span></div>`;
   });
@@ -2368,10 +2462,13 @@ function estimateVoiceSeconds(en){
   const sets = voiceSetsOf(en);
   if(!sets.length) return 0;
   const cfg = voiceCfgFor(en.exerciseId);
+  const timed = exIsTimed(en.exerciseId);
   let t = 0;
   sets.forEach((s,i)=>{
     t += (i===0 ? cfg.prepSec : cfg.restSec);
-    t += Math.floor(Number(s.reps)||0) * (cfg.repTermSec + 0.8); // 0.8초 = 숫자 발화 시간
+    const n = Math.floor(Number(s.reps)||0);
+    // 버티기는 초가 곧 시간, 횟수 종목은 (발화 0.8초 + 간격)
+    t += timed ? n + 1.6 : n * (cfg.repTermSec + 0.8);
   });
   return Math.round(t + 2);
 }
@@ -2383,14 +2480,20 @@ function buildSetAnnounce(exName, lib, idx, set, withName){
   const parts = [];
   if(withName) parts.push(exName);
   parts.push(ordinalKo(idx+1) + '번째 세트');
-  if(!lib.repsOnly && Number(set.weight) > 0) parts.push(readWeight(set.weight));
-  parts.push(readReps(Math.max(1, Math.floor(Number(set.reps)||0))));
+  const n = Math.max(1, Math.floor(Number(set.reps)||0));
+  if(lib.timed){
+    parts.push(sinoKo(n) + '초');
+  } else {
+    if(!lib.repsOnly && Number(set.weight) > 0) parts.push(readWeight(set.weight));
+    parts.push(readReps(n));
+  }
   parts.push('준비하세요');
   return parts.join(', ');
 }
 function setLabel(lib, s){
-  const reps = Math.floor(Number(s.reps)||0);
-  return (lib.repsOnly || !(Number(s.weight)>0)) ? `${reps}회` : `${Number(s.weight)}kg × ${reps}회`;
+  const n = Math.floor(Number(s.reps)||0);
+  if(lib.timed) return `${n}초 버티기`;
+  return (lib.repsOnly || !(Number(s.weight)>0)) ? `${n}회` : `${Number(s.weight)}kg × ${n}회`;
 }
 
 /* ---- 발화 엔진 --------------------------------------------------- */
@@ -2503,6 +2606,25 @@ async function runVoiceSession(){
     if(await vsCountdown(totalMs, marks, (remain, prog)=>{
       voBig(Math.ceil(remain/1000)); voRing(prog);
     }) === 'abort') return;
+
+    if(lib.timed){
+      // 버티기 — 초를 하나씩 세지 않고, 끝나가는 시점만 짚어준다
+      voPhase('hold', '버티는 중');
+      // 큰 숫자가 남은 초라 시간은 이미 보인다. 페이스 조절에 쓰이는 건 남은 세트 수.
+      voSub(i + 1 < sets.length ? `남은 세트 ${sets.length - i - 1}` : '마지막 세트');
+      await speakAsync('시작');
+      if(vs.abort) return;
+      const holdMs = reps * 1000;
+      const marks = [];
+      cfg.warnAt.forEach(w=>{ if(w*1000 < holdMs - 1500) marks.push({ remain: w*1000, text: sinoKo(w) + '초' }); });
+      if(holdMs >= 5000) [3,2,1].forEach(w=>marks.push({ remain: w*1000, text: sinoKo(w) }));
+      if(await vsCountdown(holdMs, marks, (remain, prog)=>{
+        voBig(Math.ceil(remain/1000)); voRing(prog);
+      }) === 'abort') return;
+      await speakAsync('끝');
+      if(vs.abort) return;
+      continue;
+    }
 
     // 카운트 — 발화가 끝난 뒤부터 간격을 센다
     voPhase('count', '카운트');
@@ -2683,10 +2805,23 @@ async function playVoiceSample(uriOverride, exercise){
     const cfg = exercise ? voiceCfgFor(exercise.id) : (state.voiceDefaults || VOICE_DEFAULTS);
     let intro = '렛풀다운, 첫번째 세트, 이십킬로, 십이회, 준비하세요';
     if(exercise){
-      const first = ((state.templates[exercise.id]||{}).sets||[])[0] || { weight: exercise.repsOnly?0:20, reps:12 };
+      const first = ((state.templates[exercise.id]||{}).sets||[])[0]
+        || { weight: exNoWeight(exercise)?0:20, reps: exercise.timed?DEFAULT_HOLD_SEC:12 };
       intro = buildSetAnnounce(exercise.name, exercise, 0, first, true);
     }
     await speakAsync(intro, vo);
+    if(exercise && exercise.timed){
+      // 버티기는 세는 소리가 없으니 시작과 마무리만 들려준다
+      if(_sampleAbort) return;
+      await speakAsync('시작', vo);
+      for(const n of [3,2,1]){
+        if(_sampleAbort) return;
+        await new Promise(r=>setTimeout(r, 1000));
+        await speakAsync(sinoKo(n), vo);
+      }
+      if(!_sampleAbort) await speakAsync('끝', vo);
+      return;
+    }
     for(let k=1; k<=3 && !_sampleAbort; k++){
       await speakAsync(nativeKo(k), vo);
       if(_sampleAbort) break;
@@ -2725,18 +2860,19 @@ function openLibraryDetailSheet(it){
     </div>`;
   };
   const inner = openSheetHTML(it.name, `
-    <p class="muted">${esc(it.bodyPart||'')} · ${it.type==='cardio'?'유산소':'근력'}${it.repsOnly?' · 맨몸(횟수만)':''}</p>
+    <p class="muted">${esc(it.bodyPart||'')} · ${it.type==='cardio'?'유산소':(it.timed?'시간 버티기':(it.repsOnly?'맨몸(횟수만)':'근력'))}</p>
+    ${it.guide ? `<div class="form-guide"><b>자세</b> ${esc(it.guide)}</div>` : ''}
     ${isStrength ? `
       <div class="sheet-group">
         <div class="sheet-group-label">음성 가이드</div>
-        ${dial('repTermSec','안내 간격','횟수를 읽고 나서 쉬는 시간',1,10,1)}
+        ${it.timed ? '' : dial('repTermSec','안내 간격','횟수를 읽고 나서 쉬는 시간',1,10,1)}
         ${dial('prepSec','준비 시간','첫 세트 안내 후 시작까지',5,90,5)}
         ${dial('restSec','세트 휴식','다음 세트 안내를 포함한 시간',10,180,5)}
         <div class="btn-row" style="margin-top:0;">
           <button class="btn ghost small" id="ldPreview">▶ 미리듣기</button>
           <button class="btn ghost small" id="ldResetVoice">기본값으로</button>
         </div>
-        <div class="small-note">'기본'이라고 표시된 값은 설정 탭의 전역 기본값을 따라갑니다. 슬라이더를 움직이면 이 종목만 따로 저장됩니다.</div>
+        <div class="small-note">'기본'이라고 표시된 값은 설정 탭의 전역 기본값을 따라갑니다. 슬라이더를 움직이면 이 종목만 따로 저장됩니다.${it.timed?' 버티기 종목은 세트에 적은 초가 곧 버티는 시간이라 안내 간격을 쓰지 않습니다.':''}</div>
       </div>
       <div class="divider"></div>
       <div class="sheet-group">
@@ -2751,11 +2887,12 @@ function openLibraryDetailSheet(it){
       <div class="divider"></div>
       <div class="sheet-group">
         <div class="sheet-group-label">종목 설정</div>
-        <label class="voice-pick" style="border:none;">
-          <input type="checkbox" id="ldRepsOnly" ${it.repsOnly?'checked':''}>
-          <span class="vn">맨몸 (횟수만) — 무게를 읽지 않습니다</span>
-        </label>
-        <div class="dial-row" id="ldStepWrap" style="${it.repsOnly?'display:none;':''}">
+        <div class="seg-tabs" style="margin-bottom:10px;">
+          <button type="button" class="ldMode" data-mode="weight">무게 × 횟수</button>
+          <button type="button" class="ldMode" data-mode="reps">횟수만</button>
+          <button type="button" class="ldMode" data-mode="time">시간 버티기</button>
+        </div>
+        <div class="dial-row" id="ldStepWrap" style="${exNoWeight(it)?'display:none;':''}">
           <span class="dl">무게 조절 단위</span>
           <input type="number" id="ldWeightStep" step="0.5" value="${it.weightStep ?? DEFAULT_WEIGHT_STEP}" style="flex:1.4;">
           <span class="dv">kg</span>
@@ -2796,16 +2933,27 @@ function openLibraryDetailSheet(it){
   });
   inner.querySelector('#ldPreview').addEventListener('click', ()=>previewExerciseVoice(it));
 
-  const repsOnlyChk = inner.querySelector('#ldRepsOnly');
   const stepWrap = inner.querySelector('#ldStepWrap');
   const stepInput = inner.querySelector('#ldWeightStep');
-  repsOnlyChk.addEventListener('change', async ()=>{
-    it.repsOnly = repsOnlyChk.checked;
-    if(it.repsOnly) delete it.weightStep; else it.weightStep = Number(stepInput.value) || DEFAULT_WEIGHT_STEP;
-    stepWrap.style.display = it.repsOnly ? 'none' : 'flex';
-    await saveLib(`update ${it.name}`);
-    renderLibraryManage(); renderEntryList();
-    showToast('저장됨');
+  const syncMode = ()=>{
+    const m = exMode(it);
+    inner.querySelectorAll('.ldMode').forEach(b=>b.classList.toggle('active', b.dataset.mode===m));
+    stepWrap.style.display = (m==='weight') ? 'flex' : 'none';
+  };
+  syncMode();
+  inner.querySelectorAll('.ldMode').forEach(b=>{
+    b.addEventListener('click', async ()=>{
+      const m = b.dataset.mode;
+      delete it.repsOnly; delete it.timed; delete it.weightStep;
+      if(m==='reps') it.repsOnly = true;
+      else if(m==='time') it.timed = true;
+      else it.weightStep = Number(stepInput.value) || DEFAULT_WEIGHT_STEP;
+      syncMode();
+      await saveLib(`update ${it.name}`);
+      renderLibraryManage(); renderEntryList();
+      showToast(m==='time' ? '시간 버티기로 바꿨어요 (세트는 초 단위)' : '저장됨');
+      closeSheet(); openLibraryDetailSheet(it);
+    });
   });
   stepInput.addEventListener('change', async ()=>{
     it.weightStep = Number(stepInput.value) || DEFAULT_WEIGHT_STEP;
@@ -2824,8 +2972,8 @@ function openLibraryDetailSheet(it){
       setsWrap.innerHTML = working.map((s,i)=>`
         <div class="setblock"><div class="setline">
           <span class="setnum">${i+1}</span>
-          ${it.repsOnly ? '' : `<input type="number" step="0.5" inputmode="decimal" data-si="${i}" data-f="weight" value="${s.weight??''}" style="flex:1;min-width:0;text-align:center;"><span class="unit-label">kg</span>`}
-          <input type="number" inputmode="numeric" data-si="${i}" data-f="reps" value="${s.reps??''}" style="flex:1;min-width:0;text-align:center;"><span class="unit-label">회</span>
+          ${exNoWeight(it) ? '' : `<input type="number" step="0.5" inputmode="decimal" data-si="${i}" data-f="weight" value="${s.weight??''}" style="flex:1;min-width:0;text-align:center;"><span class="unit-label">kg</span>`}
+          <input type="number" inputmode="numeric" data-si="${i}" data-f="reps" value="${s.reps??''}" style="flex:1;min-width:0;text-align:center;"><span class="unit-label">${exUnit(it)}</span>
           <button class="delsetbtn" data-del="${i}">🗑</button>
         </div></div>`).join('');
       setsWrap.querySelectorAll('input[data-si]').forEach(el=>{
@@ -2836,17 +2984,20 @@ function openLibraryDetailSheet(it){
       });
     }
     const cfg = voiceCfgFor(it.id);
-    const secs = working.reduce((t,s,i)=> t + (i===0?cfg.prepSec:cfg.restSec) + (Math.floor(Number(s.reps)||0))*(cfg.repTermSec+0.8), 0);
+    const secs = working.reduce((t,s,i)=>{
+      const n = Math.floor(Number(s.reps)||0);
+      return t + (i===0?cfg.prepSec:cfg.restSec) + (it.timed ? n+1.6 : n*(cfg.repTermSec+0.8));
+    }, 0);
     note.textContent = working.length ? `총 ${working.length}세트 · 음성 재생 약 ${fmtDur(Math.round(secs+2))}` : '';
   };
   drawSets();
   inner.querySelector('#ldAddSet').addEventListener('click', ()=>{
-    const last = working[working.length-1] || { weight: it.repsOnly?0:20, reps:10 };
-    working.push({ weight: it.repsOnly?0:Number(last.weight)||0, reps: Number(last.reps)||10, failed:false });
+    const last = working[working.length-1] || { weight: exNoWeight(it)?0:20, reps: it.timed?DEFAULT_HOLD_SEC:10 };
+    working.push({ weight: exNoWeight(it)?0:Number(last.weight)||0, reps: Number(last.reps)|| (it.timed?DEFAULT_HOLD_SEC:10), failed:false });
     drawSets();
   });
   inner.querySelector('#ldSaveSets').addEventListener('click', async ()=>{
-    state.templates[it.id] = { type:'strength', sets: working.map(s=>({ weight: it.repsOnly?0:(Number(s.weight)||0), reps: Number(s.reps)||0, failed:false })) };
+    state.templates[it.id] = { type:'strength', sets: working.map(s=>({ weight: exNoWeight(it)?0:(Number(s.weight)||0), reps: Number(s.reps)||0, failed:false })) };
     try{
       const r = await gh.putFile('config/templates.json', state.templates, state.templatesSha, `sets update ${it.name}`);
       state.templatesSha = r.content.sha;
@@ -2901,7 +3052,7 @@ async function openCatalogSheet(){
         <input type="checkbox" data-cid="${esc(i.id)}" ${owned?'disabled':''} ${picked.has(i.id)?'checked':''}>
         <span class="nm">${esc(i.name)}${owned?' <span class="muted" style="font-size:11px;">(이미 있음)</span>':''}
           <span class="al">${esc((i.aliases||[]).slice(0,3).join(', '))}</span></span>
-        <span class="tags">${esc(i.bodyPart)}${i.repsOnly?' · 맨몸':''}</span>
+        <span class="tags">${esc(i.bodyPart)}${i.timed?' · 버티기':(i.repsOnly?' · 맨몸':'')}</span>
       </label>`;
     }).join('');
     listEl.querySelectorAll('input[data-cid]').forEach(c=>{
@@ -2929,6 +3080,8 @@ async function openCatalogSheet(){
       if(!src || have.has(src.name.replace(/\s/g,''))) return;
       const item = { id: 'ex_' + uid(), name: src.name, bodyPart: src.bodyPart, type: src.type, catalogId: src.id };
       if(src.repsOnly) item.repsOnly = true;
+      if(src.timed) item.timed = true;
+      if(src.guide) item.guide = src.guide;
       if(src.weightStep != null) item.weightStep = src.weightStep;
       if(src.distanceUnit) item.distanceUnit = src.distanceUnit;
       if(src.met != null) item.met = src.met;

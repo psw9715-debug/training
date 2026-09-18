@@ -1,99 +1,1148 @@
 {
   "version": 1,
-  "updated": "2026-09-14",
-  "note": "일반 헬스장 기준 기본 종목 판. 여기서 골라 담으면 내 라이브러리(config/exercises.json)로 복사됩니다. 없는 기구는 '새 종목 만들기'로 직접 추가하세요.",
+  "updated": "2026-09-18",
+  "note": "일반 헬스장 + 생활 운동 기준 기본 종목 판. 여기서 골라 담으면 내 라이브러리(config/exercises.json)로 복사됩니다. timed:true 는 횟수가 아니라 시간을 버티는 종목이며, 세트의 숫자를 초로 읽습니다. 없는 기구는 '새 종목 만들기'로 직접 추가하세요.",
   "items": [
-    {"id":"cat_bench","name":"벤치프레스","aliases":["벤치","바벨벤치","bench press"],"bodyPart":"가슴","type":"strength","weightStep":5},
-    {"id":"cat_incline_bench","name":"인클라인 벤치프레스","aliases":["인클라인벤치","이클라인 벤치","incline bench"],"bodyPart":"가슴","type":"strength","weightStep":5},
-    {"id":"cat_decline_bench","name":"디클라인 벤치프레스","aliases":["디클라인벤치","decline bench"],"bodyPart":"가슴","type":"strength","weightStep":5},
-    {"id":"cat_db_bench","name":"덤벨 벤치프레스","aliases":["덤벨프레스","dumbbell bench"],"bodyPart":"가슴","type":"strength","weightStep":2},
-    {"id":"cat_incline_db","name":"인클라인 덤벨프레스","aliases":["인클라인덤벨","incline dumbbell"],"bodyPart":"가슴","type":"strength","weightStep":2},
-    {"id":"cat_db_fly","name":"덤벨 플라이","aliases":["플라이","dumbbell fly"],"bodyPart":"가슴","type":"strength","weightStep":2},
-    {"id":"cat_incline_fly","name":"인클라인 덤벨 플라이","aliases":["인클라인플라이"],"bodyPart":"가슴","type":"strength","weightStep":2},
-    {"id":"cat_cable_crossover","name":"케이블 크로스오버","aliases":["크로스오버","케이블플라이","cable crossover"],"bodyPart":"가슴","type":"strength","weightStep":5},
-    {"id":"cat_pecdeck","name":"펙덱 플라이 (버터플라이)","aliases":["버터플라이","펙덱","pec deck"],"bodyPart":"가슴","type":"strength","weightStep":5},
-    {"id":"cat_chest_press","name":"시티드 체스트프레스","aliases":["체스트프레스","머신프레스","chest press"],"bodyPart":"가슴","type":"strength","weightStep":5},
-    {"id":"cat_dips","name":"딥스","aliases":["dips","평행봉"],"bodyPart":"가슴","type":"strength","repsOnly":true},
-    {"id":"cat_pushup","name":"푸시업","aliases":["팔굽혀펴기","푸쉬업","push up"],"bodyPart":"가슴","type":"strength","repsOnly":true},
-
-    {"id":"cat_lat_pulldown","name":"렛풀다운","aliases":["랫풀다운","풀다운","lat pulldown"],"bodyPart":"등","type":"strength","weightStep":5},
-    {"id":"cat_wide_pulldown","name":"와이드 그립 렛풀다운","aliases":["와이드풀다운","wide pulldown"],"bodyPart":"등","type":"strength","weightStep":5},
-    {"id":"cat_close_pulldown","name":"클로즈 그립 렛풀다운","aliases":["클로즈풀다운","협착풀다운"],"bodyPart":"등","type":"strength","weightStep":5},
-    {"id":"cat_seated_row","name":"시티드 로우 (롱풀)","aliases":["롱풀","시티드로우","seated row"],"bodyPart":"등","type":"strength","weightStep":5},
-    {"id":"cat_cable_row","name":"케이블 로우","aliases":["케이블로우","cable row"],"bodyPart":"등","type":"strength","weightStep":5},
-    {"id":"cat_barbell_row","name":"바벨 로우","aliases":["벤트오버로우","barbell row"],"bodyPart":"등","type":"strength","weightStep":5},
-    {"id":"cat_db_row","name":"덤벨 로우","aliases":["원암로우","dumbbell row"],"bodyPart":"등","type":"strength","weightStep":2},
-    {"id":"cat_tbar_row","name":"T바 로우","aliases":["티바로우","t-bar row"],"bodyPart":"등","type":"strength","weightStep":5},
-    {"id":"cat_pullup","name":"풀업","aliases":["턱걸이","pull up","친업"],"bodyPart":"등","type":"strength","repsOnly":true},
-    {"id":"cat_chinup","name":"친업","aliases":["언더그립 턱걸이","chin up"],"bodyPart":"등","type":"strength","repsOnly":true},
-    {"id":"cat_assist_pullup","name":"어시스트 풀업","aliases":["보조턱걸이","assisted pull up"],"bodyPart":"등","type":"strength","weightStep":5},
-    {"id":"cat_deadlift","name":"데드리프트","aliases":["데드","deadlift"],"bodyPart":"등","type":"strength","weightStep":5},
-    {"id":"cat_back_extension","name":"백 익스텐션","aliases":["백익스텐션","허리신전","back extension"],"bodyPart":"등","type":"strength","repsOnly":true},
-
-    {"id":"cat_shoulder_press","name":"숄더프레스 (머신)","aliases":["숄더프레스","어깨프레스","shoulder press"],"bodyPart":"어깨","type":"strength","weightStep":5},
-    {"id":"cat_bb_ohp","name":"바벨 숄더프레스","aliases":["오버헤드프레스","OHP","밀리터리프레스"],"bodyPart":"어깨","type":"strength","weightStep":5},
-    {"id":"cat_db_ohp","name":"덤벨 숄더프레스","aliases":["덤벨숄더","dumbbell shoulder press"],"bodyPart":"어깨","type":"strength","weightStep":2},
-    {"id":"cat_arnold","name":"아놀드 프레스","aliases":["아놀드","arnold press"],"bodyPart":"어깨","type":"strength","weightStep":2},
-    {"id":"cat_lateral_raise","name":"사이드 래터럴 레이즈","aliases":["사레레","레터럴레이즈","측면레이즈"],"bodyPart":"어깨","type":"strength","weightStep":2},
-    {"id":"cat_front_raise","name":"프론트 레이즈","aliases":["전면레이즈","front raise"],"bodyPart":"어깨","type":"strength","weightStep":2},
-    {"id":"cat_rear_delt","name":"리어 델트 플라이","aliases":["후면삼각근","리어델트","reverse fly"],"bodyPart":"어깨","type":"strength","weightStep":2},
-    {"id":"cat_facepull","name":"페이스풀","aliases":["face pull"],"bodyPart":"어깨","type":"strength","weightStep":5},
-    {"id":"cat_upright_row","name":"업라이트 로우","aliases":["upright row"],"bodyPart":"어깨","type":"strength","weightStep":5},
-    {"id":"cat_shrug","name":"슈러그","aliases":["shrug","승모근"],"bodyPart":"어깨","type":"strength","weightStep":5},
-
-    {"id":"cat_bb_curl","name":"바벨 컬","aliases":["바벨컬","barbell curl"],"bodyPart":"팔","type":"strength","weightStep":2.5},
-    {"id":"cat_db_curl","name":"덤벨 컬","aliases":["암컬","덤벨컬","dumbbell curl"],"bodyPart":"팔","type":"strength","weightStep":2},
-    {"id":"cat_hammer_curl","name":"해머 컬","aliases":["해머컬","hammer curl"],"bodyPart":"팔","type":"strength","weightStep":2},
-    {"id":"cat_preacher_curl","name":"프리처 컬","aliases":["프리쳐컬","preacher curl"],"bodyPart":"팔","type":"strength","weightStep":2.5},
-    {"id":"cat_conc_curl","name":"컨센트레이션 컬","aliases":["집중컬","concentration curl"],"bodyPart":"팔","type":"strength","weightStep":2},
-    {"id":"cat_cable_curl","name":"케이블 컬","aliases":["케이블컬","cable curl"],"bodyPart":"팔","type":"strength","weightStep":5},
-    {"id":"cat_reverse_curl","name":"리버스 컬","aliases":["역컬","reverse curl"],"bodyPart":"팔","type":"strength","weightStep":2.5},
-    {"id":"cat_pushdown","name":"트라이셉 푸시다운","aliases":["푸시다운","푸쉬다운","triceps pushdown"],"bodyPart":"팔","type":"strength","weightStep":5},
-    {"id":"cat_lying_ext","name":"라잉 트라이셉 익스텐션","aliases":["스컬크러셔","lying extension"],"bodyPart":"팔","type":"strength","weightStep":2.5},
-    {"id":"cat_oh_ext","name":"오버헤드 트라이셉 익스텐션","aliases":["오버헤드익스텐션"],"bodyPart":"팔","type":"strength","weightStep":2.5},
-    {"id":"cat_dip_machine","name":"딥스 머신","aliases":["트라이셉딥스","dip machine"],"bodyPart":"팔","type":"strength","weightStep":5},
-    {"id":"cat_kickback","name":"킥백","aliases":["트라이셉킥백","kickback"],"bodyPart":"팔","type":"strength","weightStep":2},
-
-    {"id":"cat_bb_squat","name":"바벨 스쿼트","aliases":["스쿼트","백스쿼트","squat"],"bodyPart":"하체","type":"strength","weightStep":5},
-    {"id":"cat_front_squat","name":"프론트 스쿼트","aliases":["프론트스쿼트","front squat"],"bodyPart":"하체","type":"strength","weightStep":5},
-    {"id":"cat_smith_squat","name":"스미스 스쿼트","aliases":["스미스머신 스쿼트"],"bodyPart":"하체","type":"strength","weightStep":5},
-    {"id":"cat_leg_press","name":"레그프레스","aliases":["레그프레스","leg press"],"bodyPart":"하체","type":"strength","weightStep":10},
-    {"id":"cat_seated_leg_press","name":"시티드 레그프레스","aliases":["시티드레그프레스"],"bodyPart":"하체","type":"strength","weightStep":10},
-    {"id":"cat_hack_squat","name":"핵 스쿼트","aliases":["핵스쿼트","hack squat"],"bodyPart":"하체","type":"strength","weightStep":5},
-    {"id":"cat_leg_extension","name":"레그 익스텐션","aliases":["레그익스텐션","leg extension"],"bodyPart":"하체","type":"strength","weightStep":5},
-    {"id":"cat_leg_curl","name":"레그 컬","aliases":["레그컬","라잉레그컬","leg curl"],"bodyPart":"하체","type":"strength","weightStep":5},
-    {"id":"cat_rdl","name":"루마니안 데드리프트","aliases":["루마니안데드","RDL"],"bodyPart":"하체","type":"strength","weightStep":5},
-    {"id":"cat_lunge","name":"런지","aliases":["lunge","워킹런지"],"bodyPart":"하체","type":"strength","weightStep":2},
-    {"id":"cat_bulgarian","name":"불가리안 스플릿 스쿼트","aliases":["불가리안","split squat"],"bodyPart":"하체","type":"strength","weightStep":2},
-    {"id":"cat_calf_raise","name":"카프 레이즈","aliases":["카프레이즈","종아리","calf raise"],"bodyPart":"하체","type":"strength","weightStep":5},
-    {"id":"cat_hip_thrust","name":"힙 쓰러스트","aliases":["힙쓰러스트","hip thrust"],"bodyPart":"하체","type":"strength","weightStep":5},
-    {"id":"cat_abduction","name":"힙 어브덕션","aliases":["아웃타이","어브덕션","abduction"],"bodyPart":"하체","type":"strength","weightStep":5},
-    {"id":"cat_adduction","name":"힙 어덕션","aliases":["이너타이","어덕션","adduction"],"bodyPart":"하체","type":"strength","weightStep":5},
-
-    {"id":"cat_situp","name":"싯업","aliases":["윗몸일으키기","sit up"],"bodyPart":"복근","type":"strength","repsOnly":true},
-    {"id":"cat_decline_situp","name":"디클라인 싯업","aliases":["경사싯업"],"bodyPart":"복근","type":"strength","repsOnly":true},
-    {"id":"cat_crunch","name":"크런치","aliases":["crunch"],"bodyPart":"복근","type":"strength","repsOnly":true},
-    {"id":"cat_cable_crunch","name":"케이블 크런치","aliases":["케이블크런치"],"bodyPart":"복근","type":"strength","weightStep":5},
-    {"id":"cat_leg_raise","name":"레그 레이즈","aliases":["레그레이즈","leg raise"],"bodyPart":"복근","type":"strength","repsOnly":true},
-    {"id":"cat_hanging_leg_raise","name":"행잉 레그 레이즈","aliases":["행잉레그레이즈"],"bodyPart":"복근","type":"strength","repsOnly":true},
-    {"id":"cat_russian_twist","name":"러시안 트위스트","aliases":["러시안트위스트"],"bodyPart":"복근","type":"strength","repsOnly":true},
-    {"id":"cat_plank","name":"플랭크","aliases":["plank"],"bodyPart":"복근","type":"strength","repsOnly":true},
-    {"id":"cat_ab_coaster","name":"앱 코스터","aliases":["앱코스터","ab coaster"],"bodyPart":"복근","type":"strength","weightStep":5},
-    {"id":"cat_woodchop","name":"우드찹","aliases":["케이블 우드찹","woodchop"],"bodyPart":"복근","type":"strength","weightStep":5},
-
-    {"id":"cat_kb_swing","name":"케틀벨 스윙","aliases":["케틀벨","kettlebell swing"],"bodyPart":"기타","type":"strength","weightStep":4},
-    {"id":"cat_burpee","name":"버피","aliases":["버피테스트","burpee"],"bodyPart":"기타","type":"strength","repsOnly":true},
-    {"id":"cat_battle_rope","name":"배틀로프","aliases":["배틀로프","battle rope"],"bodyPart":"기타","type":"strength","repsOnly":true},
-    {"id":"cat_farmers_walk","name":"파머스 워크","aliases":["파머스워크","farmers walk"],"bodyPart":"기타","type":"strength","weightStep":5},
-    {"id":"cat_box_jump","name":"박스 점프","aliases":["박스점프","box jump"],"bodyPart":"기타","type":"strength","repsOnly":true},
-    {"id":"cat_med_slam","name":"메디신볼 슬램","aliases":["메디신볼","medicine ball slam"],"bodyPart":"기타","type":"strength","weightStep":2},
-
-    {"id":"cat_treadmill","name":"러닝 (트레드밀)","aliases":["러닝머신","트레드밀","런닝"],"bodyPart":"유산소","type":"cardio","distanceUnit":"km","met":9.0},
-    {"id":"cat_outdoor_run","name":"실외 러닝","aliases":["조깅","달리기","running"],"bodyPart":"유산소","type":"cardio","distanceUnit":"km","met":9.5},
-    {"id":"cat_cycle","name":"사이클","aliases":["자전거","스피닝","cycling"],"bodyPart":"유산소","type":"cardio","distanceUnit":"km","met":7.0},
-    {"id":"cat_rowing","name":"로잉머신","aliases":["로잉","rowing"],"bodyPart":"유산소","type":"cardio","distanceUnit":"m","met":7.0},
-    {"id":"cat_elliptical","name":"일립티컬","aliases":["크로스트레이너","elliptical"],"bodyPart":"유산소","type":"cardio","distanceUnit":"km","met":5.0},
-    {"id":"cat_stepmill","name":"스텝밀","aliases":["천국의계단","스텝퍼","stepmill"],"bodyPart":"유산소","type":"cardio","distanceUnit":"km","met":9.0},
-    {"id":"cat_swim","name":"수영","aliases":["수영","swimming"],"bodyPart":"유산소","type":"cardio","distanceUnit":"m","met":7.0}
+    {
+      "id": "cat_bench",
+      "name": "벤치프레스",
+      "aliases": [
+        "벤치",
+        "바벨벤치",
+        "bench press"
+      ],
+      "bodyPart": "가슴",
+      "type": "strength",
+      "weightStep": 5
+    },
+    {
+      "id": "cat_incline_bench",
+      "name": "인클라인 벤치프레스",
+      "aliases": [
+        "인클라인벤치",
+        "이클라인 벤치",
+        "incline bench"
+      ],
+      "bodyPart": "가슴",
+      "type": "strength",
+      "weightStep": 5
+    },
+    {
+      "id": "cat_decline_bench",
+      "name": "디클라인 벤치프레스",
+      "aliases": [
+        "디클라인벤치",
+        "decline bench"
+      ],
+      "bodyPart": "가슴",
+      "type": "strength",
+      "weightStep": 5
+    },
+    {
+      "id": "cat_db_bench",
+      "name": "덤벨 벤치프레스",
+      "aliases": [
+        "덤벨프레스",
+        "dumbbell bench"
+      ],
+      "bodyPart": "가슴",
+      "type": "strength",
+      "weightStep": 2
+    },
+    {
+      "id": "cat_incline_db",
+      "name": "인클라인 덤벨프레스",
+      "aliases": [
+        "인클라인덤벨",
+        "incline dumbbell"
+      ],
+      "bodyPart": "가슴",
+      "type": "strength",
+      "weightStep": 2
+    },
+    {
+      "id": "cat_db_fly",
+      "name": "덤벨 플라이",
+      "aliases": [
+        "플라이",
+        "dumbbell fly"
+      ],
+      "bodyPart": "가슴",
+      "type": "strength",
+      "weightStep": 2
+    },
+    {
+      "id": "cat_incline_fly",
+      "name": "인클라인 덤벨 플라이",
+      "aliases": [
+        "인클라인플라이"
+      ],
+      "bodyPart": "가슴",
+      "type": "strength",
+      "weightStep": 2
+    },
+    {
+      "id": "cat_cable_crossover",
+      "name": "케이블 크로스오버",
+      "aliases": [
+        "크로스오버",
+        "케이블플라이",
+        "cable crossover"
+      ],
+      "bodyPart": "가슴",
+      "type": "strength",
+      "weightStep": 5
+    },
+    {
+      "id": "cat_pecdeck",
+      "name": "펙덱 플라이 (버터플라이)",
+      "aliases": [
+        "버터플라이",
+        "펙덱",
+        "pec deck"
+      ],
+      "bodyPart": "가슴",
+      "type": "strength",
+      "weightStep": 5
+    },
+    {
+      "id": "cat_chest_press",
+      "name": "시티드 체스트프레스",
+      "aliases": [
+        "체스트프레스",
+        "머신프레스",
+        "chest press"
+      ],
+      "bodyPart": "가슴",
+      "type": "strength",
+      "weightStep": 5
+    },
+    {
+      "id": "cat_dips",
+      "name": "딥스",
+      "aliases": [
+        "dips",
+        "평행봉"
+      ],
+      "bodyPart": "가슴",
+      "type": "strength",
+      "repsOnly": true
+    },
+    {
+      "id": "cat_pushup",
+      "name": "푸시업",
+      "aliases": [
+        "팔굽혀펴기",
+        "푸쉬업",
+        "push up"
+      ],
+      "bodyPart": "가슴",
+      "type": "strength",
+      "repsOnly": true
+    },
+    {
+      "id": "cat_lat_pulldown",
+      "name": "렛풀다운",
+      "aliases": [
+        "랫풀다운",
+        "풀다운",
+        "lat pulldown"
+      ],
+      "bodyPart": "등",
+      "type": "strength",
+      "weightStep": 5
+    },
+    {
+      "id": "cat_wide_pulldown",
+      "name": "와이드 그립 렛풀다운",
+      "aliases": [
+        "와이드풀다운",
+        "wide pulldown"
+      ],
+      "bodyPart": "등",
+      "type": "strength",
+      "weightStep": 5
+    },
+    {
+      "id": "cat_close_pulldown",
+      "name": "클로즈 그립 렛풀다운",
+      "aliases": [
+        "클로즈풀다운",
+        "협착풀다운"
+      ],
+      "bodyPart": "등",
+      "type": "strength",
+      "weightStep": 5
+    },
+    {
+      "id": "cat_seated_row",
+      "name": "시티드 로우 (롱풀)",
+      "aliases": [
+        "롱풀",
+        "시티드로우",
+        "seated row"
+      ],
+      "bodyPart": "등",
+      "type": "strength",
+      "weightStep": 5
+    },
+    {
+      "id": "cat_cable_row",
+      "name": "케이블 로우",
+      "aliases": [
+        "케이블로우",
+        "cable row"
+      ],
+      "bodyPart": "등",
+      "type": "strength",
+      "weightStep": 5
+    },
+    {
+      "id": "cat_barbell_row",
+      "name": "바벨 로우",
+      "aliases": [
+        "벤트오버로우",
+        "barbell row"
+      ],
+      "bodyPart": "등",
+      "type": "strength",
+      "weightStep": 5
+    },
+    {
+      "id": "cat_db_row",
+      "name": "덤벨 로우",
+      "aliases": [
+        "원암로우",
+        "dumbbell row"
+      ],
+      "bodyPart": "등",
+      "type": "strength",
+      "weightStep": 2
+    },
+    {
+      "id": "cat_tbar_row",
+      "name": "T바 로우",
+      "aliases": [
+        "티바로우",
+        "t-bar row"
+      ],
+      "bodyPart": "등",
+      "type": "strength",
+      "weightStep": 5
+    },
+    {
+      "id": "cat_pullup",
+      "name": "풀업",
+      "aliases": [
+        "턱걸이",
+        "pull up",
+        "친업"
+      ],
+      "bodyPart": "등",
+      "type": "strength",
+      "repsOnly": true
+    },
+    {
+      "id": "cat_chinup",
+      "name": "친업",
+      "aliases": [
+        "언더그립 턱걸이",
+        "chin up"
+      ],
+      "bodyPart": "등",
+      "type": "strength",
+      "repsOnly": true
+    },
+    {
+      "id": "cat_assist_pullup",
+      "name": "어시스트 풀업",
+      "aliases": [
+        "보조턱걸이",
+        "assisted pull up"
+      ],
+      "bodyPart": "등",
+      "type": "strength",
+      "weightStep": 5
+    },
+    {
+      "id": "cat_deadlift",
+      "name": "데드리프트",
+      "aliases": [
+        "데드",
+        "deadlift"
+      ],
+      "bodyPart": "등",
+      "type": "strength",
+      "weightStep": 5
+    },
+    {
+      "id": "cat_back_extension",
+      "name": "백 익스텐션",
+      "aliases": [
+        "백익스텐션",
+        "허리신전",
+        "back extension"
+      ],
+      "bodyPart": "등",
+      "type": "strength",
+      "repsOnly": true
+    },
+    {
+      "id": "cat_shoulder_press",
+      "name": "숄더프레스 (머신)",
+      "aliases": [
+        "숄더프레스",
+        "어깨프레스",
+        "shoulder press"
+      ],
+      "bodyPart": "어깨",
+      "type": "strength",
+      "weightStep": 5
+    },
+    {
+      "id": "cat_bb_ohp",
+      "name": "바벨 숄더프레스",
+      "aliases": [
+        "오버헤드프레스",
+        "OHP",
+        "밀리터리프레스"
+      ],
+      "bodyPart": "어깨",
+      "type": "strength",
+      "weightStep": 5
+    },
+    {
+      "id": "cat_db_ohp",
+      "name": "덤벨 숄더프레스",
+      "aliases": [
+        "덤벨숄더",
+        "dumbbell shoulder press"
+      ],
+      "bodyPart": "어깨",
+      "type": "strength",
+      "weightStep": 2
+    },
+    {
+      "id": "cat_arnold",
+      "name": "아놀드 프레스",
+      "aliases": [
+        "아놀드",
+        "arnold press"
+      ],
+      "bodyPart": "어깨",
+      "type": "strength",
+      "weightStep": 2
+    },
+    {
+      "id": "cat_lateral_raise",
+      "name": "사이드 래터럴 레이즈",
+      "aliases": [
+        "사레레",
+        "레터럴레이즈",
+        "측면레이즈"
+      ],
+      "bodyPart": "어깨",
+      "type": "strength",
+      "weightStep": 2
+    },
+    {
+      "id": "cat_front_raise",
+      "name": "프론트 레이즈",
+      "aliases": [
+        "전면레이즈",
+        "front raise"
+      ],
+      "bodyPart": "어깨",
+      "type": "strength",
+      "weightStep": 2
+    },
+    {
+      "id": "cat_rear_delt",
+      "name": "리어 델트 플라이",
+      "aliases": [
+        "후면삼각근",
+        "리어델트",
+        "reverse fly"
+      ],
+      "bodyPart": "어깨",
+      "type": "strength",
+      "weightStep": 2
+    },
+    {
+      "id": "cat_facepull",
+      "name": "페이스풀",
+      "aliases": [
+        "face pull"
+      ],
+      "bodyPart": "어깨",
+      "type": "strength",
+      "weightStep": 5
+    },
+    {
+      "id": "cat_upright_row",
+      "name": "업라이트 로우",
+      "aliases": [
+        "upright row"
+      ],
+      "bodyPart": "어깨",
+      "type": "strength",
+      "weightStep": 5
+    },
+    {
+      "id": "cat_shrug",
+      "name": "슈러그",
+      "aliases": [
+        "shrug",
+        "승모근"
+      ],
+      "bodyPart": "어깨",
+      "type": "strength",
+      "weightStep": 5
+    },
+    {
+      "id": "cat_bb_curl",
+      "name": "바벨 컬",
+      "aliases": [
+        "바벨컬",
+        "barbell curl"
+      ],
+      "bodyPart": "팔",
+      "type": "strength",
+      "weightStep": 2.5
+    },
+    {
+      "id": "cat_db_curl",
+      "name": "덤벨 컬",
+      "aliases": [
+        "암컬",
+        "덤벨컬",
+        "dumbbell curl"
+      ],
+      "bodyPart": "팔",
+      "type": "strength",
+      "weightStep": 2
+    },
+    {
+      "id": "cat_hammer_curl",
+      "name": "해머 컬",
+      "aliases": [
+        "해머컬",
+        "hammer curl"
+      ],
+      "bodyPart": "팔",
+      "type": "strength",
+      "weightStep": 2
+    },
+    {
+      "id": "cat_preacher_curl",
+      "name": "프리처 컬",
+      "aliases": [
+        "프리쳐컬",
+        "preacher curl"
+      ],
+      "bodyPart": "팔",
+      "type": "strength",
+      "weightStep": 2.5
+    },
+    {
+      "id": "cat_conc_curl",
+      "name": "컨센트레이션 컬",
+      "aliases": [
+        "집중컬",
+        "concentration curl"
+      ],
+      "bodyPart": "팔",
+      "type": "strength",
+      "weightStep": 2
+    },
+    {
+      "id": "cat_cable_curl",
+      "name": "케이블 컬",
+      "aliases": [
+        "케이블컬",
+        "cable curl"
+      ],
+      "bodyPart": "팔",
+      "type": "strength",
+      "weightStep": 5
+    },
+    {
+      "id": "cat_reverse_curl",
+      "name": "리버스 컬",
+      "aliases": [
+        "역컬",
+        "reverse curl"
+      ],
+      "bodyPart": "팔",
+      "type": "strength",
+      "weightStep": 2.5
+    },
+    {
+      "id": "cat_pushdown",
+      "name": "트라이셉 푸시다운",
+      "aliases": [
+        "푸시다운",
+        "푸쉬다운",
+        "triceps pushdown"
+      ],
+      "bodyPart": "팔",
+      "type": "strength",
+      "weightStep": 5
+    },
+    {
+      "id": "cat_lying_ext",
+      "name": "라잉 트라이셉 익스텐션",
+      "aliases": [
+        "스컬크러셔",
+        "lying extension"
+      ],
+      "bodyPart": "팔",
+      "type": "strength",
+      "weightStep": 2.5
+    },
+    {
+      "id": "cat_oh_ext",
+      "name": "오버헤드 트라이셉 익스텐션",
+      "aliases": [
+        "오버헤드익스텐션"
+      ],
+      "bodyPart": "팔",
+      "type": "strength",
+      "weightStep": 2.5
+    },
+    {
+      "id": "cat_dip_machine",
+      "name": "딥스 머신",
+      "aliases": [
+        "트라이셉딥스",
+        "dip machine"
+      ],
+      "bodyPart": "팔",
+      "type": "strength",
+      "weightStep": 5
+    },
+    {
+      "id": "cat_kickback",
+      "name": "킥백",
+      "aliases": [
+        "트라이셉킥백",
+        "kickback"
+      ],
+      "bodyPart": "팔",
+      "type": "strength",
+      "weightStep": 2
+    },
+    {
+      "id": "cat_bb_squat",
+      "name": "바벨 스쿼트",
+      "aliases": [
+        "스쿼트",
+        "백스쿼트",
+        "squat"
+      ],
+      "bodyPart": "하체",
+      "type": "strength",
+      "weightStep": 5
+    },
+    {
+      "id": "cat_front_squat",
+      "name": "프론트 스쿼트",
+      "aliases": [
+        "프론트스쿼트",
+        "front squat"
+      ],
+      "bodyPart": "하체",
+      "type": "strength",
+      "weightStep": 5
+    },
+    {
+      "id": "cat_smith_squat",
+      "name": "스미스 스쿼트",
+      "aliases": [
+        "스미스머신 스쿼트"
+      ],
+      "bodyPart": "하체",
+      "type": "strength",
+      "weightStep": 5
+    },
+    {
+      "id": "cat_leg_press",
+      "name": "레그프레스",
+      "aliases": [
+        "레그프레스",
+        "leg press"
+      ],
+      "bodyPart": "하체",
+      "type": "strength",
+      "weightStep": 10
+    },
+    {
+      "id": "cat_seated_leg_press",
+      "name": "시티드 레그프레스",
+      "aliases": [
+        "시티드레그프레스"
+      ],
+      "bodyPart": "하체",
+      "type": "strength",
+      "weightStep": 10
+    },
+    {
+      "id": "cat_hack_squat",
+      "name": "핵 스쿼트",
+      "aliases": [
+        "핵스쿼트",
+        "hack squat"
+      ],
+      "bodyPart": "하체",
+      "type": "strength",
+      "weightStep": 5
+    },
+    {
+      "id": "cat_leg_extension",
+      "name": "레그 익스텐션",
+      "aliases": [
+        "레그익스텐션",
+        "leg extension"
+      ],
+      "bodyPart": "하체",
+      "type": "strength",
+      "weightStep": 5
+    },
+    {
+      "id": "cat_leg_curl",
+      "name": "레그 컬",
+      "aliases": [
+        "레그컬",
+        "라잉레그컬",
+        "leg curl"
+      ],
+      "bodyPart": "하체",
+      "type": "strength",
+      "weightStep": 5
+    },
+    {
+      "id": "cat_rdl",
+      "name": "루마니안 데드리프트",
+      "aliases": [
+        "루마니안데드",
+        "RDL"
+      ],
+      "bodyPart": "하체",
+      "type": "strength",
+      "weightStep": 5
+    },
+    {
+      "id": "cat_lunge",
+      "name": "런지",
+      "aliases": [
+        "lunge",
+        "워킹런지"
+      ],
+      "bodyPart": "하체",
+      "type": "strength",
+      "weightStep": 2
+    },
+    {
+      "id": "cat_bulgarian",
+      "name": "불가리안 스플릿 스쿼트",
+      "aliases": [
+        "불가리안",
+        "split squat"
+      ],
+      "bodyPart": "하체",
+      "type": "strength",
+      "weightStep": 2
+    },
+    {
+      "id": "cat_calf_raise",
+      "name": "카프 레이즈",
+      "aliases": [
+        "카프레이즈",
+        "종아리",
+        "calf raise"
+      ],
+      "bodyPart": "하체",
+      "type": "strength",
+      "weightStep": 5,
+      "guide": "발볼을 계단이나 발판에 올리고 뒤꿈치를 최대한 내렸다가 끝까지 들어 올립니다. 무릎은 편 상태를 유지합니다."
+    },
+    {
+      "id": "cat_hip_thrust",
+      "name": "힙 쓰러스트",
+      "aliases": [
+        "힙쓰러스트",
+        "hip thrust"
+      ],
+      "bodyPart": "하체",
+      "type": "strength",
+      "weightStep": 5
+    },
+    {
+      "id": "cat_abduction",
+      "name": "힙 어브덕션",
+      "aliases": [
+        "아웃타이",
+        "어브덕션",
+        "abduction"
+      ],
+      "bodyPart": "하체",
+      "type": "strength",
+      "weightStep": 5
+    },
+    {
+      "id": "cat_adduction",
+      "name": "힙 어덕션",
+      "aliases": [
+        "이너타이",
+        "어덕션",
+        "adduction"
+      ],
+      "bodyPart": "하체",
+      "type": "strength",
+      "weightStep": 5
+    },
+    {
+      "id": "cat_situp",
+      "name": "싯업",
+      "aliases": [
+        "윗몸일으키기",
+        "sit up"
+      ],
+      "bodyPart": "복근",
+      "type": "strength",
+      "repsOnly": true
+    },
+    {
+      "id": "cat_decline_situp",
+      "name": "디클라인 싯업",
+      "aliases": [
+        "경사싯업"
+      ],
+      "bodyPart": "복근",
+      "type": "strength",
+      "repsOnly": true
+    },
+    {
+      "id": "cat_crunch",
+      "name": "크런치",
+      "aliases": [
+        "crunch"
+      ],
+      "bodyPart": "복근",
+      "type": "strength",
+      "repsOnly": true
+    },
+    {
+      "id": "cat_cable_crunch",
+      "name": "케이블 크런치",
+      "aliases": [
+        "케이블크런치"
+      ],
+      "bodyPart": "복근",
+      "type": "strength",
+      "weightStep": 5
+    },
+    {
+      "id": "cat_leg_raise",
+      "name": "레그 레이즈",
+      "aliases": [
+        "레그레이즈",
+        "leg raise"
+      ],
+      "bodyPart": "복근",
+      "type": "strength",
+      "repsOnly": true
+    },
+    {
+      "id": "cat_hanging_leg_raise",
+      "name": "행잉 레그 레이즈",
+      "aliases": [
+        "행잉레그레이즈"
+      ],
+      "bodyPart": "복근",
+      "type": "strength",
+      "repsOnly": true
+    },
+    {
+      "id": "cat_russian_twist",
+      "name": "러시안 트위스트",
+      "aliases": [
+        "러시안트위스트"
+      ],
+      "bodyPart": "복근",
+      "type": "strength",
+      "repsOnly": true
+    },
+    {
+      "id": "cat_plank",
+      "name": "플랭크",
+      "aliases": [
+        "plank"
+      ],
+      "bodyPart": "복근",
+      "type": "strength",
+      "timed": true,
+      "guide": "팔꿈치를 어깨 바로 아래에 두고 엎드려, 머리부터 발뒤꿈치까지 일직선을 만듭니다. 엉덩이가 솟거나 허리가 꺼지지 않게 배와 엉덩이에 힘을 주고 버팁니다. 호흡은 멈추지 말고 계속 쉽니다."
+    },
+    {
+      "id": "cat_ab_coaster",
+      "name": "앱 코스터",
+      "aliases": [
+        "앱코스터",
+        "ab coaster"
+      ],
+      "bodyPart": "복근",
+      "type": "strength",
+      "weightStep": 5
+    },
+    {
+      "id": "cat_woodchop",
+      "name": "우드찹",
+      "aliases": [
+        "케이블 우드찹",
+        "woodchop"
+      ],
+      "bodyPart": "복근",
+      "type": "strength",
+      "weightStep": 5
+    },
+    {
+      "id": "cat_kb_swing",
+      "name": "케틀벨 스윙",
+      "aliases": [
+        "케틀벨",
+        "kettlebell swing"
+      ],
+      "bodyPart": "기타",
+      "type": "strength",
+      "weightStep": 4
+    },
+    {
+      "id": "cat_burpee",
+      "name": "버피",
+      "aliases": [
+        "버피테스트",
+        "burpee"
+      ],
+      "bodyPart": "기타",
+      "type": "strength",
+      "repsOnly": true
+    },
+    {
+      "id": "cat_battle_rope",
+      "name": "배틀로프",
+      "aliases": [
+        "배틀로프",
+        "battle rope"
+      ],
+      "bodyPart": "기타",
+      "type": "strength",
+      "repsOnly": true
+    },
+    {
+      "id": "cat_farmers_walk",
+      "name": "파머스 워크",
+      "aliases": [
+        "파머스워크",
+        "farmers walk"
+      ],
+      "bodyPart": "기타",
+      "type": "strength",
+      "weightStep": 5
+    },
+    {
+      "id": "cat_box_jump",
+      "name": "박스 점프",
+      "aliases": [
+        "박스점프",
+        "box jump"
+      ],
+      "bodyPart": "기타",
+      "type": "strength",
+      "repsOnly": true
+    },
+    {
+      "id": "cat_med_slam",
+      "name": "메디신볼 슬램",
+      "aliases": [
+        "메디신볼",
+        "medicine ball slam"
+      ],
+      "bodyPart": "기타",
+      "type": "strength",
+      "weightStep": 2
+    },
+    {
+      "id": "cat_calf_raise_hold",
+      "name": "카프 레이즈 홀드 (까치발 버티기)",
+      "aliases": [
+        "까치발 버티기",
+        "까치발 들기",
+        "뒤꿈치 들기",
+        "발끝 서기",
+        "힐 레이즈 홀드",
+        "calf raise hold",
+        "heel raise isometric"
+      ],
+      "bodyPart": "하체",
+      "type": "strength",
+      "timed": true,
+      "guide": "평지에 어깨너비로 서서 벽이나 의자를 가볍게 잡아 균형을 잡습니다. 뒤꿈치를 최대한 높이 들어 발볼로 체중을 받치고, 종아리·허벅지·엉덩이에 힘을 준 채 버팁니다. 무릎은 펴고 몸은 앞으로 기울지 않게 수직으로 세우며, 호흡은 멈추지 말고 계속 쉽니다. 15~20초 × 5~10세트로 시작해 익숙해지면 시간을 늘립니다."
+    },
+    {
+      "id": "cat_calf_raise_hold_1leg",
+      "name": "한 발 카프 레이즈 홀드",
+      "aliases": [
+        "한발 까치발",
+        "싱글 레그 카프 레이즈",
+        "single leg calf raise hold"
+      ],
+      "bodyPart": "하체",
+      "type": "strength",
+      "timed": true,
+      "guide": "한 발로 서서 뒤꿈치를 들고 버팁니다. 양발로 할 때보다 부하가 두 배 가까이 걸리니 반드시 벽이나 난간을 잡고 하세요. 좌우 같은 시간씩 번갈아 합니다."
+    },
+    {
+      "id": "cat_calf_stretch_hold",
+      "name": "종아리 스트레칭 홀드",
+      "aliases": [
+        "종아리 늘리기",
+        "아킬레스 스트레칭",
+        "calf stretch"
+      ],
+      "bodyPart": "하체",
+      "type": "strength",
+      "timed": true,
+      "guide": "계단이나 턱에 발볼만 올리고 뒤꿈치를 아래로 천천히 내려 종아리가 당기는 지점에서 버팁니다. 무릎을 편 채로 한 번, 살짝 굽혀서 한 번 하면 종아리 위아래를 모두 늘릴 수 있습니다."
+    },
+    {
+      "id": "cat_wall_sit",
+      "name": "월 싯 (벽 스쿼트 버티기)",
+      "aliases": [
+        "벽 스쿼트",
+        "공기의자",
+        "월싯",
+        "wall sit"
+      ],
+      "bodyPart": "하체",
+      "type": "strength",
+      "timed": true,
+      "guide": "벽에 등을 붙이고 무릎이 90도가 되도록 앉은 자세로 버팁니다. 무릎이 발끝보다 앞으로 나가지 않게 하고 체중은 뒤꿈치에 싣습니다. 허벅지가 떨리는 것이 정상입니다."
+    },
+    {
+      "id": "cat_squat_hold",
+      "name": "스쿼트 홀드",
+      "aliases": [
+        "스쿼트 버티기",
+        "squat hold",
+        "isometric squat"
+      ],
+      "bodyPart": "하체",
+      "type": "strength",
+      "timed": true,
+      "guide": "발을 어깨너비로 벌리고 허벅지가 바닥과 수평이 될 때까지 앉아 그 자세로 버팁니다. 가슴을 펴고 무릎이 안쪽으로 모이지 않게 바깥으로 밀어냅니다."
+    },
+    {
+      "id": "cat_glute_bridge_hold",
+      "name": "글루트 브리지 홀드",
+      "aliases": [
+        "엉덩이 들기",
+        "브리지 버티기",
+        "glute bridge hold"
+      ],
+      "bodyPart": "하체",
+      "type": "strength",
+      "timed": true,
+      "guide": "누워서 무릎을 세우고 엉덩이를 들어 어깨-엉덩이-무릎이 일직선이 되게 합니다. 허리로 버티지 말고 엉덩이에 힘을 주며, 갈비뼈가 들리지 않게 배에 힘을 유지합니다."
+    },
+    {
+      "id": "cat_single_leg_stand",
+      "name": "한 발 서기 (균형)",
+      "aliases": [
+        "외발서기",
+        "한발 서기",
+        "balance",
+        "single leg stand"
+      ],
+      "bodyPart": "하체",
+      "type": "strength",
+      "timed": true,
+      "guide": "한 발로 서서 균형을 잡고 버팁니다. 흔들리면 벽 가까이에서 하세요. 익숙해지면 눈을 감고 해보면 난이도가 크게 올라갑니다. 좌우 같은 시간씩."
+    },
+    {
+      "id": "cat_side_plank",
+      "name": "사이드 플랭크",
+      "aliases": [
+        "옆 플랭크",
+        "사이드플랭크",
+        "side plank"
+      ],
+      "bodyPart": "복근",
+      "type": "strength",
+      "timed": true,
+      "guide": "옆으로 누워 팔꿈치를 어깨 바로 아래에 두고 몸을 들어 올립니다. 골반이 뒤로 빠지거나 아래로 처지지 않게 머리부터 발까지 일직선을 유지합니다. 좌우 같은 시간씩."
+    },
+    {
+      "id": "cat_hollow_hold",
+      "name": "할로우 홀드",
+      "aliases": [
+        "할로우바디",
+        "hollow hold",
+        "hollow body"
+      ],
+      "bodyPart": "복근",
+      "type": "strength",
+      "timed": true,
+      "guide": "누워서 허리를 바닥에 완전히 붙인 채 어깨와 다리를 함께 들어 몸을 얕은 바나나 모양으로 만듭니다. 허리가 뜨면 다리를 조금 더 높여 난이도를 낮춥니다."
+    },
+    {
+      "id": "cat_l_sit",
+      "name": "L싯",
+      "aliases": [
+        "엘싯",
+        "L-sit"
+      ],
+      "bodyPart": "복근",
+      "type": "strength",
+      "timed": true,
+      "guide": "바닥이나 평행봉에서 팔로 몸을 지탱하고 다리를 앞으로 곧게 뻗어 L자를 만들어 버팁니다. 어려우면 무릎을 굽힌 턱 홀드부터 시작합니다."
+    },
+    {
+      "id": "cat_dead_hang",
+      "name": "데드행 (매달리기)",
+      "aliases": [
+        "철봉 매달리기",
+        "데드행",
+        "dead hang"
+      ],
+      "bodyPart": "등",
+      "type": "strength",
+      "timed": true,
+      "guide": "철봉을 어깨너비로 잡고 팔을 편 채 매달립니다. 어깨를 귀에서 멀어지게 살짝 내려 견갑을 잡아주면 어깨 안정성에 좋습니다. 악력과 광배에 함께 자극이 옵니다."
+    },
+    {
+      "id": "cat_superman_hold",
+      "name": "슈퍼맨 홀드",
+      "aliases": [
+        "슈퍼맨",
+        "superman hold"
+      ],
+      "bodyPart": "등",
+      "type": "strength",
+      "timed": true,
+      "guide": "엎드려서 팔과 다리를 동시에 들어 올려 버팁니다. 목을 젖히지 말고 시선은 바닥을 향하게 두어 목이 꺾이지 않게 합니다."
+    },
+    {
+      "id": "cat_bird_dog_hold",
+      "name": "버드독 홀드",
+      "aliases": [
+        "버드독",
+        "bird dog"
+      ],
+      "bodyPart": "기타",
+      "type": "strength",
+      "timed": true,
+      "guide": "네발 자세에서 반대쪽 팔과 다리를 곧게 뻗어 버팁니다. 골반이 돌아가지 않게 수평을 유지하는 것이 핵심입니다. 좌우 번갈아 같은 시간씩."
+    },
+    {
+      "id": "cat_pushup_hold",
+      "name": "푸시업 홀드",
+      "aliases": [
+        "푸시업 버티기",
+        "push up hold"
+      ],
+      "bodyPart": "가슴",
+      "type": "strength",
+      "timed": true,
+      "guide": "푸시업 하강 지점(가슴이 바닥에 닿기 직전)에서 멈춰 버팁니다. 몸은 머리부터 발까지 일직선, 팔꿈치는 몸통에서 45도 정도로 유지합니다."
+    },
+    {
+      "id": "cat_treadmill",
+      "name": "러닝 (트레드밀)",
+      "aliases": [
+        "러닝머신",
+        "트레드밀",
+        "런닝"
+      ],
+      "bodyPart": "유산소",
+      "type": "cardio",
+      "distanceUnit": "km",
+      "met": 9.0
+    },
+    {
+      "id": "cat_outdoor_run",
+      "name": "실외 러닝",
+      "aliases": [
+        "조깅",
+        "달리기",
+        "running"
+      ],
+      "bodyPart": "유산소",
+      "type": "cardio",
+      "distanceUnit": "km",
+      "met": 9.5
+    },
+    {
+      "id": "cat_cycle",
+      "name": "사이클",
+      "aliases": [
+        "자전거",
+        "스피닝",
+        "cycling"
+      ],
+      "bodyPart": "유산소",
+      "type": "cardio",
+      "distanceUnit": "km",
+      "met": 7.0
+    },
+    {
+      "id": "cat_rowing",
+      "name": "로잉머신",
+      "aliases": [
+        "로잉",
+        "rowing"
+      ],
+      "bodyPart": "유산소",
+      "type": "cardio",
+      "distanceUnit": "m",
+      "met": 7.0
+    },
+    {
+      "id": "cat_elliptical",
+      "name": "일립티컬",
+      "aliases": [
+        "크로스트레이너",
+        "elliptical"
+      ],
+      "bodyPart": "유산소",
+      "type": "cardio",
+      "distanceUnit": "km",
+      "met": 5.0
+    },
+    {
+      "id": "cat_stepmill",
+      "name": "스텝밀",
+      "aliases": [
+        "천국의계단",
+        "스텝퍼",
+        "stepmill"
+      ],
+      "bodyPart": "유산소",
+      "type": "cardio",
+      "distanceUnit": "km",
+      "met": 9.0
+    },
+    {
+      "id": "cat_swim",
+      "name": "수영",
+      "aliases": [
+        "수영",
+        "swimming"
+      ],
+      "bodyPart": "유산소",
+      "type": "cardio",
+      "distanceUnit": "m",
+      "met": 7.0
+    }
   ]
 }
