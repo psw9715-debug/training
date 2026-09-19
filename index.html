@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- 훈련일지 v1.15 · 빌드 2026-09-19 -->
+<!-- 훈련일지 v1.16 · 빌드 2026-09-19 -->
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -235,6 +235,7 @@ a{color:var(--blue);}
 .pk-info{ border:1px dashed var(--paper-line); border-radius:8px; padding:10px; margin:2px 0 8px; background:var(--paper); }
 .pk-info .exi-box{ width:80px; height:80px; margin:0 auto 8px; display:block; }
 .pk-info .meta{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--ink-soft); text-align:center; margin-bottom:8px; }
+.pk-row.done .tapzone{ opacity:.5; }
 .pk-empty{ text-align:center; padding:18px 8px; color:var(--ink-soft); font-size:12.5px; }
 
 /* 기구 아이콘 */
@@ -611,7 +612,7 @@ nav.bottomnav button.active{color:var(--ink);background:var(--paper);}
    화면 상단(훈련일지 옆)에 표시되어, 어느 버전이 실제로 올라가 있는지
    바로 눈으로 구분할 수 있게 해줍니다.
 ============================================================ */
-const APP_VERSION = 'v1.15';
+const APP_VERSION = 'v1.16';
 const APP_BUILD = '2026-09-19';
 
 /* ============================================================
@@ -1603,7 +1604,7 @@ function openPickerSheet(mode, weekday){
     </div>`;
   overlay.appendChild(sheet); root.innerHTML=''; root.appendChild(overlay);
   sheet.querySelector('#sheetCloseBtn').addEventListener('click', closeSheet);
-  sheet.querySelector('#pkCatalog').addEventListener('click', openCatalogSheet);
+  sheet.querySelector('#pkCatalog').addEventListener('click', ()=>openCatalogSheet(mode==='routine'?'routine':'today', weekday));
   sheet.querySelector('#pkNew').addEventListener('click', ()=>openNewExerciseForm(mode, weekday));
 
   const body = sheet.querySelector('#pkBody');
@@ -3122,7 +3123,7 @@ function bindVoiceHandlers(){
       saveVoiceDefaultsDebounced();
     });
   });
-  document.getElementById('btnOpenCatalog').addEventListener('click', openCatalogSheet);
+  document.getElementById('btnOpenCatalog').addEventListener('click', ()=>openCatalogSheet('library'));
 }
 function voiceDefBadgeText(){
   const g = state.voiceDefaults;
@@ -3410,7 +3411,11 @@ function previewExerciseVoice(it){ return playVoiceSample(undefined, it); }
 /* ---- 카탈로그 ------------------------------------------------------
    config/catalog.json 은 일반 헬스장 기준 종목 판이다. 여기서 고르면
    내 라이브러리로 복사되고, 그 뒤 수정은 내 쪽에만 반영된다.       */
-async function openCatalogSheet(){
+/* 카탈로그 — 줄을 누르면 바로 담긴다.
+   체크해 두었다가 아래에서 한꺼번에 담는 방식은 걷어냈다. 새 종목을
+   고른다는 건 지금 그걸 하겠다는 뜻이라, 라이브러리에 넣는 동시에
+   오늘 목록(또는 그 요일 루틴)에도 바로 올려 준다. */
+async function openCatalogSheet(mode, weekday){
   if(!state.catalog){
     try{
       const f = await gh.getFile('config/catalog.json');
@@ -3420,24 +3425,72 @@ async function openCatalogSheet(){
   }
   const items = (state.catalog.items || []);
   const parts = ['전체', ...BODY_PARTS.filter(bp => items.some(i => i.bodyPart === bp))];
-  const inner = openSheetHTML('카탈로그에서 추가', `
-    <p class="muted">일반 헬스장 기준 ${items.length}종. 다니시는 곳에 있는 기구만 골라 담으세요.
-      여기 없는 기구는 '새 종목 만들기'로 직접 추가하면 됩니다.</p>
-    <input type="text" id="catSearch" placeholder="이름으로 검색 (랫풀, 벤치, curl ...)" autocapitalize="off" autocorrect="off">
-    <div class="chip-row" id="catParts" style="margin:10px 0;">
+  const where = mode==='routine' ? `${WEEKDAY_LABEL[weekday]}요일 루틴` : (mode==='today' ? '오늘 목록' : '내 종목');
+  const inner = openSheetHTML('카탈로그', `
+    <p class="muted">일반 헬스장 기준 ${items.length}종. <b>줄을 누르면 바로 ${where}에 들어갑니다.</b>
+      여기 없는 기구는 '새 종목'으로 직접 만드세요.</p>
+    <div class="pk-search" style="margin-top:10px;"><span class="mag">🔍</span>
+      <input type="text" id="catSearch" placeholder="이름으로 검색 (랫풀, 벤치, curl …)" autocapitalize="off" autocorrect="off"></div>
+    <div class="chip-row" id="catParts" style="margin:0 0 10px;">
       ${parts.map((p,i)=>`<button class="chip-btn${i===0?' selected':''}" data-part="${esc(p)}">${esc(p)}</button>`).join('')}
     </div>
     <div id="catList"></div>
-    <div class="btn-row"><button class="btn" id="catAdd">선택한 종목 담기 (0)</button></div>
   `);
   let part = '전체', q = '';
-  const picked = new Set();
   const listEl = inner.querySelector('#catList');
-  const addBtn = inner.querySelector('#catAdd');
-  const haveNames = ()=> new Set(state.library.map(x => x.name.replace(/\s/g,'')));
+  const libByName = ()=>{
+    const m = {};
+    state.library.forEach(x=>{ m[x.name.replace(/\s/g,'')] = x; });
+    return m;
+  };
+  const onList = (id)=> mode==='routine'
+    ? ((state.routine[weekday]||{}).exerciseIds||[]).includes(id)
+    : (mode==='today' ? state.entries.some(en=>en.exerciseId===id) : true);
 
-  const draw = ()=>{
-    const have = haveNames();
+  /* 라이브러리에 없으면 만들고, 이미 있으면 그걸 쓴다 */
+  async function ensureInLibrary(src){
+    const mine = libByName()[src.name.replace(/\s/g,'')];
+    if(mine) return mine;
+    const item = { id: 'ex_' + uid(), name: src.name, bodyPart: src.bodyPart, type: src.type, catalogId: src.id };
+    if(src.repsOnly) item.repsOnly = true;
+    if(src.timed) item.timed = true;
+    if(src.guide) item.guide = src.guide;
+    if(src.icon) item.icon = src.icon;
+    if(src.aliases && src.aliases.length) item.aliases = src.aliases;
+    if(src.weightStep != null) item.weightStep = src.weightStep;
+    if(src.distanceUnit) item.distanceUnit = src.distanceUnit;
+    if(src.met != null) item.met = src.met;
+    state.library.push(item);
+    const r = await gh.putFile('config/exercises.json', state.library, state.librarySha, `add ${src.name} from catalog`);
+    state.librarySha = r.content.sha;
+    renderLibraryManage(); renderTrendSelect();
+    return item;
+  }
+
+  async function pick(src, btn){
+    if(btn.disabled) return;
+    btn.disabled = true; btn.textContent = '…';
+    try{
+      const it = await ensureInLibrary(src);
+      if(mode==='routine'){
+        const list = state.routine[weekday].exerciseIds;
+        if(!list.includes(it.id)) list.push(it.id);
+        renderAssignedList();
+      } else if(mode==='today'){
+        if(!state.entries.some(en=>en.exerciseId===it.id)) state.entries.push(buildEntryFromTemplate(it.id, null, true));
+        renderEntryList();
+      }
+      showToast(`"${it.name}" ${mode==='library' ? '담았어요' : where+'에 넣었어요'}`);
+    }catch(e){
+      showToast('저장 실패: ' + e.message);
+    }finally{
+      btn.disabled = false;
+      draw();
+    }
+  }
+
+  function draw(){
+    const have = libByName();
     const nq = q.trim().toLowerCase().replace(/\s/g,'');
     const rows = items.filter(i=>{
       if(part !== '전체' && i.bodyPart !== part) return false;
@@ -3445,24 +3498,29 @@ async function openCatalogSheet(){
       const hay = [i.name, ...(i.aliases||[])].join('|').toLowerCase().replace(/\s/g,'');
       return hay.includes(nq);
     });
-    if(!rows.length){ listEl.innerHTML = '<div class="empty">검색 결과가 없습니다.</div>'; return; }
-    listEl.innerHTML = rows.map(i=>{
-      const owned = have.has(i.name.replace(/\s/g,''));
-      return `<label class="cat-row${owned?' have':''}">
-        <input type="checkbox" data-cid="${esc(i.id)}" ${owned?'disabled':''} ${picked.has(i.id)?'checked':''}>
-        ${exIconHTML(i,'md')}
-        <span class="nm">${esc(i.name)}${owned?' <span class="muted" style="font-size:11px;">(이미 있음)</span>':''}
-          <span class="al">${esc((i.aliases||[]).slice(0,3).join(', '))}</span></span>
-        <span class="tags">${esc(i.bodyPart)}${i.timed?' · 버티기':(i.repsOnly?' · 맨몸':'')}</span>
-      </label>`;
-    }).join('');
-    listEl.querySelectorAll('input[data-cid]').forEach(c=>{
-      c.addEventListener('change', ()=>{
-        c.checked ? picked.add(c.dataset.cid) : picked.delete(c.dataset.cid);
-        addBtn.textContent = `선택한 종목 담기 (${picked.size})`;
-      });
+    if(!rows.length){ listEl.innerHTML = '<div class="pk-empty">검색 결과가 없습니다.</div>'; return; }
+    listEl.innerHTML = '';
+    rows.forEach(src=>{
+      const mine = have[src.name.replace(/\s/g,'')];
+      const done = !!mine && onList(mine.id);
+      const row = document.createElement('div');
+      row.className = 'pk-row' + (done ? ' done' : '');
+      const tag = [src.bodyPart, src.timed?'버티기':(src.repsOnly?'맨몸':'')].filter(Boolean).join(' · ');
+      const al = (src.aliases||[]).slice(0,3).join(', ');
+      row.innerHTML = `
+        <div class="tapzone">
+          ${exIconHTML(src,'md')}
+          <span class="pk-nm">${esc(src.name)}${mine?' <span class="muted" style="font-size:10.5px;">보유</span>':''}
+            <span class="sub">${esc(tag)}${al?' · '+esc(al):''}</span></span>
+        </div>
+        <button class="pk-add ${done?'on':''}">${done?'✓':'＋'}</button>`;
+      const btn = row.querySelector('.pk-add');
+      const go = ()=>{ if(!done) pick(src, btn); };
+      row.querySelector('.tapzone').addEventListener('click', go);
+      btn.addEventListener('click', (e)=>{ e.stopPropagation(); go(); });
+      listEl.appendChild(row);
     });
-  };
+  }
   draw();
   inner.querySelector('#catSearch').addEventListener('input', (e)=>{ q = e.target.value; draw(); });
   inner.querySelectorAll('#catParts .chip-btn').forEach(b=>{
@@ -3472,38 +3530,14 @@ async function openCatalogSheet(){
       draw();
     });
   });
-  addBtn.addEventListener('click', async ()=>{
-    if(!picked.size){ showToast('담을 종목을 선택해주세요'); return; }
-    const have = haveNames();
-    let added = 0;
-    picked.forEach(cid=>{
-      const src = items.find(i => i.id === cid);
-      if(!src || have.has(src.name.replace(/\s/g,''))) return;
-      const item = { id: 'ex_' + uid(), name: src.name, bodyPart: src.bodyPart, type: src.type, catalogId: src.id };
-      if(src.repsOnly) item.repsOnly = true;
-      if(src.timed) item.timed = true;
-      if(src.guide) item.guide = src.guide;
-      if(src.icon) item.icon = src.icon;
-      if(src.aliases && src.aliases.length) item.aliases = src.aliases;
-      if(src.weightStep != null) item.weightStep = src.weightStep;
-      if(src.distanceUnit) item.distanceUnit = src.distanceUnit;
-      if(src.met != null) item.met = src.met;
-      state.library.push(item);
-      added++;
-    });
-    if(!added){ showToast('이미 모두 있는 종목이에요'); return; }
-    addBtn.disabled = true; addBtn.textContent = '담는 중...';
-    try{
-      const r = await gh.putFile('config/exercises.json', state.library, state.librarySha, `add ${added} exercises from catalog`);
-      state.librarySha = r.content.sha;
-      showToast(`${added}개 종목을 담았어요`);
-      renderLibraryManage(); renderTrendSelect();
-      closeSheet();
-    }catch(e){
-      showToast('저장 실패: ' + e.message);
-      addBtn.disabled = false; addBtn.textContent = `선택한 종목 담기 (${picked.size})`;
-    }
-  });
+  /* 종목 추가 화면에서 열었다면, 닫을 때 그리로 돌아간다 */
+  if(mode==='today' || mode==='routine'){
+    const closeBtn = inner.closest('.sheet').querySelector('[data-close]');
+    closeBtn.textContent = '← 목록으로';
+    closeBtn.replaceWith(closeBtn.cloneNode(true));
+    inner.closest('.sheet').querySelector('[data-close]')
+      .addEventListener('click', ()=>openPickerSheet(mode, weekday));
+  }
 }
 
 /* ============================================================
