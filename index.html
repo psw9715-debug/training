@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- 훈련일지 v1.16 · 빌드 2026-09-19 -->
+<!-- 훈련일지 v1.17 · 빌드 2026-09-19 -->
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -207,6 +207,15 @@ a{color:var(--blue);}
 .vo.phase-count{ --vo-accent:#7FD1A0; }
 .vo.phase-rest{ --vo-accent:#E0A44A; }
 .vo.phase-hold{ --vo-accent:#79B4E8; }
+.vo-pausetag{ display:none; font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--amber);
+  letter-spacing:.5px; margin-top:10px; }
+.vo-hint{ flex-shrink:0; text-align:center; font-family:'IBM Plex Mono',monospace; font-size:10.5px;
+  color:#49565F; padding:6px 0 2px; }
+/* 멈췄을 때 — 숫자를 흐리게 해서 한눈에 알아보게 */
+.vo.paused .vo-dial{ opacity:.3; }
+.vo.paused .vo-fig{ opacity:.3; }
+.vo.paused .vo-pausetag{ display:block; }
+.vo.paused .vo-hint{ visibility:hidden; }
 .vo.phase-hold .vo-big{ font-size:min(27vw,98px); }
 .vo.phase-done{ --vo-accent:#7FD1A0; }
 
@@ -597,10 +606,12 @@ nav.bottomnav button.active{color:var(--ink);background:var(--paper);}
     </div>
     <div class="vo-phase" id="voPhase">준비</div>
     <div class="vo-sub" id="voSub"></div>
+    <div class="vo-pausetag">❚❚ 멈춤 · 화면을 누르면 계속</div>
   </div>
   <div class="vo-bar">
     <button id="voPause">일시정지</button>
   </div>
+  <div class="vo-hint">화면 아무 곳이나 눌러도 멈춰요</div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -612,7 +623,7 @@ nav.bottomnav button.active{color:var(--ink);background:var(--paper);}
    화면 상단(훈련일지 옆)에 표시되어, 어느 버전이 실제로 올라가 있는지
    바로 눈으로 구분할 수 있게 해줍니다.
 ============================================================ */
-const APP_VERSION = 'v1.16';
+const APP_VERSION = 'v1.17';
 const APP_BUILD = '2026-09-19';
 
 /* ============================================================
@@ -3045,7 +3056,7 @@ function endVoiceSession(){
   releaseWakeLock();
   const ov = document.getElementById('voiceOverlay');
   ov.classList.add('hidden');
-  ov.className = 'vo hidden';
+  ov.className = 'vo hidden';   // paused 를 포함해 전부 초기화
   const b = document.getElementById('voPause');
   b.textContent = '일시정지'; b.classList.remove('paused');
 }
@@ -3055,6 +3066,7 @@ function toggleVoicePause(){
   const b = document.getElementById('voPause');
   b.textContent = vs.paused ? '계속하기' : '일시정지';
   b.classList.toggle('paused', vs.paused);
+  document.getElementById('voiceOverlay').classList.toggle('paused', vs.paused);
   try{ vs.paused ? speechSynthesis.pause() : speechSynthesis.resume(); }catch(e){}
 }
 
@@ -3108,6 +3120,13 @@ document.addEventListener('visibilitychange', ()=>{
 function bindVoiceHandlers(){
   document.getElementById('voClose').addEventListener('click', endVoiceSession);
   document.getElementById('voPause').addEventListener('click', toggleVoicePause);
+  /* 기구를 잡고 있으면 아래 버튼까지 손을 뻗기 어렵다. 화면 아무 데나
+     눌러도 멈추고 다시 눌러 이어 간다. 버튼은 제 동작대로 두고, 거기서
+     올라온 클릭만 걸러 낸다. */
+  document.getElementById('voiceOverlay').addEventListener('click', (e)=>{
+    if(e.target.closest('button')) return;
+    toggleVoicePause();
+  });
   const dials = [
     ['vdTerm','vdTermV','repTermSec'],
     ['vdPrep','vdPrepV','prepSec'],
