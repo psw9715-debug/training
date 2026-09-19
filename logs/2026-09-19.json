@@ -15,12 +15,95 @@
       "adHoc": true,
       "distance": 1000,
       "duration": 50
+    },
+    {
+      "instanceId": "pr5vl66",
+      "exerciseId": "ex_qdk9w3w",
+      "name": "카프 레이즈 홀드 (까치발 버티기)",
+      "type": "strength",
+      "adHoc": true,
+      "sets": [
+        {
+          "weight": 0,
+          "reps": 20,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 20,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 20,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 20,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 20,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 20,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 20,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 20,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 20,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 20,
+          "failed": false
+        }
+      ]
+    },
+    {
+      "instanceId": "l8ste8o",
+      "exerciseId": "ex_4woxit3",
+      "name": "스쿼트",
+      "type": "strength",
+      "adHoc": true,
+      "sets": [
+        {
+          "weight": 0,
+          "reps": 20,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 20,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 20,
+          "failed": false
+        }
+      ]
     }
   ],
   "calories": {
-    "strength": 0,
+    "strength": 216,
     "cardio": 465,
-    "total": 465
+    "total": 681
   },
-  "savedAt": "2026-09-19T12:43:43.717Z"
+  "savedAt": "2026-09-19T14:32:53.313Z"
 }
