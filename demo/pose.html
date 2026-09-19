@@ -1,0 +1,455 @@
+<!doctype html><html lang="ko"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1.0">
+<title>훈련일지 · 동작 그림 시험판</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Mono:wght@500;600;700&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#EFEAE1;--paper-line:#D9D1BF;--card:#FBF8F2;--ink:#1C2B39;--ink-soft:#5B6B74;--ink-faint:#6E7A83;--amber:#C98A2C;--green:#3F7D58;}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{margin:0;background:linear-gradient(var(--paper-line) 1px,transparent 1px);background-size:100% 32px;background-color:var(--paper);
+ color:var(--ink);font-family:'Noto Sans KR',sans-serif;padding-bottom:40px;}
+header.top{padding:calc(16px + env(safe-area-inset-top)) 16px 4px;max-width:480px;margin:0 auto;}
+.stamp-title{display:inline-flex;align-items:center;gap:8px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:19px;
+ border:2.5px solid var(--ink);padding:5px 12px;transform:rotate(-1deg);border-radius:3px;background:var(--card);}
+.stamp-title .dot{width:8px;height:8px;border-radius:50%;background:#C1432E;}
+.subtitle{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-soft);margin:9px 2px 0;}
+main{max-width:480px;margin:0 auto;padding:0 16px;}
+.card{background:var(--card);border:2px solid var(--ink);border-radius:8px;padding:16px;margin-top:14px;box-shadow:3px 3px 0 var(--paper-line);}
+.card h2{font-family:'Space Grotesk',sans-serif;font-size:15px;margin:0 0 4px;}
+.muted{color:var(--ink-soft);font-size:12.5px;line-height:1.6;}
+.small-note{font-size:11px;color:var(--ink-faint);margin-top:8px;line-height:1.6;}
+.hidden{display:none!important;}
+/* 동작 그림 */
+.posefig{display:block;color:var(--ink);--accent:var(--amber);width:100%;}
+.posefig .bone{stroke:currentColor;stroke-width:6;stroke-linecap:round;stroke-linejoin:round;fill:none;}
+.posefig .torso{stroke-width:9.5;}
+.posefig .head{fill:currentColor;}
+.posefig .far{opacity:.30;}
+.posefig .ground{stroke:currentColor;opacity:.22;stroke-width:1.6;stroke-dasharray:3 4;}
+.posefig .equip line{stroke:var(--accent);stroke-width:5;stroke-linecap:round;}
+.posefig .equip circle{fill:var(--accent);}
+/* 카탈로그 행 */
+.cat-row{display:flex;align-items:center;gap:10px;padding:8px 2px;border-bottom:1px dashed var(--paper-line);cursor:pointer;}
+.thumb{width:46px;height:46px;flex-shrink:0;border:1.5px solid var(--paper-line);border-radius:8px;background:#fff;padding:1px;}
+.cat-row .nm{flex:1;font-size:14px;font-weight:500;}
+.cat-row .al{display:block;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--ink-faint);margin-top:2px;}
+.cat-row .go{color:var(--ink-faint);font-size:12px;}
+/* 미리보기 시트 */
+.sheet-overlay{position:fixed;inset:0;background:rgba(28,43,57,.5);z-index:100;display:flex;align-items:flex-end;}
+.sheet{background:var(--paper);width:100%;max-height:86vh;overflow-y:auto;border-radius:16px 16px 0 0;
+ padding:16px 16px calc(20px + env(safe-area-inset-bottom));border-top:2px solid var(--ink);}
+.sheet h3{font-family:'Space Grotesk',sans-serif;font-size:16px;margin:0 0 10px;display:flex;justify-content:space-between;align-items:center;}
+.btn{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:13px;padding:12px 16px;border-radius:6px;
+ border:2px solid var(--ink);background:var(--ink);color:var(--paper);min-height:44px;}
+.btn.ghost{border-color:var(--paper-line);color:var(--ink-soft);background:transparent;}
+.btn.small{padding:8px 12px;font-size:12px;min-height:38px;}
+.btn-row{display:flex;gap:8px;margin-top:12px;} .btn-row .btn{flex:1;}
+.stage{background:#fff;border:1.5px solid var(--paper-line);border-radius:10px;padding:4px;}
+.form-guide{border:1px dashed var(--paper-line);border-left:3px solid var(--amber);border-radius:8px;padding:9px 10px;margin-top:10px;
+ font-size:12px;line-height:1.7;color:var(--ink-soft);background:var(--paper);}
+.form-guide b{color:var(--amber);font-family:'IBM Plex Mono',monospace;font-size:10.5px;display:block;margin-bottom:3px;letter-spacing:.5px;}
+/* 오늘 카드 */
+.ex-card{border:2px dashed var(--paper-line);border-radius:8px;margin-bottom:10px;background:#fff;}
+.ex-head{display:flex;align-items:center;gap:9px;padding:10px 12px;}
+.ex-head .mini{width:40px;height:40px;flex-shrink:0;}
+.ex-head .nm{flex:1;font-weight:700;font-size:14.5px;}
+.ex-voice{width:36px;height:36px;border:1.5px solid var(--paper-line);border-radius:8px;background:#fff;font-size:15px;padding:0;}
+.vol-line{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-faint);padding:0 12px 10px;}
+/* 음성 오버레이 */
+.vo{position:fixed;inset:0;z-index:200;background:#10161C;color:#EFEAE1;display:flex;flex-direction:column;
+ padding:calc(8px + env(safe-area-inset-top)) 16px calc(8px + env(safe-area-inset-bottom));}
+.vo-top{display:flex;align-items:center;height:44px;flex-shrink:0;}
+.vo-exname{flex:1;font-family:'Space Grotesk','Noto Sans KR',sans-serif;font-weight:700;font-size:16px;}
+.vo-close{width:44px;height:44px;background:none;border:none;color:#8A97A0;font-size:19px;}
+.vo-mid{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:0;}
+.vo-setline{font-family:'IBM Plex Mono',monospace;font-size:13px;color:#8A97A0;}
+.vo-target{font-family:'Space Grotesk','Noto Sans KR',sans-serif;font-weight:700;font-size:28px;margin-top:2px;}
+.vo .stagefig{width:min(72vw,270px);margin:4px 0 2px;}
+.vo .posefig{color:#EFEAE1;--accent:#E0A44A;}
+.vo-dial{position:relative;width:110px;aspect-ratio:1;}
+.vo-ring{width:100%;height:100%;transform:rotate(-90deg);display:block;}
+.vo-ring-bg{fill:none;stroke:#232F3A;stroke-width:7;}
+.vo-ring-fg{fill:none;stroke:var(--vo-accent,#8A97A0);stroke-width:7;stroke-linecap:round;}
+.vo-big{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+ font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:46px;color:var(--vo-accent,#8A97A0);}
+.vo-dial.big{width:min(74vw,262px);} .vo-dial.big .vo-big{font-size:min(31vw,112px);}
+.vo-phase{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--vo-accent,#8A97A0);letter-spacing:2px;margin-top:8px;}
+.vo-sub{font-family:'IBM Plex Mono',monospace;font-size:12px;color:#6E7A83;margin-top:6px;min-height:16px;}
+.vo-bar{flex-shrink:0;display:flex;gap:8px;padding-top:6px;}
+.vo-bar button{flex:1;height:58px;border-radius:10px;border:2px solid #2F3D49;background:#1A222B;color:#EFEAE1;
+ font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:15px;}
+.vo.p-prep{--vo-accent:#8A97A0;} .vo.p-hold{--vo-accent:#79B4E8;} .vo.p-rest{--vo-accent:#E0A44A;}
+.seg{display:flex;gap:5px;background:var(--paper);padding:4px;border-radius:8px;border:1.5px solid var(--paper-line);margin-bottom:10px;}
+.seg button{flex:1;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:11.5px;padding:8px 3px;border:none;border-radius:6px;background:transparent;color:var(--ink-soft);}
+.seg button.active{background:var(--ink);color:var(--paper);}
+</style></head><body>
+<header class="top">
+  <div class="stamp-title"><span class="dot"></span>훈련일지</div>
+  <div class="subtitle">동작 그림 시험판 · 실제 앱에는 아직 안 들어갔습니다</div>
+</header>
+<main>
+
+<div class="card">
+  <h2>① 카탈로그에서 고를 때</h2>
+  <p class="muted">이름 옆에 작은 그림이 붙고, 줄을 누르면 큰 동작이 움직입니다.</p>
+  <div id="catList" style="margin-top:10px;"></div>
+</div>
+
+<div class="card">
+  <h2>② 오늘의 종목 카드</h2>
+  <p class="muted">카드마다 40px 짜리 작은 동작이 돕니다.</p>
+  <div id="todayList" style="margin-top:10px;"></div>
+</div>
+
+<div class="card">
+  <h2>③ 음성 가이드 준비 화면 <span class="muted" style="font-size:11px;">← 여기가 핵심</span></h2>
+  <p class="muted">준비 30초 동안 멍하니 기다리는 대신, 그 시간에 동작을 보여줍니다.
+    카운트가 시작되면 그림은 사라지고 숫자만 커집니다.</p>
+  <div class="btn-row">
+    <button class="btn" onclick="playDemo('calf_raise_hold')">카프 레이즈 홀드 재생</button>
+  </div>
+  <div class="btn-row" style="margin-top:8px;">
+    <button class="btn ghost small" onclick="playDemo('bb_squat')">바벨 스쿼트</button>
+    <button class="btn ghost small" onclick="playDemo('bench_press')">벤치프레스</button>
+  </div>
+</div>
+
+<div class="card">
+  <h2>무게</h2>
+  <div class="muted" id="sizeInfo">재는 중...</div>
+</div>
+</main>
+
+<div id="sheetRoot"></div>
+<div class="vo hidden" id="vo">
+  <div class="vo-top"><span class="vo-exname" id="voName">-</span><button class="vo-close" onclick="stopDemo()">✕</button></div>
+  <div class="vo-mid">
+    <div class="vo-setline" id="voSet">-</div>
+    <div class="vo-target" id="voTarget">-</div>
+    <div class="stagefig" id="voFig"></div>
+    <div class="vo-dial" id="voDial">
+      <svg class="vo-ring" viewBox="0 0 200 200"><circle class="vo-ring-bg" cx="100" cy="100" r="92"/><circle class="vo-ring-fg" id="voRing" cx="100" cy="100" r="92"/></svg>
+      <div class="vo-big" id="voBig">-</div>
+    </div>
+    <div class="vo-phase" id="voPhase">준비</div>
+    <div class="vo-sub" id="voSub"></div>
+  </div>
+  <div class="vo-bar"><button onclick="stopDemo()">그만 보기</button></div>
+</div>
+
+<script>
+/* ============================================================
+   포즈 리그 — 동작 그림을 "그림 파일"이 아니라 "각도 숫자"로 만든다.
+   뼈대(리그)는 몇 개만 만들어 두고, 종목마다 시작 자세 A 와 끝 자세 B 의
+   관절 각도만 적으면 그 사이를 오가는 그림이 나온다.
+
+   각도 규칙 (옆에서 본 모습, 얼굴은 오른쪽)
+     다리·몸통 : 0 = 수직,        + = 위쪽 끝이 앞(오른쪽)으로 기욺
+     팔        : 0 = 아래로 늘어뜨림, 90 = 앞으로 수평, 180 = 머리 위
+     팔꿈치    : 0 = 폄,           + = 굽힘
+     발        : 0 = 바닥과 평행,   + = 뒤꿈치 들림
+
+   반대쪽 팔다리는 같은 몸을 살짝 옆으로 밀어 흐리게 한 벌 더 그려서
+   표현한다. 관절을 두 벌 계산하지 않아도 입체로 보인다.
+============================================================ */
+const NS = 'http://www.w3.org/2000/svg';
+const SEG = { shin:16, thigh:16, spine:21, uarm:12, farm:12, foot:8.5, heel:4.5, head:5.8, neck:3.2 };
+const GROUND = 90;
+
+function el(tag, a, kids){
+  const n = document.createElementNS(NS, tag);
+  for(const k in (a||{})) n.setAttribute(k, a[k]);
+  (kids||[]).forEach(c=>c && n.appendChild(c));
+  return n;
+}
+const bone  = (len, cls)=> el('line', {x1:0,y1:0,x2:0,y2:-len, class:cls||'bone'});
+function joint(J, name, x, y, kids){
+  const rot = el('g', {}, kids);
+  (J[name] = J[name] || []).push(rot);
+  return el('g', {transform:`translate(${x},${y})`}, [rot]);
+}
+const head = ()=> el('g', {}, [
+  el('line',{x1:0,y1:0,x2:0,y2:-SEG.neck, class:'bone'}),
+  el('circle',{cx:0.6, cy:-SEG.neck-SEG.head+0.4, r:SEG.head, class:'head'}),
+]);
+function arm(J){
+  const hand = el('g', {transform:`translate(0,-${SEG.farm})`});
+  (J.hand = J.hand || []).push(hand);
+  const fore  = joint(J,'farm', 0, -SEG.uarm, [ bone(SEG.farm), hand, el('circle',{cx:0,cy:-SEG.farm,r:2.6,class:'head'}) ]);
+  return joint(J,'uarm', 0, 0, [ bone(SEG.uarm), fore ]);
+}
+
+/* ---- 서 있는 몸: 발목을 바닥에 붙이고 위로 쌓는다 ---- */
+function buildStanding(J){
+  const shoulder = el('g', {transform:`translate(0,-${SEG.spine})`}, [ head(), arm(J) ]);
+  (J.shoulder = J.shoulder || []).push(shoulder);
+  const spine = joint(J,'spine', 0, 0, [ bone(SEG.spine,'bone torso'), shoulder ]);
+  const thigh = joint(J,'thigh', 0, 0, [ bone(SEG.thigh), el('g',{transform:`translate(0,-${SEG.thigh})`},[spine]) ]);
+  const shin  = joint(J,'shin',  0, 0, [ bone(SEG.shin),  el('g',{transform:`translate(0,-${SEG.shin})`},[thigh]) ]);
+  const foot  = joint(J,'foot',  0, 0, [ el('line',{x1:-SEG.heel,y1:0,x2:SEG.foot,y2:0, class:'bone'}) ]);
+  const body  = el('g', {}, [ shin, foot ]);
+  (J.body = J.body || []).push(body);
+  return el('g', {transform:`translate(48,${GROUND})`}, [body]);
+}
+
+/* ---- 누운 몸 (벤치프레스) ---- */
+function buildLying(J){
+  const by = 58, hipX = 30, shX = 60;
+  const body = el('g', {}, [
+    el('line',{x1:hipX,y1:by,x2:shX,y2:by, class:'bone torso'}),
+    el('circle',{cx:shX+SEG.head+1.5, cy:by-0.5, r:SEG.head, class:'head'}),
+    el('line',{x1:hipX,y1:by,x2:hipX-11,y2:by+11, class:'bone'}),
+    el('line',{x1:hipX-11,y1:by+11,x2:hipX-11,y2:by+26, class:'bone'}),
+    el('line',{x1:hipX-15,y1:by+26,x2:hipX-7,y2:by+26, class:'bone'}),
+    el('g',{transform:`translate(${shX},${by})`},[arm(J)]),
+  ]);
+  (J.body = J.body || []).push(body);
+  return body;
+}
+
+/* ---- 앉은 몸 (렛풀다운) ---- */
+function buildSeated(J){
+  const px = 40, py = 62;
+  const shoulder = el('g',{transform:`translate(0,-${SEG.spine})`},[ head(), arm(J) ]);
+  (J.shoulder = J.shoulder || []).push(shoulder);
+  const spine = joint(J,'spine', 0, 0, [ bone(SEG.spine,'bone torso'), shoulder ]);
+  const body = el('g',{},[
+    el('line',{x1:px,y1:py,x2:px+SEG.thigh,y2:py, class:'bone'}),
+    el('line',{x1:px+SEG.thigh,y1:py,x2:px+SEG.thigh+1,y2:py+SEG.shin, class:'bone'}),
+    el('line',{x1:px+SEG.thigh-2,y1:py+SEG.shin,x2:px+SEG.thigh+7,y2:py+SEG.shin, class:'bone'}),
+    el('g',{transform:`translate(${px},${py})`},[spine]),
+  ]);
+  (J.body = J.body || []).push(body);
+  return body;
+}
+
+/* ---- 엎드린 몸 (플랭크) ---- */
+function buildProne(J){
+  const line = joint(J,'spine', 18, 84, [
+    el('line',{x1:0,y1:0,x2:47,y2:-22, class:'bone torso'}),
+    el('circle',{cx:53,cy:-26,r:SEG.head, class:'head'}),
+  ]);
+  const body = el('g',{},[
+    line,
+    el('line',{x1:57,y1:58,x2:54,y2:84, class:'bone'}),
+    el('line',{x1:47,y1:84,x2:62,y2:84, class:'bone'}),
+    el('line',{x1:18,y1:84,x2:10,y2:84, class:'bone'}),
+  ]);
+  (J.body = J.body || []).push(body);
+  return body;
+}
+
+const RIGS = { standing:buildStanding, lying:buildLying, seated:buildSeated, prone:buildProne };
+const HAS_GROUND = { standing:1, prone:1 };
+
+function relAngles(rig, p){
+  const a = {}, s = p.spine||0, t = p.thigh||0, sh = p.shin||0;
+  if(rig==='standing'){
+    a.shin=sh; a.thigh=t-sh; a.spine=s-t;
+    a.uarm=(180-(p.uarm??0))-s; a.farm=-(p.elbow||0); a.foot=p.foot||0;
+  } else if(rig==='lying'){
+    a.uarm=(p.uarm??0); a.farm=-(p.elbow||0);
+  } else if(rig==='seated'){
+    a.spine=s; a.uarm=(180-(p.uarm??0))-s; a.farm=-(p.elbow||0);
+  } else { a.spine=s; }
+  return a;
+}
+
+/* ---- 기구 ----
+   손·어깨에 매다는 것은 관절 안에, 벽·랙처럼 가만히 있는 것은
+   그림 전체 좌표에 놓는다.                                     */
+function addEquip(kind, J, svg, rootNode){
+  const world = (kids)=> svg.insertBefore(el('g',{class:'equip'},kids), rootNode);
+  const onAll = (list, make)=> (list||[]).forEach(n=> n.appendChild(el('g',{class:'equip'}, make())));
+  if(kind==='bar_shoulder')
+    onAll(J.shoulder, ()=>[ el('line',{x1:-12,y1:1.5,x2:12,y2:1.5}), el('circle',{cx:-12,cy:1.5,r:4.6}), el('circle',{cx:12,cy:1.5,r:4.6}) ]);
+  else if(kind==='bar_hand')
+    onAll(J.hand, ()=>[ el('line',{x1:-11,y1:0,x2:11,y2:0}), el('circle',{cx:-11,cy:0,r:4.6}), el('circle',{cx:11,cy:0,r:4.6}) ]);
+  else if(kind==='dumbbell')
+    onAll(J.hand, ()=>[ el('line',{x1:-5.5,y1:0,x2:5.5,y2:0}), el('circle',{cx:-5.5,cy:0,r:3.4}), el('circle',{cx:5.5,cy:0,r:3.4}) ]);
+  else if(kind==='pulldown_bar')
+    onAll(J.hand, ()=>[ el('line',{x1:-10,y1:0,x2:10,y2:0}) ]);
+  else if(kind==='support')
+    world([ el('line',{x1:78,y1:30,x2:78,y2:GROUND}), el('line',{x1:70,y1:30,x2:86,y2:30}) ]);
+  else if(kind==='bench')
+    world([ el('line',{x1:16,y1:65,x2:78,y2:65}), el('line',{x1:26,y1:65,x2:26,y2:84}), el('line',{x1:68,y1:65,x2:68,y2:84}) ]);
+  else if(kind==='wall')
+    world([ el('line',{x1:22,y1:20,x2:22,y2:GROUND}) ]);
+  else if(kind==='rack')
+    world([ el('line',{x1:26,y1:10,x2:78,y2:10}), el('line',{x1:26,y1:10,x2:26,y2:22}), el('line',{x1:78,y1:10,x2:78,y2:22}) ]);
+}
+
+/* ---- 그리기 + 움직이기 ---- */
+function renderPose(def, opts){
+  opts = opts || {};
+  const J = {}, build = RIGS[def.rig] || RIGS.standing;
+  const svg = el('svg', {viewBox:'0 0 100 100', class:'posefig', 'aria-hidden':'true'});
+  if(HAS_GROUND[def.rig]) svg.appendChild(el('line',{x1:5,y1:GROUND+0.6,x2:95,y2:GROUND+0.6, class:'ground'}));
+  if(def.equipBack) addEquip(def.equipBack, J, svg, null);
+  // 반대쪽 팔다리 = 같은 몸을 살짝 밀어 흐리게 한 벌 더
+  const far  = el('g', {class:'far',  transform:'translate(-3.4,0)'}, [ build(J) ]);
+  const near = el('g', {class:'near'}, [ build(J) ]);
+  svg.appendChild(far); svg.appendChild(near);
+  if(def.equip) addEquip(def.equip, J, svg, far);
+
+  const A = relAngles(def.rig, def.a), B = relAngles(def.rig, def.b);
+  const anims = [];
+  const dur = (def.loop || 2.6) * 1000;
+  const timing = def.hold
+    ? { duration:dur, iterations:Infinity, easing:'ease-in-out' }
+    : { duration:dur, iterations:Infinity, direction:'alternate', easing:'ease-in-out' };
+  const frames = (from, to)=> def.hold
+    ? [{offset:0,transform:from},{offset:.28,transform:to},{offset:.80,transform:to},{offset:1,transform:from}]
+    : [{transform:from},{transform:to}];
+
+  Object.keys(J).forEach(k=>{
+    if(k==='hand'||k==='shoulder'||k==='body') return;
+    if(A[k]===undefined && B[k]===undefined) return;
+    J[k].forEach(n=>{
+      if(opts.still){ n.setAttribute('transform', `rotate(${B[k]||0})`); return; }
+      anims.push(n.animate(frames(`rotate(${A[k]||0}deg)`, `rotate(${B[k]||0}deg)`), timing));
+    });
+  });
+  const ra = def.a.rise||0, rb = def.b.rise||0;
+  if(ra !== rb) J.body.forEach(n=>{
+    if(opts.still){ n.setAttribute('transform', `translate(0,${-rb})`); return; }
+    anims.push(n.animate(frames(`translate(0px,${-ra}px)`, `translate(0px,${-rb}px)`), timing));
+  });
+
+  svg.__anims = anims;
+  svg.__hold = !!def.hold;
+  svg.pauseFig = ()=>anims.forEach(a=>a.pause());
+  svg.playFig  = ()=>anims.forEach(a=>a.play());
+  return svg;
+}
+
+/* 종목별 자세 — 그림 한 장당 이 세 줄이 전부다 */
+const POSES = {
+  calf_raise_hold:{ name:'카프 레이즈 홀드', rig:'standing', equip:'support', hold:true, loop:4.2,
+    a:{ uarm:74, elbow:22, foot:0,  rise:0   },
+    b:{ uarm:74, elbow:22, foot:42, rise:6.4 } },
+  bb_squat:{ name:'바벨 스쿼트', rig:'standing', equip:'bar_shoulder', loop:2.8,
+    a:{ shin:2,  thigh:0,   spine:8,  uarm:158, elbow:140 },
+    b:{ shin:22, thigh:-70, spine:22, uarm:158, elbow:140 } },
+  shoulder_press:{ name:'숄더프레스', rig:'standing', equip:'dumbbell', loop:2.6,
+    a:{ uarm:92,  elbow:104 },
+    b:{ uarm:170, elbow:8   } },
+  wall_sit:{ name:'월 싯', rig:'standing', equipBack:'wall', hold:true, loop:4.2,
+    a:{ shin:0,  thigh:0,   spine:0, uarm:6,  elbow:4 },
+    b:{ shin:10, thigh:-86, spine:2, uarm:78, elbow:8 } },
+  bench_press:{ name:'벤치프레스', rig:'lying', equip:'bar_hand', equipBack:'bench', loop:2.6,
+    a:{ uarm:-38, elbow:104 },
+    b:{ uarm:0,   elbow:0   } },
+  lat_pulldown:{ name:'렛풀다운', rig:'seated', equip:'pulldown_bar', equipBack:'rack', loop:2.6,
+    a:{ spine:-5,  uarm:166, elbow:6  },
+    b:{ spine:-14, uarm:124, elbow:92 } },
+  plank:{ name:'플랭크', rig:'prone', hold:true, loop:4.2,
+    a:{ spine:0 }, b:{ spine:2 } },
+  pushup:{ name:'푸시업', rig:'prone', loop:2.4,
+    a:{ spine:0 }, b:{ spine:-7 } },
+};
+
+const GUIDE = {"calf_raise_hold": "평지에 어깨너비로 서서 벽이나 의자를 가볍게 잡아 균형을 잡습니다. 뒤꿈치를 최대한 높이 들어 발볼로 체중을 받치고, 종아리·허벅지·엉덩이에 힘을 준 채 버팁니다.", "bb_squat": "발을 어깨너비로 벌리고 바를 승모근에 얹습니다. 가슴을 펴고 엉덩이를 뒤로 빼면서 허벅지가 바닥과 수평이 될 때까지 앉습니다.", "shoulder_press": "덤벨을 귀 옆 높이에 두고 시작해 팔꿈치가 펴질 때까지 위로 밀어 올립니다. 허리가 젖혀지지 않게 배에 힘을 줍니다.", "wall_sit": "벽에 등을 붙이고 무릎이 90도가 되도록 앉은 자세로 버팁니다. 무릎이 발끝보다 앞으로 나가지 않게 합니다.", "bench_press": "견갑을 모아 벤치에 고정하고 바를 가슴 중앙까지 내렸다가 밀어 올립니다.", "lat_pulldown": "바를 어깨너비보다 넓게 잡고 가슴을 펴면서 쇄골 쪽으로 당깁니다.", "plank": "팔꿈치를 어깨 바로 아래에 두고 머리부터 발뒤꿈치까지 일직선을 만들어 버팁니다.", "pushup": "손을 어깨너비보다 조금 넓게 짚고 몸을 일직선으로 유지한 채 내렸다 올립니다."};
+const ALIAS = { calf_raise_hold:'까치발 버티기, heel raise hold', bb_squat:'스쿼트, 백스쿼트', shoulder_press:'어깨프레스',
+  wall_sit:'벽 스쿼트, 공기의자', bench_press:'벤치, bench press', lat_pulldown:'랫풀다운, 풀다운', plank:'plank', pushup:'팔굽혀펴기' };
+
+/* ① 카탈로그 */
+const cat = document.getElementById('catList');
+Object.entries(POSES).forEach(([k,def])=>{
+  const row=document.createElement('div'); row.className='cat-row';
+  const th=document.createElement('div'); th.className='thumb';
+  th.appendChild(renderPose(def,{still:true}));
+  row.appendChild(th);
+  const nm=document.createElement('span'); nm.className='nm';
+  nm.innerHTML = def.name + '<span class="al">'+(ALIAS[k]||'')+'</span>';
+  row.appendChild(nm);
+  const go=document.createElement('span'); go.className='go'; go.textContent='▸'; row.appendChild(go);
+  row.addEventListener('click',()=>openPreview(k,def));
+  cat.appendChild(row);
+});
+function openPreview(k,def){
+  const root=document.getElementById('sheetRoot');
+  const ov=document.createElement('div'); ov.className='sheet-overlay';
+  ov.addEventListener('click',e=>{ if(e.target===ov) root.innerHTML=''; });
+  const sh=document.createElement('div'); sh.className='sheet';
+  sh.innerHTML='<h3><span>'+def.name+'</span><button class="btn ghost small" id="cls">닫기</button></h3>'
+    +'<div class="stage" id="stg"></div>'
+    +'<div class="form-guide"><b>자세</b>'+(GUIDE[k]||'')+'</div>'
+    +'<div class="btn-row"><button class="btn">이 종목 담기</button></div>';
+  ov.appendChild(sh); root.innerHTML=''; root.appendChild(ov);
+  sh.querySelector('#cls').addEventListener('click',()=>root.innerHTML='');
+  sh.querySelector('#stg').appendChild(renderPose(def));
+}
+
+/* ② 오늘 카드 */
+const today=document.getElementById('todayList');
+[['calf_raise_hold','10세트 200초 · 약 9분'],['bb_squat','5세트 50회 · 약 6분']].forEach(([k,stat])=>{
+  const def=POSES[k];
+  const c=document.createElement('div'); c.className='ex-card';
+  const h=document.createElement('div'); h.className='ex-head';
+  const m=document.createElement('div'); m.className='mini'; m.appendChild(renderPose(def));
+  h.appendChild(m);
+  const n=document.createElement('span'); n.className='nm'; n.textContent=def.name; h.appendChild(n);
+  const v=document.createElement('button'); v.className='ex-voice'; v.textContent='🔊';
+  v.addEventListener('click',()=>playDemo(k)); h.appendChild(v);
+  c.appendChild(h);
+  const s=document.createElement('div'); s.className='vol-line'; s.textContent=stat; c.appendChild(s);
+  today.appendChild(c);
+});
+
+/* ③ 음성 오버레이 흉내 */
+let demoTimer=null;
+const TARGET={ calf_raise_hold:'20초 버티기', bb_squat:'60kg × 10회', bench_press:'60kg × 8회' };
+function playDemo(k){
+  const def=POSES[k]; const vo=document.getElementById('vo');
+  vo.classList.remove('hidden'); vo.className='vo p-prep';
+  document.getElementById('voName').textContent=def.name;
+  document.getElementById('voSet').textContent='1 / 10 세트';
+  document.getElementById('voTarget').textContent=TARGET[k]||'';
+  const fig=document.getElementById('voFig'); fig.innerHTML=''; fig.appendChild(renderPose(def));
+  fig.classList.remove('hidden');
+  document.getElementById('voDial').classList.remove('big');
+  document.getElementById('voPhase').textContent='준비';
+  document.getElementById('voSub').textContent='동작을 보면서 자세를 잡으세요';
+  let t=8; const C=2*Math.PI*92;
+  const tick=()=>{
+    document.getElementById('voBig').textContent=t;
+    const p=1-t/8;
+    const r=document.getElementById('voRing');
+    r.style.strokeDasharray=C.toFixed(1); r.style.strokeDashoffset=(C*(1-p)).toFixed(1);
+    if(t<=0){ clearInterval(demoTimer); toCount(k,def); return; }
+    t--;
+  };
+  tick(); demoTimer=setInterval(tick,1000);
+}
+function toCount(k,def){
+  const vo=document.getElementById('vo');
+  const timed = !!def.hold;
+  vo.className='vo '+(timed?'p-hold':'p-rest');
+  document.getElementById('voFig').classList.add('hidden');
+  document.getElementById('voDial').classList.add('big');
+  document.getElementById('voPhase').textContent=timed?'버티는 중':'카운트';
+  document.getElementById('voSub').textContent=timed?'남은 세트 9':'1 / 10';
+  let t=timed?20:1; const C=2*Math.PI*92;
+  const tick=()=>{
+    document.getElementById('voBig').textContent=t;
+    const p=timed?1-t/20:0.4;
+    const r=document.getElementById('voRing');
+    r.style.strokeDasharray=C.toFixed(1); r.style.strokeDashoffset=(C*(1-p)).toFixed(1);
+    if(t<=0){ clearInterval(demoTimer); return; }
+    t--;
+  };
+  tick(); demoTimer=setInterval(tick,1000);
+}
+function stopDemo(){ clearInterval(demoTimer); document.getElementById('vo').classList.add('hidden'); }
+
+/* 무게 재기 */
+(function(){
+  const one = new XMLSerializer().serializeToString(renderPose(POSES.calf_raise_hold));
+  const poseJson = JSON.stringify(POSES.calf_raise_hold).length;
+  document.getElementById('sizeInfo').innerHTML =
+    '종목 한 개의 자세 데이터 <b>'+poseJson+'바이트</b> (JSON 세 줄)<br>'
+   +'그려진 SVG 한 장 <b>'+Math.round(one.length/1024*10)/10+'KB</b> · 화면에서 만들어지므로 내려받을 파일은 없습니다<br>'
+   +'리그 코드 전체 <b>약 9KB</b> — 종목이 99개든 999개든 이 코드 하나면 됩니다';
+})();
+</script></body></html>
