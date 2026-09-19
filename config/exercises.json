@@ -114,5 +114,24 @@
     "bodyPart": "하체",
     "type": "strength",
     "repsOnly": true
+  },
+  {
+    "id": "ex_qdk9w3w",
+    "name": "카프 레이즈 홀드 (까치발 버티기)",
+    "bodyPart": "하체",
+    "type": "strength",
+    "catalogId": "cat_calf_raise_hold",
+    "timed": true,
+    "guide": "평지에 어깨너비로 서서 벽이나 의자를 가볍게 잡아 균형을 잡습니다. 뒤꿈치를 최대한 높이 들어 발볼로 체중을 받치고, 종아리·허벅지·엉덩이에 힘을 준 채 버팁니다. 무릎은 펴고 몸은 앞으로 기울지 않게 수직으로 세우며, 호흡은 멈추지 말고 계속 쉽니다. 15~20초 × 5~10세트로 시작해 익숙해지면 시간을 늘립니다.",
+    "icon": "bw_calf",
+    "aliases": [
+      "까치발 버티기",
+      "까치발 들기",
+      "뒤꿈치 들기",
+      "발끝 서기",
+      "힐 레이즈 홀드",
+      "calf raise hold",
+      "heel raise isometric"
+    ]
   }
 ]
