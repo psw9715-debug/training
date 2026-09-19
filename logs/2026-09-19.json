@@ -1,0 +1,26 @@
+{
+  "date": "2026-09-19",
+  "weekday": "sat",
+  "bodyWeight": 79.7,
+  "muscleMass": 33.4,
+  "fatMass": 26,
+  "rpe": null,
+  "memo": "",
+  "entries": [
+    {
+      "instanceId": "4advybo",
+      "exerciseId": "swimming",
+      "name": "수영",
+      "type": "cardio",
+      "adHoc": true,
+      "distance": 1000,
+      "duration": 50
+    }
+  ],
+  "calories": {
+    "strength": 0,
+    "cardio": 465,
+    "total": 465
+  },
+  "savedAt": "2026-09-19T12:43:43.717Z"
+}
