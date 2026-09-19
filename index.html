@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- 훈련일지 v1.13 · 빌드 2026-09-18 -->
+<!-- 훈련일지 v1.14 · 빌드 2026-09-19 -->
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -209,6 +209,26 @@ a{color:var(--blue);}
 .vo.phase-hold{ --vo-accent:#79B4E8; }
 .vo.phase-hold .vo-big{ font-size:min(27vw,98px); }
 .vo.phase-done{ --vo-accent:#7FD1A0; }
+
+/* 기구 아이콘 */
+.exi{ display:block; width:100%; height:100%; color:var(--ink); --acc:var(--amber); }
+.exi .fr{ stroke:currentColor; stroke-width:5.5; stroke-linecap:round; stroke-linejoin:round; fill:none; }
+.exi .body{ stroke:currentColor; stroke-width:10; stroke-linecap:round; stroke-linejoin:round; fill:none; }
+.exi .body circle{ fill:currentColor; stroke:none; }
+.exi .pad{ fill:currentColor; }
+.exi .mv{ stroke:var(--acc); stroke-width:6; stroke-linecap:round; stroke-linejoin:round; fill:none; }
+.exi .mv circle, .exi .mv rect{ fill:var(--acc); stroke:none; }
+.exi .stack rect{ fill:var(--acc); }
+.exi .stack .sl{ stroke:var(--card); stroke-width:1.6; fill:none; }
+.exi-box{ flex-shrink:0; border:1.5px solid var(--paper-line); border-radius:8px; background:#fff; padding:1px; }
+.exi-sm{ width:34px; height:34px; }
+.exi-md{ width:46px; height:46px; }
+.exi-lg{ width:120px; height:120px; margin:0 auto 10px; display:block; }
+.vo .exi{ color:#EFEAE1; --acc:#E0A44A; }
+.vo .exi .stack .sl{ stroke:#10161C; }
+.vo-fig{ width:min(52vw,190px); margin:2px 0; }
+.vo.with-fig .vo-dial{ width:104px; }
+.vo.with-fig .vo-big{ font-size:42px; }
 
 /* 자세 안내 */
 .form-guide{ border:1px dashed var(--paper-line); border-left:3px solid var(--amber);
@@ -539,6 +559,7 @@ nav.bottomnav button.active{color:var(--ink);background:var(--paper);}
   <div class="vo-mid">
     <div class="vo-setline" id="voSetLine">-</div>
     <div class="vo-target" id="voTarget">-</div>
+    <div class="vo-fig hidden" id="voFig"></div>
     <div class="vo-dial">
       <svg class="vo-ring" viewBox="0 0 200 200" aria-hidden="true">
         <circle class="vo-ring-bg" cx="100" cy="100" r="92"></circle>
@@ -563,8 +584,8 @@ nav.bottomnav button.active{color:var(--ink);background:var(--paper);}
    화면 상단(훈련일지 옆)에 표시되어, 어느 버전이 실제로 올라가 있는지
    바로 눈으로 구분할 수 있게 해줍니다.
 ============================================================ */
-const APP_VERSION = 'v1.13';
-const APP_BUILD = '2026-09-18';
+const APP_VERSION = 'v1.14';
+const APP_BUILD = '2026-09-19';
 
 /* ============================================================
    상수
@@ -1082,6 +1103,7 @@ function renderEntryCard(en){
   const canVoice = en.type!=='cardio' && voiceSetsOf(en).length>0;
   header.innerHTML = `
     <button class="ex-check ${en.completed?'checked':''}" aria-label="완료 체크">✓</button>
+    ${exIconHTML(findLibItem(en.exerciseId) || {name:en.name}, 'sm')}
     <span class="ex-name">${esc(en.name)}${en.adHoc?' <span style="font-size:10px;color:var(--ink-faint);">(오늘만)</span>':''}</span>
     ${canVoice? '<button class="ex-voice" aria-label="음성 가이드 시작" title="음성 가이드">🔊</button>' : ''}
     <span class="ex-chevron">${en.expanded?'▾ 편집중':'▸'}</span>
@@ -1843,7 +1865,7 @@ function renderLibraryManage(){
       : (it.timed
           ? `버티기 · 휴식 ${cfg.restSec}초${own?' *':''}`
           : `${it.repsOnly?'맨몸':(it.weightStep??DEFAULT_WEIGHT_STEP)+'kg'} · ${cfg.repTermSec}/${cfg.restSec}초${own?' *':''}`);
-    row.innerHTML = `<span class="nm">${esc(it.name)} <span class="muted">(${esc(it.bodyPart)})</span></span>
+    row.innerHTML = `${exIconHTML(it,'sm')}<span class="nm">${esc(it.name)} <span class="muted">(${esc(it.bodyPart)})</span></span>
       <span class="tags">${esc(tags)}</span>
       <button class="iconbtn" aria-label="삭제">✕</button>`;
     row.addEventListener('click', (e)=>{
@@ -2378,6 +2400,213 @@ function openHistoryDetail(log){
 
 
 /* ============================================================
+   기구 아이콘 — 종목이 아니라 "기구" 단위로 공용한다.
+   렛풀다운/와이드그립/클로즈그립은 기계가 같으니 그림도 같다.
+   세부 차이는 종목마다 붙는 자세 안내 글이 담당한다.
+
+   그리기 규칙
+     fr    프레임 (먹색 선)        pad   시트·등판 (먹색 면)
+     mv    잡거나 움직이는 것 (주황)  stack 중량추 (주황 블록 + 눈금)
+     body  맨몸 운동의 몸 (굵은 먹색)
+============================================================ */
+const EX_ICONS = {};
+const G = '<path d="M14 86 H86"/>';                                   // 바닥
+const STACK = (x,y,h,n)=>`<g class="stack"><rect x="${x}" y="${y}" width="16" height="${h}" rx="2.5"/>`
+  + `<path class="sl" d="${Array.from({length:n},(_,i)=>`M${x+1} ${y+6+i*6}H${x+15}`).join('')}"/></g>`;
+const PLATE = (cx,cy,r)=>`<circle cx="${cx}" cy="${cy}" r="${r}"/>`;
+
+/* ---------- 프리웨이트 ---------- */
+EX_ICONS.barbell = `<g class="mv"><path d="M18 50 H82"/>${PLATE(26,50,13)}${PLATE(74,50,13)}</g>`;
+EX_ICONS.dumbbell = `<g class="mv"><path d="M30 50 H70"/>${PLATE(26,50,13)}${PLATE(74,50,13)}</g>
+  <g class="fr"><path d="M14 50 H18"/><path d="M82 50 H86"/></g>`;
+EX_ICONS.kettlebell = `<g class="mv"><path d="M40 34 a10 10 0 0 1 20 0 v6"/>
+  <path d="M34 46 h32 a8 8 0 0 1 8 8 v14 a16 16 0 0 1 -16 16 h-16 a16 16 0 0 1 -16 -16 v-14 a8 8 0 0 1 8 -8 z"/></g>`;
+EX_ICONS.med_ball = `<g class="mv">${PLATE(50,54,24)}</g><g class="fr"><path d="M50 30 V78"/><path d="M26 54 H74"/></g>`;
+EX_ICONS.rope = `<g class="fr"><path d="M16 22 H30"/></g>
+  <g class="mv"><path d="M30 22 q14 12 0 24 q-14 12 0 24 q14 12 0 18"/><path d="M52 22 q14 12 0 24 q-14 12 0 24 q14 12 0 18"/></g>`;
+
+/* ---------- 벤치·랙 ---------- */
+EX_ICONS.bench_flat = `<g class="fr">${G}<path d="M30 86 V62"/><path d="M70 86 V62"/><path d="M24 30 V62"/><path d="M76 30 V62"/></g>
+  <rect class="pad" x="26" y="56" width="48" height="8" rx="4"/>
+  <g class="mv"><path d="M18 34 H82"/>${PLATE(24,34,6)}${PLATE(76,34,6)}</g>`;
+EX_ICONS.bench_incline = `<g class="fr">${G}<path d="M32 86 V70"/><path d="M68 86 V64"/></g>
+  <rect class="pad" x="28" y="44" width="10" height="34" rx="5" transform="rotate(34 33 61)"/>
+  <rect class="pad" x="40" y="62" width="30" height="8" rx="4"/>
+  <g class="mv"><path d="M20 30 H80"/>${PLATE(26,30,6)}${PLATE(74,30,6)}</g>`;
+EX_ICONS.bench_decline = `<g class="fr">${G}<path d="M32 86 V58"/><path d="M68 86 V72"/></g>
+  <rect class="pad" x="26" y="52" width="48" height="8" rx="4" transform="rotate(14 50 56)"/>
+  <g class="mv"><path d="M20 30 H80"/>${PLATE(26,30,6)}${PLATE(74,30,6)}</g>`;
+EX_ICONS.rack = `<g class="fr">${G}<path d="M24 86 V16"/><path d="M76 86 V16"/><path d="M24 16 H76"/></g>
+  <g class="mv"><path d="M16 46 H84"/>${PLATE(24,46,8)}${PLATE(76,46,8)}</g>`;
+EX_ICONS.smith = `<g class="fr">${G}<path d="M28 86 V16"/><path d="M72 86 V16"/></g>
+  <g class="mv"><path d="M18 48 H82"/>${PLATE(28,48,9)}${PLATE(72,48,9)}</g>`;
+
+/* ---------- 가슴 ---------- */
+EX_ICONS.chest_press = `<g class="fr">${G}<path d="M26 86 V34"/><path d="M26 56 H44"/><path d="M44 56 V70"/><path d="M44 70 H68"/></g>
+  <rect class="pad" x="40" y="40" width="9" height="30" rx="4.5" transform="rotate(8 44 55)"/>
+  <rect class="pad" x="46" y="64" width="26" height="8" rx="4"/>
+  <g class="mv"><path d="M30 40 H62"/>${PLATE(64,40,5)}<path d="M64 33 V47"/></g>
+  ${STACK(18,52,30,4)}`;
+EX_ICONS.pec_deck = `<g class="fr">${G}<path d="M50 86 V30"/><path d="M40 70 H62"/></g>
+  <rect class="pad" x="44" y="44" width="9" height="28" rx="4.5"/>
+  <g class="mv"><path d="M50 34 L28 48"/><path d="M50 34 L72 48"/>${PLATE(26,50,5)}${PLATE(74,50,5)}</g>`;
+EX_ICONS.cable_cross = `<g class="fr">${G}<path d="M22 86 V18"/><path d="M78 86 V18"/><path d="M22 18 H78"/></g>
+  <g class="mv"><path d="M22 26 V50"/><path d="M78 26 V50"/><path d="M16 54 H28"/><path d="M72 54 H84"/></g>`;
+EX_ICONS.dip_bar = `<g class="fr">${G}<path d="M30 86 V50"/><path d="M70 86 V50"/></g>
+  <g class="mv"><path d="M22 46 H44"/><path d="M56 46 H78"/></g>`;
+
+/* ---------- 등 ---------- */
+EX_ICONS.lat_pulldown = `<g class="fr">${G}<path d="M24 86 V14"/><path d="M24 14 H70"/><path d="M52 86 V66"/><path d="M44 66 H68"/></g>
+  <rect class="pad" x="46" y="60" width="26" height="8" rx="4"/>
+  <rect class="pad" x="62" y="46" width="8" height="16" rx="4"/>
+  <g class="mv"><path d="M70 14 V30"/><path d="M56 32 H84"/><path d="M58 32 V38"/><path d="M82 32 V38"/></g>
+  ${STACK(16,40,42,6)}`;
+EX_ICONS.seated_row = `<g class="fr">${G}<path d="M24 86 V36"/><path d="M40 78 H62"/><path d="M62 78 V70"/></g>
+  <rect class="pad" x="44" y="70" width="26" height="8" rx="4"/>
+  <g class="mv"><path d="M28 50 H66"/><path d="M66 44 V56"/></g>
+  ${STACK(16,44,34,5)}`;
+EX_ICONS.tbar = `<g class="fr">${G}<path d="M18 82 L64 44"/></g>
+  <g class="mv"><path d="M64 44 L76 34"/>${PLATE(74,30,10)}<path d="M52 56 H70"/></g>`;
+EX_ICONS.pullup_bar = `<g class="fr"><path d="M14 18 H86"/><path d="M20 18 V32"/><path d="M80 18 V32"/></g>
+  <g class="mv"><path d="M41 18 V28"/><path d="M59 18 V28"/></g>
+  <g class="body">${PLATE(50,44,9)}<path d="M42 29 L47 38"/><path d="M58 29 L53 38"/><path d="M50 52 V72"/><path d="M50 72 L62 82"/></g>`;
+EX_ICONS.assist_machine = `<g class="fr">${G}<path d="M30 86 V16"/><path d="M30 16 H74"/><path d="M74 16 V28"/></g>
+  <g class="mv"><path d="M60 28 H88"/><rect x="46" y="58" width="26" height="8" rx="4"/></g>
+  ${STACK(22,40,36,5)}`;
+EX_ICONS.back_ext_bench = `<g class="fr">${G}<path d="M36 86 V58"/><path d="M62 86 V44"/></g>
+  <rect class="pad" x="28" y="52" width="26" height="8" rx="4" transform="rotate(-24 41 56)"/>
+  <rect class="pad" x="58" y="38" width="9" height="18" rx="4.5"/>
+  <g class="mv"><path d="M58 70 H74"/></g>`;
+
+/* ---------- 어깨·팔 ---------- */
+EX_ICONS.shoulder_machine = `<g class="fr">${G}<path d="M28 86 V30"/><path d="M44 78 H66"/><path d="M44 78 V64"/></g>
+  <rect class="pad" x="40" y="44" width="9" height="26" rx="4.5"/>
+  <rect class="pad" x="46" y="70" width="24" height="8" rx="4"/>
+  <g class="mv"><path d="M40 30 H70"/><path d="M70 24 V36"/></g>
+  ${STACK(20,46,32,4)}`;
+EX_ICONS.cable = `<g class="fr">${G}<path d="M28 86 V18"/><path d="M28 18 H72"/></g>
+  <g class="mv"><path d="M72 18 V52"/><path d="M64 58 H80"/></g>
+  ${STACK(20,42,38,5)}`;
+EX_ICONS.preacher = `<g class="fr">${G}<path d="M38 86 V60"/><path d="M62 86 V68"/></g>
+  <rect class="pad" x="30" y="46" width="30" height="9" rx="4.5" transform="rotate(-28 45 50)"/>
+  <rect class="pad" x="52" y="62" width="22" height="8" rx="4"/>
+  <g class="mv"><path d="M28 34 H56"/>${PLATE(26,34,6)}</g>`;
+
+/* ---------- 하체 ---------- */
+EX_ICONS.leg_press = `<g class="fr">${G}<path d="M20 86 L66 30"/><path d="M20 86 V70"/></g>
+  <rect class="pad" x="16" y="56" width="26" height="9" rx="4.5" transform="rotate(-18 29 60)"/>
+  <rect class="pad" x="14" y="66" width="10" height="16" rx="5"/>
+  <g class="mv"><path d="M56 24 L78 46"/><path d="M62 18 L84 40"/></g>`;
+EX_ICONS.hack_squat = `<g class="fr">${G}<path d="M22 84 L70 26"/><path d="M22 84 H48"/></g>
+  <rect class="pad" x="34" y="44" width="34" height="9" rx="4.5" transform="rotate(-50 51 48)"/>
+  <g class="mv"><path d="M60 58 H80"/><path d="M36 74 H64"/></g>`;
+EX_ICONS.leg_ext = `<g class="fr">${G}<path d="M26 86 V44"/><path d="M26 66 H52"/><path d="M52 66 V80"/></g>
+  <rect class="pad" x="22" y="44" width="9" height="22" rx="4.5"/>
+  <rect class="pad" x="30" y="60" width="26" height="8" rx="4"/>
+  <g class="mv"><path d="M58 76 H78"/>${PLATE(58,76,5)}${PLATE(78,76,5)}</g>
+  ${STACK(62,32,26,4)}`;
+EX_ICONS.leg_curl = `<g class="fr">${G}<path d="M28 86 V60"/><path d="M28 60 H62"/></g>
+  <rect class="pad" x="26" y="54" width="34" height="8" rx="4"/>
+  <g class="mv"><path d="M62 72 H80"/>${PLATE(62,72,5)}${PLATE(80,72,5)}</g>
+  ${STACK(20,28,26,4)}`;
+EX_ICONS.hip_thrust = `<g class="fr">${G}<path d="M24 76 H50"/><path d="M24 76 V86"/></g>
+  <rect class="pad" x="22" y="68" width="28" height="9" rx="4.5"/>
+  <g class="mv"><path d="M40 48 H88"/>${PLATE(46,48,9)}${PLATE(82,48,9)}</g>`;
+EX_ICONS.abduction = `<g class="fr">${G}<path d="M50 86 V56"/><path d="M36 74 H64"/></g>
+  <rect class="pad" x="44" y="34" width="9" height="24" rx="4.5"/>
+  <g class="mv"><path d="M50 62 L26 78"/><path d="M50 62 L74 78"/>${PLATE(24,80,5)}${PLATE(76,80,5)}</g>`;
+EX_ICONS.step = `<g class="fr">${G}<path d="M22 86 V70"/><path d="M22 70 H52"/><path d="M52 70 V86"/></g>
+  <g class="mv"><path d="M28 64 H70"/></g>`;
+EX_ICONS.box = `<g class="fr">${G}</g>
+  <g class="mv"><path d="M28 80 V52"/><path d="M28 52 H72"/><path d="M72 52 V80"/><path d="M28 80 H72"/></g>`;
+
+/* ---------- 복근 벤치 ---------- */
+EX_ICONS.ab_bench = `<g class="fr">${G}<path d="M30 86 V56"/><path d="M68 86 V70"/></g>
+  <rect class="pad" x="26" y="52" width="48" height="8" rx="4" transform="rotate(16 50 56)"/>
+  <g class="mv"><path d="M22 44 H40"/></g>`;
+
+/* ---------- 맨몸 ---------- */
+EX_ICONS.bw_prone = `<g class="fr">${G}</g>
+  <g class="body">${PLATE(72,42,9)}<path d="M64 48 L26 76"/><path d="M64 48 V78"/><path d="M52 78 H72"/></g>`;
+EX_ICONS.bw_supine = `<g class="fr">${G}</g>
+  <g class="body">${PLATE(24,64,9)}<path d="M32 68 H56"/><path d="M56 68 L68 52"/><path d="M68 52 L78 72"/></g>`;
+EX_ICONS.bw_stand = `<g class="fr">${G}</g>
+  <g class="body">${PLATE(46,22,9)}<path d="M46 32 V54"/><path d="M46 54 L34 72"/><path d="M34 72 L38 84"/><path d="M48 40 H70"/></g>`;
+EX_ICONS.bw_calf = `<g class="fr">${G}<path d="M76 86 V34"/><path d="M68 34 H84"/></g>
+  <g class="body">${PLATE(40,22,9)}<path d="M40 32 V62"/><path d="M40 62 L32 78"/><path d="M42 40 H70"/></g>
+  <g class="mv"><path d="M26 82 L44 86"/></g>`;
+EX_ICONS.wall_sit = `<g class="fr">${G}<path d="M22 86 V20"/></g>
+  <g class="body">${PLATE(38,34,9)}<path d="M30 44 V64"/><path d="M30 64 H58"/><path d="M58 64 V84"/></g>`;
+
+/* ---------- 유산소 ---------- */
+EX_ICONS.treadmill = `<g class="fr">${G}<path d="M20 78 H70"/><path d="M20 78 V70"/><path d="M70 78 V70"/><path d="M62 70 V34"/></g>
+  <g class="mv"><path d="M48 34 H80"/><path d="M18 70 H72"/></g>`;
+EX_ICONS.bike = `<g class="fr">${G}<path d="M30 76 L48 44"/><path d="M48 44 H68"/><path d="M68 44 V32"/></g>
+  <g class="mv">${PLATE(30,76,12)}<path d="M44 52 L58 60"/><path d="M52 34 H72"/></g>`;
+EX_ICONS.rower = `<g class="fr">${G}<path d="M18 78 H80"/><path d="M28 78 V66"/></g>
+  <rect class="pad" x="40" y="64" width="22" height="8" rx="4"/>
+  <g class="mv">${PLATE(24,50,14)}<path d="M38 50 H72"/></g>`;
+EX_ICONS.elliptical = `<g class="fr">${G}<path d="M26 74 H74"/><path d="M60 74 V30"/></g>
+  <g class="mv">${PLATE(30,62,12)}<path d="M44 74 H74"/><path d="M48 30 H72"/></g>`;
+EX_ICONS.stepmill = `<g class="fr">${G}<path d="M24 82 H40 V70 H56 V58 H72 V46"/><path d="M72 46 V26"/></g>
+  <g class="mv"><path d="M58 26 H86"/></g>`;
+EX_ICONS.swim = `<g class="mv"><path d="M12 68 q10 -8 20 0 t20 0 t20 0 t16 0"/><path d="M12 82 q10 -8 20 0 t20 0 t20 0 t16 0"/></g>
+  <g class="body">${PLATE(38,34,9)}<path d="M48 40 H74"/><path d="M46 44 L24 52"/></g>`;
+
+/* 종목 이름으로 아이콘을 고른다. 카탈로그에서 담은 종목은 icon 값을
+   이미 갖고 있고, 예전에 직접 만든 종목은 이 규칙으로 찾아 준다. */
+const ICON_RULES = [
+  [['트레드밀','러닝머신','러닝'],'treadmill'], [['사이클'],'bike'], [['로잉'],'rower'],
+  [['일립티컬'],'elliptical'], [['스텝밀'],'stepmill'], [['수영'],'swim'],
+  [['케틀벨'],'kettlebell'], [['메디신볼'],'med_ball'], [['배틀로프'],'rope'],
+  [['박스 점프','박스점프'],'box'], [['파머스'],'dumbbell'], [['버피'],'bw_stand'],
+  [['카프 레이즈 홀드','까치발'],'bw_calf'], [['종아리 스트레칭'],'step'], [['월 싯','월싯','공기의자'],'wall_sit'],
+  [['스쿼트 홀드','한 발 서기','런지','불가리안'],'bw_stand'],
+  [['글루트 브리지'],'bw_supine'],
+  [['플랭크','푸시업','푸쉬업','팔굽혀펴기','슈퍼맨','버드독'],'bw_prone'],
+  [['할로우','L싯','러시안','레그 레이즈','레그레이즈','크런치'],'bw_supine'],
+  [['행잉','데드행','풀업','친업','턱걸이'],'pullup_bar'], [['어시스트'],'assist_machine'],
+  [['싯업','윗몸'],'ab_bench'], [['앱 코스터'],'ab_bench'],
+  [['펙덱','버터플라이'],'pec_deck'], [['크로스오버'],'cable_cross'],
+  [['체스트프레스'],'chest_press'], [['딥스 머신'],'cable'], [['딥스'],'dip_bar'],
+  [['인클라인','이클라인'],'bench_incline'], [['디클라인 벤치'],'bench_decline'],
+  [['벤치','플라이'],'bench_flat'],
+  [['렛풀','랫풀','풀다운'],'lat_pulldown'], [['롱풀','시티드 로우','시티드로우','케이블 로우'],'seated_row'],
+  [['T바','티바'],'tbar'], [['바벨 로우','데드리프트','루마니안'],'barbell'], [['덤벨 로우'],'dumbbell'],
+  [['백 익스텐션','백익스텐션'],'back_ext_bench'],
+  [['숄더프레스 (머신)'],'shoulder_machine'],
+  [['바벨 숄더','오버헤드프레스','업라이트','슈러그'],'barbell'],
+  [['덤벨 숄더','아놀드','래터럴','레터럴','프론트 레이즈','리어 델트'],'dumbbell'],
+  [['페이스풀','푸시다운','푸쉬다운','케이블 컬','케이블컬','우드찹','케이블 크런치','오버헤드 트라이셉'],'cable'],
+  [['프리처','프리쳐'],'preacher'],
+  [['바벨 컬','바벨컬','리버스 컬','라잉 트라이셉','스컬크러셔'],'barbell'],
+  [['암컬','덤벨 컬','덤벨컬','해머','컨센트','킥백'],'dumbbell'],
+  [['스미스'],'smith'], [['핵 스쿼트','핵스쿼트'],'hack_squat'],
+  [['레그프레스','레그 프레스'],'leg_press'],
+  [['레그 익스텐션','레그익스텐션'],'leg_ext'], [['레그 컬','레그컬'],'leg_curl'],
+  [['힙 쓰러스트','힙쓰러스트'],'hip_thrust'], [['어브덕션','어덕션','아웃타이','이너타이'],'abduction'],
+  [['카프 레이즈','카프레이즈'],'step'],
+  [['스쿼트'],'rack'], [['숄더프레스'],'shoulder_machine'],
+];
+const ICON_BY_PART = { '가슴':'bench_flat', '등':'lat_pulldown', '어깨':'dumbbell', '팔':'dumbbell',
+  '복근':'bw_supine', '하체':'leg_press', '유산소':'treadmill', '기타':'bw_stand' };
+
+function iconKeyFor(lib){
+  if(!lib) return null;
+  if(lib.icon && EX_ICONS[lib.icon]) return lib.icon;
+  const n = lib.name || '';
+  for(const [keys, ico] of ICON_RULES){ for(const k of keys){ if(n.includes(k)) return ico; } }
+  if(lib.repsOnly || lib.timed) return 'bw_stand';
+  return ICON_BY_PART[lib.bodyPart] || 'dumbbell';
+}
+/* 아이콘 하나를 그려서 돌려준다. box 를 주면 테두리 상자에 담는다. */
+function exIconHTML(lib, size){
+  const key = iconKeyFor(lib);
+  const svg = `<svg class="exi" viewBox="0 0 100 100" aria-hidden="true">${EX_ICONS[key]||''}</svg>`;
+  return size ? `<span class="exi-box exi-${size}">${svg}</span>` : svg;
+}
+
+/* ============================================================
    음성 가이드
    ------------------------------------------------------------
    목적은 "기록"이 아니라 "안내"다. 이어폰으로 무게·횟수·세트를
@@ -2583,6 +2812,7 @@ async function startVoiceSession(en){
   vs.entry = en; vs.lib = findLibItem(en.exerciseId) || {}; vs.cfg = voiceCfgFor(en.exerciseId); vs.sets = sets;
 
   voOpen(en.name);
+  document.getElementById('voFig').innerHTML = exIconHTML(vs.lib);
   acquireWakeLock();
   try{ await runVoiceSession(); }
   catch(e){ showToast('음성 재생 오류: ' + e.message); }
@@ -2668,12 +2898,17 @@ const VO_CIRC = 2 * Math.PI * 92;
 function voOpen(name){
   const ov = document.getElementById('voiceOverlay');
   ov.classList.remove('hidden');
+  document.getElementById('voFig').innerHTML = '';
   document.getElementById('voExName').textContent = name;
   voPhase('prep','준비'); voBig('-'); voRing(0); voSub('');
 }
 function voPhase(phase, label){
   const ov = document.getElementById('voiceOverlay');
-  ov.className = 'vo phase-' + phase;
+  // 준비 시간에는 큰 숫자 대신 기구 그림을 보여준다. 어차피 기다리는
+  // 시간이라 그때 자세를 확인하는 편이 낫다.
+  const withFig = (phase === 'prep') && !!document.getElementById('voFig').innerHTML;
+  ov.className = 'vo phase-' + phase + (withFig ? ' with-fig' : '');
+  document.getElementById('voFig').classList.toggle('hidden', !withFig);
   document.getElementById('voPhase').textContent = label;
 }
 function voHeader(idx, total, targetLabel){
@@ -2860,7 +3095,8 @@ function openLibraryDetailSheet(it){
     </div>`;
   };
   const inner = openSheetHTML(it.name, `
-    <p class="muted">${esc(it.bodyPart||'')} · ${it.type==='cardio'?'유산소':(it.timed?'시간 버티기':(it.repsOnly?'맨몸(횟수만)':'근력'))}</p>
+    <span class="exi-box exi-lg">${exIconHTML(it)}</span>
+    <p class="muted" style="text-align:center;">${esc(it.bodyPart||'')} · ${it.type==='cardio'?'유산소':(it.timed?'시간 버티기':(it.repsOnly?'맨몸(횟수만)':'근력'))}</p>
     ${it.guide ? `<div class="form-guide"><b>자세</b> ${esc(it.guide)}</div>` : ''}
     ${isStrength ? `
       <div class="sheet-group">
@@ -3050,6 +3286,7 @@ async function openCatalogSheet(){
       const owned = have.has(i.name.replace(/\s/g,''));
       return `<label class="cat-row${owned?' have':''}">
         <input type="checkbox" data-cid="${esc(i.id)}" ${owned?'disabled':''} ${picked.has(i.id)?'checked':''}>
+        ${exIconHTML(i,'md')}
         <span class="nm">${esc(i.name)}${owned?' <span class="muted" style="font-size:11px;">(이미 있음)</span>':''}
           <span class="al">${esc((i.aliases||[]).slice(0,3).join(', '))}</span></span>
         <span class="tags">${esc(i.bodyPart)}${i.timed?' · 버티기':(i.repsOnly?' · 맨몸':'')}</span>
@@ -3082,6 +3319,7 @@ async function openCatalogSheet(){
       if(src.repsOnly) item.repsOnly = true;
       if(src.timed) item.timed = true;
       if(src.guide) item.guide = src.guide;
+      if(src.icon) item.icon = src.icon;
       if(src.weightStep != null) item.weightStep = src.weightStep;
       if(src.distanceUnit) item.distanceUnit = src.distanceUnit;
       if(src.met != null) item.met = src.met;
