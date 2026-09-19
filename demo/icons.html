@@ -1,156 +1,117 @@
-<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1.0">
+<!doctype html><html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1.0">
 <title>기구 아이콘 시안</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@600&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 :root{--paper:#EFEAE1;--card:#FBF8F2;--paper-line:#D9D1BF;--ink:#1C2B39;--ink-soft:#5B6B74;--amber:#C98A2C;}
-body{margin:0;background:var(--paper);font-family:'Noto Sans KR',system-ui,sans-serif;color:var(--ink);padding:14px;}
-h3{font-size:13px;margin:16px 0 8px;font-family:ui-monospace,monospace;color:var(--ink-soft);}
-.big{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-width:380px;}
-.big .c{background:var(--card);border:2px solid var(--ink);border-radius:8px;padding:5px;text-align:center;}
-.big .n{font-size:9.5px;margin-top:2px;}
+body{margin:0;background:var(--paper);font-family:'Noto Sans KR',system-ui,sans-serif;color:var(--ink);padding:14px;
+ padding-bottom:40px;-webkit-font-smoothing:antialiased;}
+h3{font-size:12px;margin:18px 0 8px;font-family:'IBM Plex Mono',monospace;color:var(--ink-soft);}
+p.lead{font-size:12.5px;color:var(--ink-soft);line-height:1.7;max-width:360px;margin:0 0 4px;}
+.big{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:343px;}
+.big .c{background:var(--card);border:2px solid var(--ink);border-radius:8px;padding:6px;text-align:center;}
+.big .n{font-size:10px;margin-top:1px;}
 .ico{width:100%;display:block;color:var(--ink);--acc:var(--amber);}
-.ico .fr{stroke:currentColor;stroke-width:5.5;stroke-linecap:round;fill:none;}
-.ico .body{stroke:currentColor;stroke-width:10;stroke-linecap:round;stroke-linejoin:round;fill:none;}
-.ico .body circle{fill:currentColor;stroke:none;}
-.ico .pad{fill:currentColor;}
-.ico .mv{stroke:var(--acc);stroke-width:6;stroke-linecap:round;fill:none;}
+.ico .fr{stroke:currentColor;stroke-width:7;stroke-linecap:round;stroke-linejoin:round;fill:none;}
+.ico .bd{stroke:currentColor;stroke-width:11;stroke-linecap:round;stroke-linejoin:round;fill:none;}
+.ico .dot{fill:currentColor;}
+.ico .mv{stroke:var(--acc);stroke-width:7;stroke-linecap:round;stroke-linejoin:round;fill:none;}
 .ico .mv circle{fill:var(--acc);stroke:none;}
-.ico .stack rect{fill:var(--acc);}
-.ico .stack .sl{stroke:var(--paper);stroke-width:1.6;fill:none;}
-.row{display:flex;align-items:center;gap:10px;padding:9px 2px;border-bottom:1px dashed var(--paper-line);max-width:343px;}
+.ico .blk{fill:var(--acc);}
+.ico .sl{stroke:var(--card);stroke-width:2.2;stroke-linecap:round;fill:none;}
+.row{display:flex;align-items:center;gap:11px;padding:9px 2px;border-bottom:1px dashed var(--paper-line);max-width:343px;}
 .row .t{width:46px;height:46px;flex-shrink:0;border:1.5px solid var(--paper-line);border-radius:9px;background:#fff;padding:2px;}
 .row .nm{flex:1;font-size:14px;font-weight:500;}
-.dark{background:#10161C;padding:12px;border-radius:10px;margin-top:8px;}
+.row .go{color:#6E7A83;font-size:12px;}
+.dark{background:#10161C;padding:12px;border-radius:10px;}
 .dark .c{background:#1A222B;border-color:#2F3D49;color:#EFEAE1;}
 .dark .ico{color:#EFEAE1;--acc:#E0A44A;}
-.dark .ico .stack .sl{stroke:#1A222B;}
+.dark .ico .sl{stroke:#1A222B;}
+.tiny{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.tiny .t{width:28px;height:28px;}
 </style></head><body>
-<p style="font-size:12.5px;color:#5B6B74;line-height:1.7;max-width:360px;"><b>기구 아이콘 시안</b> — 직접 그린 실루엣입니다. 제조사 제품 사진은 저작권이 있어 쓸 수 없어서, 기구의 생김새만 참고해 새로 그렸습니다. 맨몸운동도 같은 그림체로 통일합니다.</p>
-<h3>크게 — 밝은 화면</h3><div class="big" id="b1"></div>
-<h3>크게 — 어두운 화면 (음성 오버레이)</h3><div class="dark"><div class="big" id="b2"></div></div>
-<h3>실제 목록 크기 46px (iPhone 13 mini 폭 375px)</h3><div id="rows"></div>
+<p class="lead"><b>기구 아이콘 시안 · 단순화판</b><br>도형을 대여섯 개까지만 쓰고 잔선을 걷어냈습니다.
+<b style="color:var(--amber)">주황</b>은 잡거나 움직이는 것(손잡이·바·중량추·발판)입니다.</p>
+<h3>크게</h3><div class="big" id="b1"></div>
+<h3>어두운 화면 (음성 오버레이)</h3><div class="dark"><div class="big" id="b2"></div></div>
+<h3>실제 목록 46px</h3><div id="rows"></div>
+<h3>더 작게 28px — 뭉개지는지 확인</h3><div class="tiny" id="tiny"></div>
 <script>
 /* ============================================================
-   기구 아이콘 — 실루엣 방식
-   기계는 "물건"으로, 맨몸운동은 "꽉 찬 사람 모양"으로 그린다.
-   선으로 된 졸라맨을 버리고 굵은 덩어리로 간다.
-     ink   = 기구 프레임 / 몸
-     amber = 손잡이·중량추 같이 움직이거나 잡는 부분
+   기구 아이콘 — 단순화판
+   규칙 : 한 아이콘에 도형 대여섯 개까지. 선 굵기는 하나로 통일.
+          ink   = 프레임과 몸
+          amber = 잡거나 움직이는 것 (손잡이·바·중량추·발판)
+   46px 로 줄여도 뭉개지지 않게 잔선을 다 걷어냈다.
 ============================================================ */
-const I = {};
+const ICONS = {};
 
-/* ---- 시티드 체스트프레스 ---- */
-I.chest_press = `
-<g class="fr">
-  <path d="M16 86 H82"/>
-  <path d="M26 86 V34"/>
-  <path d="M26 56 H44"/>
-  <path d="M44 56 V70"/>
-  <path d="M44 70 H68"/>
-</g>
-<rect class="pad" x="40" y="40" width="9" height="30" rx="4.5" transform="rotate(8 44 55)"/>
-<rect class="pad" x="46" y="64" width="26" height="8" rx="4"/>
-<g class="mv">
-  <path d="M30 40 H62"/>
-  <circle cx="64" cy="40" r="5"/>
-  <path d="M64 33 V47"/>
-</g>
-<g class="stack"><rect x="18" y="52" width="16" height="30" rx="2.5"/>
-  <path class="sl" d="M19 58H33M19 64H33M19 70H33M19 76H33"/></g>`;
+/* 시티드 체스트프레스 — 등판 + 시트 + 손잡이 + 중량추 */
+ICONS.chest_press = `
+<g class="fr"><path d="M42 34 V64"/><path d="M42 64 H66"/></g>
+<g class="mv"><path d="M40 44 H70"/></g>
+<rect class="blk" x="18" y="40" width="16" height="36" rx="4"/>
+<g class="sl"><path d="M20 52H32M20 60H32M20 68H32"/></g>`;
 
-/* ---- 렛풀다운 ---- */
-I.lat_pulldown = `
-<g class="fr">
-  <path d="M16 86 H84"/>
-  <path d="M24 86 V14"/>
-  <path d="M24 14 H70"/>
-  <path d="M52 86 V66"/>
-  <path d="M44 66 H68"/>
-</g>
-<rect class="pad" x="46" y="60" width="26" height="8" rx="4"/>
-<rect class="pad" x="62" y="46" width="8" height="16" rx="4"/>
-<g class="mv">
-  <path d="M70 14 V30"/>
-  <path d="M56 32 H84"/>
-  <path d="M58 32 V38"/><path d="M82 32 V38"/>
-</g>
-<g class="stack"><rect x="16" y="40" width="16" height="42" rx="2.5"/>
-  <path class="sl" d="M17 46H31M17 52H31M17 58H31M17 64H31M17 70H31M17 76H31"/></g>`;
+/* 렛풀다운 — 기둥 + 매달린 바 + 시트 + 중량추 */
+ICONS.lat_pulldown = `
+<g class="fr"><path d="M26 78 V18"/><path d="M26 18 H68"/><path d="M52 78 V64"/><path d="M44 64 H64"/></g>
+<g class="mv"><path d="M68 18 V30"/><path d="M54 30 H82"/></g>
+<rect class="blk" x="18" y="40" width="16" height="36" rx="4"/>
+<g class="sl"><path d="M20 52H32M20 60H32M20 68H32"/></g>`;
 
-/* ---- 레그프레스 ---- */
-I.leg_press = `
-<g class="fr">
-  <path d="M12 86 H86"/>
-  <path d="M20 86 L66 30"/>
-  <path d="M20 86 V70"/>
-</g>
-<rect class="pad" x="16" y="56" width="26" height="9" rx="4.5" transform="rotate(-18 29 60)"/>
-<rect class="pad" x="14" y="66" width="10" height="16" rx="5"/>
-<g class="mv">
-  <path d="M56 24 L78 46"/>
-  <path d="M62 18 L84 40"/>
-</g>`;
+/* 레그프레스 — 비스듬한 레일 + 발판 + 시트 */
+ICONS.leg_press = `
+<g class="fr"><path d="M22 80 L64 32"/><path d="M22 80 V64"/><path d="M22 64 H40"/></g>
+<g class="mv"><path d="M54 22 L74 44"/></g>`;
 
-/* ---- 스미스머신 / 바벨 랙 ---- */
-I.rack = `
-<g class="fr">
-  <path d="M14 86 H86"/>
-  <path d="M24 86 V16"/>
-  <path d="M76 86 V16"/>
-  <path d="M24 16 H76"/>
-</g>
-<g class="mv">
-  <path d="M16 50 H84"/>
-  <circle cx="26" cy="50" r="9"/><circle cx="74" cy="50" r="9"/>
-</g>`;
+/* 스미스머신 / 랙 — 기둥 둘 + 바 */
+ICONS.rack = `
+<g class="fr"><path d="M28 82 V20"/><path d="M72 82 V20"/></g>
+<g class="mv"><path d="M20 48 H80"/><circle cx="28" cy="48" r="9"/><circle cx="72" cy="48" r="9"/></g>`;
 
-/* ---- 덤벨 ---- */
-I.dumbbell = `
-<g class="mv">
-  <path d="M30 50 H70"/>
-  <circle cx="26" cy="50" r="13"/><circle cx="74" cy="50" r="13"/>
-</g>
-<g class="fr"><path d="M14 50 H18"/><path d="M82 50 H86"/></g>`;
+/* 덤벨 */
+ICONS.dumbbell = `
+<g class="mv"><path d="M34 50 H66"/><circle cx="26" cy="50" r="14"/><circle cx="74" cy="50" r="14"/></g>`;
 
-/* ---- 카프 레이즈 홀드 (맨몸 + 지지대) ---- */
-I.calf_raise_hold = `
-<g class="fr"><path d="M14 86 H86"/><path d="M76 86 V34"/><path d="M68 34 H84"/></g>
-<g class="body">
-  <circle cx="40" cy="22" r="9"/>
-  <path d="M40 32 q6 2 6 10 v14 q0 4 -3 8 l-6 10" />
-  <path d="M43 40 H70"/>
-  <path d="M37 64 l-3 14"/>
-  <path d="M30 80 l14 4"/>
-</g>`;
+/* 케이블 머신 */
+ICONS.cable = `
+<g class="fr"><path d="M30 82 V20"/><path d="M30 20 H70"/></g>
+<g class="mv"><path d="M70 20 V54"/><path d="M62 60 H78"/></g>
+<rect class="blk" x="22" y="40" width="16" height="36" rx="4"/>
+<g class="sl"><path d="M24 52H36M24 60H36M24 68H36"/></g>`;
 
-/* ---- 플랭크 (맨몸) ---- */
-I.plank = `
-<g class="fr"><path d="M10 86 H90"/></g>
-<g class="body">
-  <circle cx="72" cy="40" r="9"/>
-  <path d="M64 46 L26 76"/>
-  <path d="M64 46 L64 78"/>
-  <path d="M52 78 H72"/>
-  <path d="M26 76 L16 82"/>
-</g>`;
+/* 카프 레이즈 홀드 — 까치발 + 지지대 */
+ICONS.calf_raise_hold = `
+<g class="mv"><path d="M76 82 V32"/></g>
+<circle class="dot" cx="42" cy="24" r="10"/>
+<g class="bd"><path d="M42 36 V66"/><path d="M42 66 L32 80"/><path d="M44 44 H70"/></g>`;
 
-/* ---- 푸시업 (맨몸) ---- */
-I.pushup = `
-<g class="fr"><path d="M10 86 H90"/></g>
-<g class="body">
-  <circle cx="74" cy="34" r="9"/>
-  <path d="M66 40 L24 74"/>
-  <path d="M66 40 L68 78"/>
-  <path d="M24 74 L14 80"/>
-</g>`;
+/* 플랭크 — 팔꿈치가 바닥 (ㄴ 자 팔) */
+ICONS.plank = `
+<circle class="dot" cx="72" cy="42" r="10"/>
+<g class="bd"><path d="M64 50 L24 78"/><path d="M64 50 V78"/><path d="M64 78 H80"/></g>`;
 
-const ICONS = I;
+/* 푸시업 — 팔이 쭉 펴짐 (ㅣ 자 팔) */
+ICONS.pushup = `
+<circle class="dot" cx="74" cy="32" r="10"/>
+<g class="bd"><path d="M66 40 L24 74"/><path d="M66 40 L72 78"/></g>`;
+
+/* 풀업 — 철봉에 매달림 */
+ICONS.pullup = `
+<g class="mv"><path d="M18 20 H82"/></g>
+<g class="bd"><path d="M41 24 L47 42"/><path d="M59 24 L53 42"/></g>
+<circle class="dot" cx="50" cy="50" r="10"/>
+<g class="bd"><path d="M50 60 V78"/><path d="M50 78 L62 86"/></g>`;
 
 </script><script>
 const NAMES={chest_press:'시티드 체스트프레스',lat_pulldown:'렛풀다운',leg_press:'레그프레스',rack:'스미스머신',
- dumbbell:'덤벨',calf_raise_hold:'카프 레이즈 홀드',plank:'플랭크',pushup:'푸시업'};
+ dumbbell:'덤벨',cable:'케이블 머신',calf_raise_hold:'카프 레이즈 홀드',plank:'플랭크',pushup:'푸시업',pullup:'풀업'};
 const svg=(k)=>`<svg class="ico" viewBox="0 0 100 100">${ICONS[k]}</svg>`;
-for(const host of ['b1','b2']) document.getElementById(host).innerHTML =
+for(const h of ['b1','b2']) document.getElementById(h).innerHTML =
   Object.keys(ICONS).map(k=>`<div class="c">${svg(k)}<div class="n">${NAMES[k]}</div></div>`).join('');
 document.getElementById('rows').innerHTML = Object.keys(ICONS)
-  .map(k=>`<div class="row"><div class="t">${svg(k)}</div><span class="nm">${NAMES[k]}</span><span style="color:#6E7A83;font-size:12px;">▸</span></div>`).join('');
+  .map(k=>`<div class="row"><div class="t">${svg(k)}</div><span class="nm">${NAMES[k]}</span><span class="go">▸</span></div>`).join('');
+document.getElementById('tiny').innerHTML = Object.keys(ICONS)
+  .map(k=>`<div class="t" style="border:1.5px solid var(--paper-line);border-radius:6px;background:#fff;padding:1px;">${svg(k)}</div>`).join('');
 </script></body></html>
