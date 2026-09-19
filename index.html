@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- 훈련일지 v1.14 · 빌드 2026-09-19 -->
+<!-- 훈련일지 v1.15 · 빌드 2026-09-19 -->
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -209,6 +209,33 @@ a{color:var(--blue);}
 .vo.phase-hold{ --vo-accent:#79B4E8; }
 .vo.phase-hold .vo-big{ font-size:min(27vw,98px); }
 .vo.phase-done{ --vo-accent:#7FD1A0; }
+
+/* 종목 추가 화면 */
+.pk-search{ position:relative; margin-bottom:10px; }
+.pk-search input{ padding-left:32px; }
+.pk-search .mag{ position:absolute; left:10px; top:50%; transform:translateY(-50%); font-size:13px; opacity:.5; }
+.pk-sec{ margin-bottom:14px; }
+.pk-sec-h{ display:flex; align-items:center; gap:6px; font-family:'IBM Plex Mono',monospace; font-size:11px;
+  color:var(--ink-soft); padding:7px 2px; border-bottom:1.5px solid var(--paper-line); }
+.pk-sec-h .ttl{ flex:1; font-weight:600; letter-spacing:.3px; }
+.pk-sec-h .cnt{ font-size:10px; color:var(--ink-faint); }
+.pk-sec-h.tap{ cursor:pointer; }
+.pk-sec-h .caret{ width:14px; text-align:center; color:var(--ink-faint); }
+.pk-row{ display:flex; align-items:center; gap:9px; padding:7px 2px; border-bottom:1px dashed var(--paper-line); }
+.pk-row .tapzone{ display:flex; align-items:center; gap:9px; flex:1; min-width:0; cursor:pointer; }
+.pk-nm{ flex:1; min-width:0; font-size:14px; line-height:1.3; }
+.pk-nm .sub{ display:block; font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--ink-faint);
+  margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.pk-fav{ width:30px; height:38px; flex-shrink:0; background:none; border:none; padding:0;
+  font-size:15px; color:var(--paper-line); line-height:1; }
+.pk-fav.on{ color:var(--amber); }
+.pk-add{ width:42px; height:38px; flex-shrink:0; border:1.5px solid var(--paper-line); border-radius:8px;
+  background:#fff; font-size:17px; line-height:1; padding:0; color:var(--ink-soft); }
+.pk-add.on{ background:var(--green); border-color:var(--green); color:#fff; }
+.pk-info{ border:1px dashed var(--paper-line); border-radius:8px; padding:10px; margin:2px 0 8px; background:var(--paper); }
+.pk-info .exi-box{ width:80px; height:80px; margin:0 auto 8px; display:block; }
+.pk-info .meta{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--ink-soft); text-align:center; margin-bottom:8px; }
+.pk-empty{ text-align:center; padding:18px 8px; color:var(--ink-soft); font-size:12.5px; }
 
 /* 기구 아이콘 */
 .exi{ display:block; width:100%; height:100%; color:var(--ink); --acc:var(--amber); }
@@ -584,7 +611,7 @@ nav.bottomnav button.active{color:var(--ink);background:var(--paper);}
    화면 상단(훈련일지 옆)에 표시되어, 어느 버전이 실제로 올라가 있는지
    바로 눈으로 구분할 수 있게 해줍니다.
 ============================================================ */
-const APP_VERSION = 'v1.14';
+const APP_VERSION = 'v1.15';
 const APP_BUILD = '2026-09-19';
 
 /* ============================================================
@@ -678,6 +705,43 @@ function showToast(msg){
   clearTimeout(showToast._tm); showToast._tm=setTimeout(()=>t.classList.remove('show'),2800);
 }
 function findLibItem(id){ return state.library.find(e=>e.id===id); }
+
+/* ------------------------------------------------------------
+   종목을 몇 번이나 했는지 세어 둔다. 기록을 저장할 때마다 올라가고,
+   '종목 추가' 화면에서 자주 하는 것을 위로 올리는 데 쓴다.
+   이 폰에만 남는 값이라 GitHub 를 건드리지 않는다.
+------------------------------------------------------------ */
+const USAGE_KEY = 'training-log:usage';
+function usageMap(){
+  try{ return JSON.parse(localStorage.getItem(USAGE_KEY) || '{}') || {}; }catch(e){ return {}; }
+}
+function bumpUsage(entries){
+  try{
+    const m = usageMap();
+    (entries||[]).forEach(en=>{ if(en.exerciseId) m[en.exerciseId] = (m[en.exerciseId]||0) + 1; });
+    localStorage.setItem(USAGE_KEY, JSON.stringify(m));
+  }catch(e){ /* 저장 공간 문제는 조용히 넘어간다 */ }
+}
+/* 아직 한 번도 세지 않았어도, 저장된 세트가 있으면 해본 종목이다 */
+function usageOf(id){
+  const m = usageMap();
+  if(m[id]) return m[id];
+  return state.templates[id] ? 1 : 0;
+}
+/* 마지막으로 한 내용을 한 줄로 */
+function lastDoneLine(it){
+  const tpl = state.templates[it.id];
+  if(!tpl) return '';
+  if(tpl.type==='cardio'){
+    const u = it.distanceUnit || 'km';
+    return `${tpl.distance||0}${u} · ${tpl.duration||0}분`;
+  }
+  const sets = tpl.sets || [];
+  if(!sets.length) return '';
+  const U = exUnit(it), nw = exNoWeight(it);
+  const head = sets.slice(0,3).map(x=> nw ? `${x.reps}${U}` : `${x.weight}×${x.reps}`).join(', ');
+  return `${sets.length}세트 · ${head}${sets.length>3?' …':''}`;
+}
 
 /* ------------------------------------------------------------
    종목 유형
@@ -1443,6 +1507,7 @@ async function saveTodayLog(){
 
   try{
     await syncTemplatesAndRecords(logEntries, date, bodyWeight, muscleMass, fatMass);
+    bumpUsage(logEntries);
     setSaveHint('저장 완료 ✓');
     showToast('오늘 운동 저장 완료');
     clearDraft(date);
@@ -1511,81 +1576,180 @@ async function syncTemplatesAndRecords(logEntries, date, bodyWeight, muscleMass,
 /* ============================================================
    종목 선택 시트
 ============================================================ */
+function closeSheet(){ document.getElementById('sheetRoot').innerHTML=''; }
+
+/* ============================================================
+   종목 추가 화면
+   자주 하는 것과 오늘 루틴을 위로 올리고, 나머지는 부위별로 접어 둔다.
+   줄을 누르면 그게 무슨 운동인지 펼쳐 보여 주고, 오른쪽 ＋ 로 담는다.
+   담아도 화면이 닫히지 않아 여러 개를 이어서 고를 수 있다.
+============================================================ */
 function openPickerSheet(mode, weekday){
   const root = document.getElementById('sheetRoot');
   const overlay = document.createElement('div');
-  overlay.className='sheet-overlay';
-  overlay.addEventListener('click',(e)=>{ if(e.target===overlay) closeSheet(); });
+  overlay.className = 'sheet-overlay';
+  overlay.addEventListener('click', (e)=>{ if(e.target===overlay) closeSheet(); });
   const sheet = document.createElement('div');
-  sheet.className='sheet';
-  sheet.innerHTML = `<h3>종목 추가 <button class="btn ghost small" id="sheetCloseBtn">닫기</button></h3><div id="sheetBody"></div>`;
-  overlay.appendChild(sheet);
-  root.innerHTML=''; root.appendChild(overlay);
-  document.getElementById('sheetCloseBtn').addEventListener('click', closeSheet);
+  sheet.className = 'sheet';
+  const title = mode==='routine' ? `${WEEKDAY_LABEL[weekday]}요일에 배정` : '종목 추가';
+  sheet.innerHTML = `
+    <h3><span>${title}</span><button class="btn ghost small" id="sheetCloseBtn">닫기</button></h3>
+    <div class="pk-search"><span class="mag">🔍</span>
+      <input type="text" id="pkQ" placeholder="이름으로 검색 (랫풀, 벤치, curl …)" autocapitalize="off" autocorrect="off"></div>
+    <div id="pkBody"></div>
+    <div class="btn-row">
+      <button class="btn ghost small" id="pkCatalog">📚 카탈로그에서 찾기</button>
+      <button class="btn ghost small" id="pkNew">+ 새 종목</button>
+    </div>`;
+  overlay.appendChild(sheet); root.innerHTML=''; root.appendChild(overlay);
+  sheet.querySelector('#sheetCloseBtn').addEventListener('click', closeSheet);
+  sheet.querySelector('#pkCatalog').addEventListener('click', openCatalogSheet);
+  sheet.querySelector('#pkNew').addEventListener('click', ()=>openNewExerciseForm(mode, weekday));
 
-  const body = document.getElementById('sheetBody');
-  BODY_PARTS.forEach(bp=>{
-    const items = state.library.filter(l=>l.bodyPart===bp);
-    if(!items.length) return;
-    const grp = document.createElement('div'); grp.className='sheet-group';
-    grp.innerHTML = `<div class="sheet-group-label">${bp}</div>`;
-    items.forEach(it=>{
-      const chipWrap = document.createElement('span');
-      chipWrap.className = 'chip-wrap';
-      const chip = document.createElement('button');
-      chip.className='chip-btn'; chip.textContent=it.name;
-      const already = mode==='routine'
-        ? (state.routine[weekday]?.exerciseIds||[]).includes(it.id)
-        : state.entries.some(en=>en.exerciseId===it.id && en.adHoc);
-      if(already) chip.classList.add('selected');
-      if(mode!=='routine'){
-        const existing = state.entries.find(en=>en.exerciseId===it.id && en.adHoc);
-        if(existing) chip.dataset.instanceId = existing.instanceId;
+  const body = sheet.querySelector('#pkBody');
+  const openParts = new Set();
+  let q = '', expanded = null;
+
+  const isOn = (id)=> mode==='routine'
+    ? ((state.routine[weekday]||{}).exerciseIds||[]).includes(id)
+    : state.entries.some(en=>en.exerciseId===id);
+
+  function toggleAdd(it){
+    if(mode==='routine'){
+      const list = state.routine[weekday].exerciseIds;
+      const i = list.indexOf(it.id);
+      if(i>=0) list.splice(i,1); else list.push(it.id);
+      renderAssignedList();
+    } else {
+      if(state.entries.some(en=>en.exerciseId===it.id)){
+        state.entries = state.entries.filter(en=>en.exerciseId!==it.id);
+      } else {
+        state.entries.push(buildEntryFromTemplate(it.id, null, true));
+        showToast(`"${it.name}" 담았어요`);
       }
-      chip.addEventListener('click', ()=>{
-        if(mode==='routine'){
-          const list = state.routine[weekday].exerciseIds;
-          if(list.includes(it.id)){ state.routine[weekday].exerciseIds = list.filter(x=>x!==it.id); }
-          else { list.push(it.id); }
-          renderAssignedList();
-        } else {
-          if(chip.dataset.instanceId){
-            state.entries = state.entries.filter(en=>en.instanceId!==chip.dataset.instanceId);
-          } else {
-            const newEntry = buildEntryFromTemplate(it.id, null, true);
-            state.entries.push(newEntry);
-          }
-          renderEntryList();
-        }
-        closeSheet();
-      });
-      const delBadge = document.createElement('button');
-      delBadge.className = 'chip-del';
-      delBadge.textContent = '✕';
-      delBadge.title = '이 종목 완전히 삭제';
-      delBadge.addEventListener('click', (e)=>{
-        e.stopPropagation();
-        if(delBadge.dataset.armed==='1'){
-          clearTimeout(delBadge._tm);
-          deleteLibraryItem(it.id, it.name, mode, weekday);
-        } else {
-          delBadge.dataset.armed='1'; delBadge.textContent='✓';
-          delBadge._tm = setTimeout(()=>{ delBadge.dataset.armed='0'; delBadge.textContent='✕'; }, 2500);
-        }
-      });
-      chipWrap.appendChild(chip);
-      chipWrap.appendChild(delBadge);
-      grp.appendChild(chipWrap);
-    });
-    body.appendChild(grp);
-  });
+      renderEntryList();
+    }
+    draw();
+  }
+  async function toggleFav(it){
+    if(it.fav) delete it.fav; else it.fav = true;
+    draw();
+    try{
+      const r = await gh.putFile('config/exercises.json', state.library, state.librarySha, `favorite ${it.name}`);
+      state.librarySha = r.content.sha;
+    }catch(e){ showToast('즐겨찾기 저장 실패: '+e.message); }
+  }
 
-  const newBtn = document.createElement('button');
-  newBtn.className='btn ghost small'; newBtn.style.marginTop='8px'; newBtn.textContent='+ 새 종목 만들기';
-  newBtn.addEventListener('click', ()=>openNewExerciseForm(mode, weekday));
-  body.appendChild(newBtn);
+  function rowEl(it){
+    const on = isOn(it.id);
+    const sub = lastDoneLine(it) || it.bodyPart || '';
+    const row = document.createElement('div');
+    row.className = 'pk-row';
+    row.innerHTML = `
+      <div class="tapzone">
+        ${exIconHTML(it,'sm')}
+        <span class="pk-nm">${esc(it.name)}${sub?`<span class="sub">${esc(sub)}</span>`:''}</span>
+      </div>
+      <button class="pk-fav ${it.fav?'on':''}" aria-label="즐겨찾기">${it.fav?'★':'☆'}</button>
+      <button class="pk-add ${on?'on':''}" aria-label="${on?'빼기':'담기'}">${on?'✓':'＋'}</button>`;
+    row.querySelector('.tapzone').addEventListener('click', ()=>{ expanded = (expanded===it.id) ? null : it.id; draw(); });
+    row.querySelector('.pk-fav').addEventListener('click', (e)=>{ e.stopPropagation(); toggleFav(it); });
+    row.querySelector('.pk-add').addEventListener('click', (e)=>{ e.stopPropagation(); toggleAdd(it); });
+    return row;
+  }
+
+  function infoEl(it){
+    const kind = it.type==='cardio' ? '유산소'
+      : (it.timed ? '시간 버티기' : (it.repsOnly ? '맨몸 (횟수만)' : `무게 ${it.weightStep??DEFAULT_WEIGHT_STEP}kg 단위`));
+    const n = usageOf(it.id), last = lastDoneLine(it);
+    const d = document.createElement('div');
+    d.className = 'pk-info';
+    d.innerHTML = `
+      <span class="exi-box">${exIconHTML(it)}</span>
+      <div class="meta">${esc(it.bodyPart||'')} · ${kind} · ${n ? `${n}번 했음` : '아직 안 해봄'}</div>
+      ${it.guide ? `<div class="form-guide"><b>자세</b>${esc(it.guide)}</div>` : ''}
+      ${last ? `<div class="vol-line" style="text-align:center;">마지막: ${esc(last)}</div>` : ''}
+      <div class="btn-row"><button class="btn ghost small pkDel" style="color:var(--red);border-color:var(--red);">이 종목 삭제</button></div>`;
+    const del = d.querySelector('.pkDel');
+    del.addEventListener('click', ()=>{
+      if(del.dataset.armed==='1'){ clearTimeout(del._tm); deleteLibraryItem(it.id, it.name, mode, weekday); return; }
+      del.dataset.armed='1'; del.textContent='정말 삭제할까요? (다시 누르면)';
+      del._tm = setTimeout(()=>{ del.dataset.armed='0'; del.textContent='이 종목 삭제'; }, 3000);
+    });
+    return d;
+  }
+
+  function section(label, items, opt){
+    opt = opt || {};
+    if(!items.length) return;
+    const sec = document.createElement('div'); sec.className='pk-sec';
+    const open = !opt.collapsible || openParts.has(opt.key);
+    const h = document.createElement('div');
+    h.className = 'pk-sec-h' + (opt.collapsible ? ' tap' : '');
+    h.innerHTML = `${opt.collapsible ? `<span class="caret">${open?'▾':'▸'}</span>` : ''}`
+      + `<span class="ttl">${esc(label)}</span><span class="cnt">${items.length}</span>`;
+    if(opt.collapsible) h.addEventListener('click', ()=>{
+      open ? openParts.delete(opt.key) : openParts.add(opt.key);
+      draw();
+    });
+    sec.appendChild(h);
+    if(open) items.forEach(it=>{
+      sec.appendChild(rowEl(it));
+      if(expanded===it.id) sec.appendChild(infoEl(it));
+    });
+    body.appendChild(sec);
+  }
+
+  function draw(){
+    body.innerHTML = '';
+    const nq = q.trim().toLowerCase().replace(/\s/g,'');
+    if(nq){
+      const hit = state.library.filter(it=>{
+        const hay = [it.name, ...(it.aliases||[])].join('|').toLowerCase().replace(/\s/g,'');
+        return hay.includes(nq);
+      });
+      if(hit.length) section('검색 결과', hit);
+      else body.innerHTML = `<div class="pk-empty">'${esc(q)}' 에 맞는 종목이 없습니다.<br>
+        아래 <b>카탈로그에서 찾기</b> 로 새로 담아보세요.</div>`;
+      return;
+    }
+
+    // 오늘 루틴에 이미 나온 종목은 바로 아래 '자주 하는' 에서 빼 준다.
+    // (부위별 목록에는 그대로 둔다 — 부위로 찾을 때 빠져 있으면 더 헷갈린다)
+    const shown = new Set();
+    // 오늘 배정된 것 먼저 — 오늘 할 종목을 다시 찾을 필요가 없게
+    if(mode !== 'routine'){
+      const wd = weekdayOf(state.currentDate);
+      const day = state.routine[wd] || {};
+      const items = (day.exerciseIds||[]).map(findLibItem).filter(Boolean);
+      if(items.length){
+        section(`오늘 루틴 · ${WEEKDAY_LABEL[wd]}요일${day.label?' '+day.label:''}`, items);
+        items.forEach(x=>shown.add(x.id));
+      }
+    }
+    // 즐겨찾기 먼저, 그다음 많이 한 순
+    const rest  = state.library.filter(x=>!shown.has(x.id));
+    const favs  = rest.filter(x=>x.fav);
+    const often = rest.filter(x=>!x.fav && usageOf(x.id)>0)
+      .sort((a,b)=>usageOf(b.id)-usageOf(a.id))
+      .slice(0, Math.max(0, 8 - favs.length));
+    const top = favs.concat(often);
+    if(top.length){ section('자주 하는 종목', top); top.forEach(x=>shown.add(x.id)); }
+    const topShown = shown.size;
+
+    // 나머지는 부위별로 접어 둔다. 위가 비어 있으면 첫 부위는 펼쳐 준다.
+    const parts = BODY_PARTS.filter(bp=>state.library.some(l=>l.bodyPart===bp));
+    if(!topShown && parts.length && !openParts.size) openParts.add(parts[0]);
+    parts.forEach(bp=>section(bp, state.library.filter(l=>l.bodyPart===bp), {collapsible:true, key:bp}));
+
+    if(!state.library.length){
+      body.innerHTML = `<div class="pk-empty">종목이 하나도 없습니다.<br>아래 <b>카탈로그에서 찾기</b> 로 담아보세요.</div>`;
+    }
+  }
+
+  sheet.querySelector('#pkQ').addEventListener('input', (e)=>{ q = e.target.value; expanded = null; draw(); });
+  draw();
 }
-function closeSheet(){ document.getElementById('sheetRoot').innerHTML=''; }
 
 async function deleteLibraryItem(id, name, mode, weekday){
   state.library = state.library.filter(x=>x.id!==id);
@@ -3320,6 +3484,7 @@ async function openCatalogSheet(){
       if(src.timed) item.timed = true;
       if(src.guide) item.guide = src.guide;
       if(src.icon) item.icon = src.icon;
+      if(src.aliases && src.aliases.length) item.aliases = src.aliases;
       if(src.weightStep != null) item.weightStep = src.weightStep;
       if(src.distanceUnit) item.distanceUnit = src.distanceUnit;
       if(src.met != null) item.met = src.met;
