@@ -608,5 +608,40 @@
         "failed": false
       }
     ]
+  },
+  "ex_shiv21i": {
+    "type": "strength",
+    "sets": [
+      {
+        "weight": 0,
+        "reps": 60,
+        "failed": false
+      },
+      {
+        "weight": 0,
+        "reps": 60,
+        "failed": false
+      },
+      {
+        "weight": 0,
+        "reps": 60,
+        "failed": false
+      },
+      {
+        "weight": 0,
+        "reps": 60,
+        "failed": false
+      },
+      {
+        "weight": 0,
+        "reps": 60,
+        "failed": false
+      },
+      {
+        "weight": 0,
+        "reps": 60,
+        "failed": false
+      }
+    ]
   }
 }
