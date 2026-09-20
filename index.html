@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- 훈련일지 v1.18 · 빌드 2026-09-20 -->
+<!-- 훈련일지 v1.19 · 빌드 2026-09-20 -->
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -366,6 +366,12 @@ nav.bottomnav button.active{color:var(--ink);background:var(--paper);}
     </div>
     <div class="small-note">휴식이 끝나기 10초 전과 5초 전에 "십초", "오초"를 알려줍니다. (남은 시간보다 긴 안내는 건너뜁니다)</div>
     <div class="divider"></div>
+    <div class="sheet-group-label">박자 소리</div>
+    <p class="muted">제자리 뛰기처럼 리듬을 타는 종목에 "띡 띡" 을 깔아 줍니다. 종목별로 켜고 끕니다.</p>
+    <div class="btn-row"><button class="btn ghost small" id="btnBeepTest">🔔 박자 소리 들어보기</button></div>
+    <div class="small-note">소리가 안 들리면 <b>아이폰 옆면 무음 스위치</b>를 먼저 확인하세요.
+      말소리는 무음 스위치를 무시하지만 박자음은 영향을 받을 수 있습니다. 볼륨도 같이 올려주세요.</div>
+    <div class="divider"></div>
     <div class="sheet-group-label">목소리</div>
     <div id="voiceList"><p class="muted">목록을 불러오는 중...</p></div>
     <div class="small-note">▶ 를 누르면 실제 흐름 그대로 들려줍니다 (세트 안내 → 카운트 세 번). 재생 중에 다시 누르면 멈춥니다.
@@ -623,7 +629,7 @@ nav.bottomnav button.active{color:var(--ink);background:var(--paper);}
    화면 상단(훈련일지 옆)에 표시되어, 어느 버전이 실제로 올라가 있는지
    바로 눈으로 구분할 수 있게 해줍니다.
 ============================================================ */
-const APP_VERSION = 'v1.18';
+const APP_VERSION = 'v1.19';
 const APP_BUILD = '2026-09-20';
 
 /* ============================================================
@@ -2969,33 +2975,92 @@ function speakNow(text){
 /* ---- 박자 소리 ----------------------------------------------------
    제자리 뛰기처럼 리듬을 타야 하는 종목에 "띡 띡" 을 깔아 준다.
    말소리로는 0.5초 간격을 따라갈 수 없어 짧은 전자음을 쓴다.
-   iOS 는 사용자가 화면을 누른 뒤에만 소리를 낼 수 있어서, 🔊 를
-   누르는 그 순간에 오디오를 깨워 둔다.                            */
+
+   아이폰에서 소리가 안 나던 이유가 둘 있었다.
+     · 옆면 무음 스위치를 내려 두면 WebAudio 는 통째로 막힌다.
+       (말소리는 그 스위치를 무시해서 목소리만 들렸다)
+     · 사용자가 화면을 누른 적이 없으면 소리를 낼 수 없다.
+   그래서 소리를 <audio> 로 낸다. <audio> 는 영상·음악과 같은 길을
+   타서 무음 스위치를 타지 않는다. 거기에 audioSession 을 playback
+   으로 선언해 WebAudio 쪽도 함께 열어 두고, 둘 다 막히면 마지막으로
+   WebAudio 로 떨어진다.                                         */
+const BEEP_SRC = { lo: 'data:audio/wav;base64,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', hi: 'data:audio/wav;base64,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' };
+const beepPool = { lo: [], hi: [], i: 0, ready: false };
 let _actx = null;
+
 function ensureAudio(){
+  /* 이 함수는 반드시 사용자가 화면을 누른 그 순간에 불려야 한다 */
+  try{
+    if(navigator.audioSession) navigator.audioSession.type = 'playback';
+  }catch(e){}
+  if(!beepPool.ready){
+    ['lo','hi'].forEach(k=>{
+      for(let n=0; n<4; n++){
+        const a = new Audio(BEEP_SRC[k]);
+        a.preload = 'auto';
+        a.playsInline = true;
+        beepPool[k].push(a);
+      }
+    });
+    beepPool.ready = true;
+  }
+  /* 아이폰은 element 마다 한 번씩 손으로 눌러 열어 줘야 한다.
+     소리를 죽인 채 재생했다가 곧바로 되감아 둔다. 여기서 볼륨을
+     건드렸다가 나중에 되돌리면 첫 박자가 무음으로 나가 버리므로,
+     muted 로만 막고 한 호흡 안에 전부 되돌려 놓는다. */
+  ['lo','hi'].forEach(k=>beepPool[k].forEach(a=>{
+    if(a.dataset.unlocked) return;
+    a.dataset.unlocked = '1';
+    a.muted = true;
+    try{
+      const pr = a.play();
+      if(pr && pr.catch) pr.catch(()=>{});
+    }catch(e){}
+    a.pause(); a.currentTime = 0; a.muted = false;
+  }));
   try{
     const AC = window.AudioContext || window.webkitAudioContext;
-    if(!AC) return null;
+    if(AC){
+      if(!_actx) _actx = new AC();
+      if(_actx.state === 'suspended') _actx.resume();
+    }
+  }catch(e){}
+  return true;
+}
+
+function beepWebAudio(strong){
+  try{
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if(!AC) return;
     if(!_actx) _actx = new AC();
     if(_actx.state === 'suspended') _actx.resume();
-  }catch(e){ return null; }
-  return _actx;
-}
-function beep(strong){
-  const ctx = ensureAudio();
-  if(!ctx) return;
-  try{
-    const t = ctx.currentTime;
-    const osc = ctx.createOscillator(), gain = ctx.createGain();
+    const t = _actx.currentTime;
+    const osc = _actx.createOscillator(), gain = _actx.createGain();
     osc.type = 'square';
-    osc.frequency.value = strong ? 1400 : 1000;   // 네 박마다 한 번 높게
+    osc.frequency.value = strong ? 1400 : 1000;
     gain.gain.setValueAtTime(0.0001, t);
-    gain.gain.exponentialRampToValueAtTime(strong ? 0.28 : 0.18, t + 0.004);
+    gain.gain.exponentialRampToValueAtTime(strong ? 0.3 : 0.2, t + 0.004);
     gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.055);
-    osc.connect(gain); gain.connect(ctx.destination);
+    osc.connect(gain); gain.connect(_actx.destination);
     osc.start(t); osc.stop(t + 0.07);
   }catch(e){}
 }
+
+function beep(strong){
+  const k = strong ? 'hi' : 'lo';
+  const list = beepPool[k];
+  if(list && list.length){
+    const a = list[beepPool.i++ % list.length];
+    try{
+      a.currentTime = 0;
+      const pr = a.play();
+      if(pr && pr.catch) pr.catch(()=>beepWebAudio(strong));
+      return;
+    }catch(e){ /* 아래로 */ }
+  }
+  beepWebAudio(strong);
+}
+
 /* 스스로 어긋남을 바로잡는 박자 루프. 멈춰 있는 동안에는 소리만 쉰다. */
 function startMetronome(intervalMs){
   stopMetronome();
@@ -3015,6 +3080,23 @@ function startMetronome(intervalMs){
   step();
 }
 function stopMetronome(){ clearTimeout(vs.met); vs.met = null; }
+
+/* 설정에서 눌러 보는 시험 재생 — 운동을 시작하지 않고도 소리를 확인한다 */
+let _beepTestTm = null;
+function playBeepTest(){
+  if(_beepTestTm){ clearTimeout(_beepTestTm); _beepTestTm = null; showToast('박자 멈춤'); return; }
+  ensureAudio();
+  const t = Number(state.voiceDefaults.testTempo) || 0.5;
+  let n = 0;
+  const t0 = performance.now();
+  const step = ()=>{
+    beep(n % 4 === 0);
+    n++;
+    if(n >= 12){ _beepTestTm = null; return; }
+    _beepTestTm = setTimeout(step, Math.max(5, t0 + n*t*1000 - performance.now()));
+  };
+  step();
+}
 
 /* ---- 세션 ---------------------------------------------------------
    vs.paused 는 카운트다운 루프가 매 틱마다 확인한다. 발화 도중에
@@ -3215,6 +3297,7 @@ function bindVoiceHandlers(){
     });
   });
   document.getElementById('btnOpenCatalog').addEventListener('click', ()=>openCatalogSheet('library'));
+  document.getElementById('btnBeepTest').addEventListener('click', playBeepTest);
 }
 function voiceDefBadgeText(){
   const g = state.voiceDefaults;
