@@ -133,5 +133,22 @@
       "calf raise hold",
       "heel raise isometric"
     ]
+  },
+  {
+    "id": "ex_shiv21i",
+    "name": "제자리 뛰기",
+    "bodyPart": "하체",
+    "type": "strength",
+    "catalogId": "cat_pogo_hop",
+    "timed": true,
+    "guide": "발을 모으고 무릎은 거의 펴진 채로, 발목의 탄력만 써서 가볍게 통통 뜁니다. 발볼로 착지해 소리가 크게 나지 않게 하고, 뒤꿈치는 바닥에 살짝 닿을 정도까지만 내립니다. 박자 소리에 맞춰 1분 정도씩 나눠서 합니다.",
+    "icon": "jump",
+    "aliases": [
+      "콩콩 뛰기",
+      "포고 홉",
+      "제자리 점프",
+      "pogo hop"
+    ],
+    "tempoSec": 0.5
   }
 ]
