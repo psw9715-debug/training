@@ -327,14 +327,19 @@
           "weight": 0,
           "reps": 60,
           "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 60,
+          "failed": false
         }
       ]
     }
   ],
   "calories": {
-    "strength": 869,
+    "strength": 886,
     "cardio": 0,
-    "total": 869
+    "total": 886
   },
-  "savedAt": "2026-09-20T14:46:09.241Z"
+  "savedAt": "2026-09-20T14:49:22.493Z"
 }
