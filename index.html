@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- 훈련일지 v1.17 · 빌드 2026-09-19 -->
+<!-- 훈련일지 v1.18 · 빌드 2026-09-20 -->
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -623,8 +623,8 @@ nav.bottomnav button.active{color:var(--ink);background:var(--paper);}
    화면 상단(훈련일지 옆)에 표시되어, 어느 버전이 실제로 올라가 있는지
    바로 눈으로 구분할 수 있게 해줍니다.
 ============================================================ */
-const APP_VERSION = 'v1.17';
-const APP_BUILD = '2026-09-19';
+const APP_VERSION = 'v1.18';
+const APP_BUILD = '2026-09-20';
 
 /* ============================================================
    상수
@@ -770,6 +770,13 @@ function exIsTimed(x){ return !!(libOf(x)||{}).timed; }
 function exNoWeight(x){ const l = libOf(x)||{}; return !!(l.repsOnly || l.timed); }
 function exUnit(x){ return exIsTimed(x) ? '초' : '회'; }
 function exMode(x){ const l = libOf(x)||{}; return l.timed ? 'time' : (l.repsOnly ? 'reps' : 'weight'); }
+/* 템포가 있는 종목(제자리 뛰기 같은)은 초를 정하면 횟수가 따라 나온다.
+   0.5초에 한 번이면 60초에 약 120번. 사람이 정하는 건 초 하나뿐이다. */
+function tempoOf(x){ const l = libOf(x)||{}; return Number(l.tempoSec) || 0; }
+function tempoReps(x, sec){
+  const t = tempoOf(x);
+  return (t && sec) ? Math.round(sec / t) : 0;
+}
 function fmtSecKo(sec){
   sec = Math.round(Number(sec)||0);
   if(sec < 60) return `${sec}초`;
@@ -1362,7 +1369,8 @@ function renderEntryCard(en){
       const vol = isRepsOnly ? 0 : computeVolume(en.sets);
       const totalReps = (en.sets||[]).reduce((sum,s)=>sum+(Number(s.reps)||0),0);
       const statTxt = exIsTimed(lib)
-        ? (totalReps>0 ? `총 ${fmtSecKo(totalReps)} 버티기` : '')
+        ? (totalReps>0 ? (tempoOf(lib) ? `총 ${fmtSecKo(totalReps)} · 약 ${tempoReps(lib,totalReps)}회`
+                                       : `총 ${fmtSecKo(totalReps)} 버티기`) : '')
         : (isRepsOnly ? (totalReps>0?`총 ${totalReps}회`:'') : (vol>0?`총 볼륨 ${Math.round(vol)}kg`:''));
       const est = estimateVoiceSeconds(en);
       const statLine = [statTxt, est? `약 ${fmtDur(est)}`:''].filter(Boolean);
@@ -2714,6 +2722,11 @@ EX_ICONS.bw_calf = `<g class="fr">${G}<path d="M76 86 V34"/><path d="M68 34 H84"
 EX_ICONS.wall_sit = `<g class="fr">${G}<path d="M22 86 V20"/></g>
   <g class="body">${PLATE(38,34,9)}<path d="M30 44 V64"/><path d="M30 64 H58"/><path d="M58 64 V84"/></g>`;
 
+EX_ICONS.jump = `<g class="fr">${G}</g>
+  <g class="body">${PLATE(50,24,9)}<path d="M50 34 V52"/><path d="M50 52 L41 66"/><path d="M50 52 L59 66"/>
+    <path d="M45 40 L34 32"/><path d="M55 40 L66 32"/></g>
+  <g class="mv"><path d="M28 78 H42"/><path d="M58 78 H72"/></g>`;
+
 /* ---------- 유산소 ---------- */
 EX_ICONS.treadmill = `<g class="fr">${G}<path d="M20 78 H70"/><path d="M20 78 V70"/><path d="M70 78 V70"/><path d="M62 70 V34"/></g>
   <g class="mv"><path d="M48 34 H80"/><path d="M18 70 H72"/></g>`;
@@ -2897,7 +2910,10 @@ function buildSetAnnounce(exName, lib, idx, set, withName){
 }
 function setLabel(lib, s){
   const n = Math.floor(Number(s.reps)||0);
-  if(lib.timed) return `${n}초 버티기`;
+  if(lib.timed){
+    const r = tempoReps(lib, n);
+    return r ? `${n}초 · 약 ${r}회` : `${n}초 버티기`;
+  }
   return (lib.repsOnly || !(Number(s.weight)>0)) ? `${n}회` : `${Number(s.weight)}kg × ${n}회`;
 }
 
@@ -2950,11 +2966,61 @@ function speakNow(text){
   try{ speechSynthesis.speak(voiceEngine.make(text)); }catch(e){}
 }
 
+/* ---- 박자 소리 ----------------------------------------------------
+   제자리 뛰기처럼 리듬을 타야 하는 종목에 "띡 띡" 을 깔아 준다.
+   말소리로는 0.5초 간격을 따라갈 수 없어 짧은 전자음을 쓴다.
+   iOS 는 사용자가 화면을 누른 뒤에만 소리를 낼 수 있어서, 🔊 를
+   누르는 그 순간에 오디오를 깨워 둔다.                            */
+let _actx = null;
+function ensureAudio(){
+  try{
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if(!AC) return null;
+    if(!_actx) _actx = new AC();
+    if(_actx.state === 'suspended') _actx.resume();
+  }catch(e){ return null; }
+  return _actx;
+}
+function beep(strong){
+  const ctx = ensureAudio();
+  if(!ctx) return;
+  try{
+    const t = ctx.currentTime;
+    const osc = ctx.createOscillator(), gain = ctx.createGain();
+    osc.type = 'square';
+    osc.frequency.value = strong ? 1400 : 1000;   // 네 박마다 한 번 높게
+    gain.gain.setValueAtTime(0.0001, t);
+    gain.gain.exponentialRampToValueAtTime(strong ? 0.28 : 0.18, t + 0.004);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.055);
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.start(t); osc.stop(t + 0.07);
+  }catch(e){}
+}
+/* 스스로 어긋남을 바로잡는 박자 루프. 멈춰 있는 동안에는 소리만 쉰다. */
+function startMetronome(intervalMs){
+  stopMetronome();
+  const t0 = performance.now();
+  let n = 0;
+  const step = ()=>{
+    if(!vs.active || vs.abort){ stopMetronome(); return; }
+    if(!vs.paused) beep(n % 4 === 0);
+    n++;
+    let next = t0 + n*intervalMs - performance.now();
+    if(next < -intervalMs){                       // 한참 밀렸으면 박자를 다시 맞춘다
+      n = Math.ceil((performance.now() - t0) / intervalMs);
+      next = t0 + n*intervalMs - performance.now();
+    }
+    vs.met = setTimeout(step, Math.max(5, next));
+  };
+  step();
+}
+function stopMetronome(){ clearTimeout(vs.met); vs.met = null; }
+
 /* ---- 세션 ---------------------------------------------------------
    vs.paused 는 카운트다운 루프가 매 틱마다 확인한다. 발화 도중에
    일시정지를 누르면 그 한 마디는 끝까지 나오고 그다음 침묵부터
    멈춘다(발화 단위가 1초 미만이라 체감 차이가 없다).            */
-const vs = { active:false, paused:false, abort:false, entry:null, lib:null, cfg:null, sets:[], tm:null, wakeLock:null };
+const vs = { active:false, paused:false, abort:false, entry:null, lib:null, cfg:null, sets:[], tm:null, met:null, wakeLock:null };
 
 function vsCountdown(totalMs, marks, onTick){
   return new Promise(resolve=>{
@@ -2989,6 +3055,7 @@ async function startVoiceSession(en){
 
   voOpen(en.name);
   document.getElementById('voFig').innerHTML = exIconHTML(vs.lib);
+  ensureAudio();          // 화면을 누른 지금이 소리를 켤 수 있는 유일한 순간
   acquireWakeLock();
   try{ await runVoiceSession(); }
   catch(e){ showToast('음성 재생 오류: ' + e.message); }
@@ -3015,18 +3082,22 @@ async function runVoiceSession(){
 
     if(lib.timed){
       // 버티기 — 초를 하나씩 세지 않고, 끝나가는 시점만 짚어준다
-      voPhase('hold', '버티는 중');
+      const tempo = tempoOf(lib);
+      voPhase('hold', tempo ? '진행 중' : '버티는 중');
       // 큰 숫자가 남은 초라 시간은 이미 보인다. 페이스 조절에 쓰이는 건 남은 세트 수.
       voSub(i + 1 < sets.length ? `남은 세트 ${sets.length - i - 1}` : '마지막 세트');
       await speakAsync('시작');
       if(vs.abort) return;
+      if(tempo) startMetronome(tempo * 1000);
       const holdMs = reps * 1000;
       const marks = [];
       cfg.warnAt.forEach(w=>{ if(w*1000 < holdMs - 1500) marks.push({ remain: w*1000, text: sinoKo(w) + '초' }); });
       if(holdMs >= 5000) [3,2,1].forEach(w=>marks.push({ remain: w*1000, text: sinoKo(w) }));
-      if(await vsCountdown(holdMs, marks, (remain, prog)=>{
+      const held = await vsCountdown(holdMs, marks, (remain, prog)=>{
         voBig(Math.ceil(remain/1000)); voRing(prog);
-      }) === 'abort') return;
+      });
+      stopMetronome();
+      if(held === 'abort') return;
       await speakAsync('끝');
       if(vs.abort) return;
       continue;
@@ -3051,6 +3122,7 @@ async function runVoiceSession(){
 function endVoiceSession(){
   vs.abort = true;
   clearTimeout(vs.tm);
+  stopMetronome();
   try{ speechSynthesis.cancel(); }catch(e){}
   vs.active = false; vs.paused = false;
   releaseWakeLock();
@@ -3233,10 +3305,19 @@ async function playVoiceSample(uriOverride, exercise){
       // 버티기는 세는 소리가 없으니 시작과 마무리만 들려준다
       if(_sampleAbort) return;
       await speakAsync('시작', vo);
-      for(const n of [3,2,1]){
-        if(_sampleAbort) return;
-        await new Promise(r=>setTimeout(r, 1000));
-        await speakAsync(sinoKo(n), vo);
+      const t = tempoOf(exercise);
+      if(t){                                   // 박자가 있으면 여덟 박만 들려준다
+        ensureAudio();
+        for(let k=0; k<8 && !_sampleAbort; k++){
+          beep(k % 4 === 0);
+          await new Promise(r=>setTimeout(r, t*1000));
+        }
+      } else {
+        for(const n of [3,2,1]){
+          if(_sampleAbort) return;
+          await new Promise(r=>setTimeout(r, 1000));
+          await speakAsync(sinoKo(n), vo);
+        }
       }
       if(!_sampleAbort) await speakAsync('끝', vo);
       return;
@@ -3312,6 +3393,12 @@ function openLibraryDetailSheet(it){
           <button type="button" class="ldMode" data-mode="reps">횟수만</button>
           <button type="button" class="ldMode" data-mode="time">시간 버티기</button>
         </div>
+        <div class="dial-row" id="ldTempoWrap" style="${it.timed?'':'display:none;'}">
+          <span class="dl">박자 소리<br><span class="muted" style="font-size:11px;">몇 초에 한 번 "띡" 할지</span></span>
+          <input type="range" id="ldTempo" min="0" max="2" step="0.1" value="${it.tempoSec||0}">
+          <span class="dv" id="ldTempoV">${it.tempoSec ? it.tempoSec+'초' : '없음'}</span>
+        </div>
+        <div class="small-note" id="ldTempoNote" style="${it.timed?'':'display:none;'}"></div>
         <div class="dial-row" id="ldStepWrap" style="${exNoWeight(it)?'display:none;':''}">
           <span class="dl">무게 조절 단위</span>
           <input type="number" id="ldWeightStep" step="0.5" value="${it.weightStep ?? DEFAULT_WEIGHT_STEP}" style="flex:1.4;">
@@ -3355,11 +3442,40 @@ function openLibraryDetailSheet(it){
 
   const stepWrap = inner.querySelector('#ldStepWrap');
   const stepInput = inner.querySelector('#ldWeightStep');
+  const tempoWrap = inner.querySelector('#ldTempoWrap');
+  const tempoNote = inner.querySelector('#ldTempoNote');
+  const tempoEl   = inner.querySelector('#ldTempo');
+  const tempoVal  = inner.querySelector('#ldTempoV');
+  const firstSec  = ()=> Math.floor(Number((((state.templates[it.id]||{}).sets||[])[0]||{}).reps) || 0);
+  const syncTempo = ()=>{
+    const t = Number(tempoEl.value) || 0;
+    tempoVal.textContent = t ? t.toFixed(1)+'초' : '없음';
+    tempoVal.classList.toggle('def', !t);
+    const sec = firstSec();
+    tempoNote.textContent = t
+      ? `${t.toFixed(1)}초에 한 번 = 분당 약 ${Math.round(60/t)}회`
+        + (sec ? ` · 한 세트 ${sec}초면 약 ${Math.round(sec/t)}번` : '')
+      : '소리 없이 시간만 셉니다.';
+  };
   const syncMode = ()=>{
     const m = exMode(it);
     inner.querySelectorAll('.ldMode').forEach(b=>b.classList.toggle('active', b.dataset.mode===m));
     stepWrap.style.display = (m==='weight') ? 'flex' : 'none';
+    tempoWrap.style.display = (m==='time') ? 'flex' : 'none';
+    tempoNote.style.display = (m==='time') ? 'block' : 'none';
+    syncTempo();
   };
+  let _tpTm;
+  tempoEl.addEventListener('input', ()=>{
+    const t = Number(tempoEl.value) || 0;
+    if(t) it.tempoSec = t; else delete it.tempoSec;
+    syncTempo();
+    if(t) beep(false);                     // 움직이는 동안 바로 들려준다
+    renderEntryList();
+    clearTimeout(_tpTm);
+    _tpTm = setTimeout(()=>saveLib(`tempo ${it.name}`), 900);
+  });
+  tempoEl.addEventListener('pointerdown', ensureAudio);
   syncMode();
   inner.querySelectorAll('.ldMode').forEach(b=>{
     b.addEventListener('click', async ()=>{
@@ -3476,6 +3592,7 @@ async function openCatalogSheet(mode, weekday){
     if(src.guide) item.guide = src.guide;
     if(src.icon) item.icon = src.icon;
     if(src.aliases && src.aliases.length) item.aliases = src.aliases;
+    if(src.tempoSec) item.tempoSec = src.tempoSec;
     if(src.weightStep != null) item.weightStep = src.weightStep;
     if(src.distanceUnit) item.distanceUnit = src.distanceUnit;
     if(src.met != null) item.met = src.met;
