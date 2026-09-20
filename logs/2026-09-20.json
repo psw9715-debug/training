@@ -266,12 +266,36 @@
           "failed": false
         }
       ]
+    },
+    {
+      "instanceId": "u9umdxp",
+      "exerciseId": "ex_4woxit3",
+      "name": "스쿼트",
+      "type": "strength",
+      "adHoc": true,
+      "sets": [
+        {
+          "weight": 0,
+          "reps": 20,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 20,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 20,
+          "failed": false
+        }
+      ]
     }
   ],
   "calories": {
-    "strength": 718,
+    "strength": 769,
     "cardio": 0,
-    "total": 718
+    "total": 769
   },
-  "savedAt": "2026-09-19T23:14:36.268Z"
+  "savedAt": "2026-09-20T14:00:52.752Z"
 }
