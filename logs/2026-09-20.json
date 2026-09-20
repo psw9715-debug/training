@@ -290,12 +290,51 @@
           "failed": false
         }
       ]
+    },
+    {
+      "instanceId": "oljd9xc",
+      "exerciseId": "ex_shiv21i",
+      "name": "제자리 뛰기",
+      "type": "strength",
+      "adHoc": true,
+      "sets": [
+        {
+          "weight": 0,
+          "reps": 60,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 60,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 60,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 60,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 60,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 60,
+          "failed": false
+        }
+      ]
     }
   ],
   "calories": {
-    "strength": 769,
+    "strength": 869,
     "cardio": 0,
-    "total": 769
+    "total": 869
   },
-  "savedAt": "2026-09-20T14:00:52.752Z"
+  "savedAt": "2026-09-20T14:46:09.241Z"
 }
