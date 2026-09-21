@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- 훈련일지 v1.19 · 빌드 2026-09-20 -->
+<!-- 훈련일지 v1.20 · 빌드 2026-09-21 -->
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -629,8 +629,8 @@ nav.bottomnav button.active{color:var(--ink);background:var(--paper);}
    화면 상단(훈련일지 옆)에 표시되어, 어느 버전이 실제로 올라가 있는지
    바로 눈으로 구분할 수 있게 해줍니다.
 ============================================================ */
-const APP_VERSION = 'v1.19';
-const APP_BUILD = '2026-09-20';
+const APP_VERSION = 'v1.20';
+const APP_BUILD = '2026-09-21';
 
 /* ============================================================
    상수
@@ -776,9 +776,19 @@ function exIsTimed(x){ return !!(libOf(x)||{}).timed; }
 function exNoWeight(x){ const l = libOf(x)||{}; return !!(l.repsOnly || l.timed); }
 function exUnit(x){ return exIsTimed(x) ? '초' : '회'; }
 function exMode(x){ const l = libOf(x)||{}; return l.timed ? 'time' : (l.repsOnly ? 'reps' : 'weight'); }
-/* 템포가 있는 종목(제자리 뛰기 같은)은 초를 정하면 횟수가 따라 나온다.
-   0.5초에 한 번이면 60초에 약 120번. 사람이 정하는 건 초 하나뿐이다. */
-function tempoOf(x){ const l = libOf(x)||{}; return Number(l.tempoSec) || 0; }
+/* 박자는 BPM(분당 몇 번)으로 정한다. 120 BPM = 0.5초에 한 번.
+   초로 적던 예전 값(tempoSec)도 그대로 읽어 준다. */
+const TEMPO_BPMS = [60, 90, 120, 150, 180];
+function tempoBpmOf(x){
+  const l = libOf(x) || {};
+  if(l.tempoBpm) return Number(l.tempoBpm) || 0;
+  if(l.tempoSec) return Math.round(60 / Number(l.tempoSec));   // 예전 형식
+  return 0;
+}
+function tempoOf(x){                                            // 초 간격
+  const bpm = tempoBpmOf(x);
+  return bpm ? 60 / bpm : 0;
+}
 function tempoReps(x, sec){
   const t = tempoOf(x);
   return (t && sec) ? Math.round(sec / t) : 0;
@@ -3081,6 +3091,23 @@ function startMetronome(intervalMs){
 }
 function stopMetronome(){ clearTimeout(vs.met); vs.met = null; }
 
+/* 고른 빠르기를 네 박만 들려준다 */
+let _tempoPreviewTm = null;
+function previewTempo(bpm){
+  clearTimeout(_tempoPreviewTm);
+  ensureAudio();
+  const ms = 60000 / bpm;
+  let n = 0;
+  const t0 = performance.now();
+  const step = ()=>{
+    beep(n % 4 === 0);
+    n++;
+    if(n >= 4){ _tempoPreviewTm = null; return; }
+    _tempoPreviewTm = setTimeout(step, Math.max(5, t0 + n*ms - performance.now()));
+  };
+  step();
+}
+
 /* 설정에서 눌러 보는 시험 재생 — 운동을 시작하지 않고도 소리를 확인한다 */
 let _beepTestTm = null;
 function playBeepTest(){
@@ -3155,7 +3182,7 @@ async function runVoiceSession(){
     const marks = [{ remain: totalMs, text: buildSetAnnounce(entry.name, lib, i, s, i === 0) }];
     cfg.warnAt.forEach(w=>{ if(w*1000 < totalMs) marks.push({ remain: w*1000, text: sinoKo(w) + '초' }); });
 
-    voPhase(i === 0 ? 'prep' : 'rest', i === 0 ? '준비' : '휴식');
+    voPhase(i === 0 ? 'prep' : 'rest', i === 0 ? '준비' : '휴식', i === 0);
     voHeader(i, sets.length, setLabel(lib, s));
     voSub(i + 1 < sets.length ? `다음: ${setLabel(lib, sets[i+1])}` : '마지막 세트');
     if(await vsCountdown(totalMs, marks, (remain, prog)=>{
@@ -3231,15 +3258,17 @@ function voOpen(name){
   ov.classList.remove('hidden');
   document.getElementById('voFig').innerHTML = '';
   document.getElementById('voExName').textContent = name;
-  voPhase('prep','준비'); voBig('-'); voRing(0); voSub('');
+  voPhase('prep','준비', false); voBig('-'); voRing(0); voSub('');
 }
-function voPhase(phase, label){
+/* 기구 그림은 첫 세트 준비 때만 띄운다. 두번째 세트부터는 숫자에만
+   집중하도록 그림을 치운다. 단계 이름에 기대지 않고 호출할 때 직접
+   정해 주어, 어떤 종목이든 똑같이 동작하게 한다. */
+function voPhase(phase, label, showFig){
   const ov = document.getElementById('voiceOverlay');
-  // 준비 시간에는 큰 숫자 대신 기구 그림을 보여준다. 어차피 기다리는
-  // 시간이라 그때 자세를 확인하는 편이 낫다.
-  const withFig = (phase === 'prep') && !!document.getElementById('voFig').innerHTML;
+  const fig = document.getElementById('voFig');
+  const withFig = !!showFig && !!fig.innerHTML;
   ov.className = 'vo phase-' + phase + (withFig ? ' with-fig' : '');
-  document.getElementById('voFig').classList.toggle('hidden', !withFig);
+  fig.classList.toggle('hidden', !withFig);
   document.getElementById('voPhase').textContent = label;
 }
 function voHeader(idx, total, targetLabel){
@@ -3476,12 +3505,14 @@ function openLibraryDetailSheet(it){
           <button type="button" class="ldMode" data-mode="reps">횟수만</button>
           <button type="button" class="ldMode" data-mode="time">시간 버티기</button>
         </div>
-        <div class="dial-row" id="ldTempoWrap" style="${it.timed?'':'display:none;'}">
-          <span class="dl">박자 소리<br><span class="muted" style="font-size:11px;">몇 초에 한 번 "띡" 할지</span></span>
-          <input type="range" id="ldTempo" min="0" max="2" step="0.1" value="${it.tempoSec||0}">
-          <span class="dv" id="ldTempoV">${it.tempoSec ? it.tempoSec+'초' : '없음'}</span>
+        <div id="ldTempoWrap" style="${it.timed?'':'display:none;'}">
+          <div class="sheet-group-label">박자 소리 <span class="muted" style="font-size:11px;">BPM · 분당 몇 번</span></div>
+          <div class="chip-row" style="margin-bottom:6px;">
+            <button type="button" class="chip-btn tpChip" data-bpm="0">없음</button>
+            ${TEMPO_BPMS.map(v=>`<button type="button" class="chip-btn tpChip" data-bpm="${v}">${v}</button>`).join('')}
+          </div>
+          <div class="small-note" id="ldTempoNote"></div>
         </div>
-        <div class="small-note" id="ldTempoNote" style="${it.timed?'':'display:none;'}"></div>
         <div class="dial-row" id="ldStepWrap" style="${exNoWeight(it)?'display:none;':''}">
           <span class="dl">무게 조절 단위</span>
           <input type="number" id="ldWeightStep" step="0.5" value="${it.weightStep ?? DEFAULT_WEIGHT_STEP}" style="flex:1.4;">
@@ -3527,17 +3558,14 @@ function openLibraryDetailSheet(it){
   const stepInput = inner.querySelector('#ldWeightStep');
   const tempoWrap = inner.querySelector('#ldTempoWrap');
   const tempoNote = inner.querySelector('#ldTempoNote');
-  const tempoEl   = inner.querySelector('#ldTempo');
-  const tempoVal  = inner.querySelector('#ldTempoV');
   const firstSec  = ()=> Math.floor(Number((((state.templates[it.id]||{}).sets||[])[0]||{}).reps) || 0);
   const syncTempo = ()=>{
-    const t = Number(tempoEl.value) || 0;
-    tempoVal.textContent = t ? t.toFixed(1)+'초' : '없음';
-    tempoVal.classList.toggle('def', !t);
+    const bpm = tempoBpmOf(it);
+    inner.querySelectorAll('.tpChip').forEach(c=>c.classList.toggle('selected', Number(c.dataset.bpm)===bpm));
     const sec = firstSec();
-    tempoNote.textContent = t
-      ? `${t.toFixed(1)}초에 한 번 = 분당 약 ${Math.round(60/t)}회`
-        + (sec ? ` · 한 세트 ${sec}초면 약 ${Math.round(sec/t)}번` : '')
+    tempoNote.textContent = bpm
+      ? `${bpm} BPM · ${+(60/bpm).toFixed(2)}초에 한 번`
+        + (sec ? ` · 한 세트 ${sec}초면 약 ${Math.round(sec*bpm/60)}번` : '')
       : '소리 없이 시간만 셉니다.';
   };
   const syncMode = ()=>{
@@ -3549,16 +3577,19 @@ function openLibraryDetailSheet(it){
     syncTempo();
   };
   let _tpTm;
-  tempoEl.addEventListener('input', ()=>{
-    const t = Number(tempoEl.value) || 0;
-    if(t) it.tempoSec = t; else delete it.tempoSec;
-    syncTempo();
-    if(t) beep(false);                     // 움직이는 동안 바로 들려준다
-    renderEntryList();
-    clearTimeout(_tpTm);
-    _tpTm = setTimeout(()=>saveLib(`tempo ${it.name}`), 900);
+  inner.querySelectorAll('.tpChip').forEach(c=>{
+    c.addEventListener('click', ()=>{
+      ensureAudio();
+      const bpm = Number(c.dataset.bpm) || 0;
+      delete it.tempoSec;                  // 예전 형식은 정리하고 BPM 으로 통일
+      if(bpm) it.tempoBpm = bpm; else delete it.tempoBpm;
+      syncTempo();
+      if(bpm) previewTempo(bpm);           // 고른 빠르기를 네 박만 들려준다
+      renderEntryList();
+      clearTimeout(_tpTm);
+      _tpTm = setTimeout(()=>saveLib(`tempo ${it.name}`), 800);
+    });
   });
-  tempoEl.addEventListener('pointerdown', ensureAudio);
   syncMode();
   inner.querySelectorAll('.ldMode').forEach(b=>{
     b.addEventListener('click', async ()=>{
@@ -3675,7 +3706,8 @@ async function openCatalogSheet(mode, weekday){
     if(src.guide) item.guide = src.guide;
     if(src.icon) item.icon = src.icon;
     if(src.aliases && src.aliases.length) item.aliases = src.aliases;
-    if(src.tempoSec) item.tempoSec = src.tempoSec;
+    if(src.tempoBpm) item.tempoBpm = src.tempoBpm;
+    else if(src.tempoSec) item.tempoBpm = Math.round(60 / src.tempoSec);
     if(src.weightStep != null) item.weightStep = src.weightStep;
     if(src.distanceUnit) item.distanceUnit = src.distanceUnit;
     if(src.met != null) item.met = src.met;

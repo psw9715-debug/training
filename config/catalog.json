@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated": "2026-09-20",
+  "updated": "2026-09-21",
   "note": "일반 헬스장 + 생활 운동 기준 기본 종목 판. 여기서 골라 담으면 내 라이브러리(config/exercises.json)로 복사됩니다. timed:true 는 횟수가 아니라 시간을 버티는 종목이며, 세트의 숫자를 초로 읽습니다. 없는 기구는 '새 종목 만들기'로 직접 추가하세요.",
   "items": [
     {
@@ -1160,9 +1160,9 @@
       "bodyPart": "하체",
       "type": "strength",
       "timed": true,
-      "tempoSec": 0.5,
       "guide": "발을 모으고 무릎은 거의 펴진 채로, 발목의 탄력만 써서 가볍게 통통 뜁니다. 발볼로 착지해 소리가 크게 나지 않게 하고, 뒤꿈치는 바닥에 살짝 닿을 정도까지만 내립니다. 박자 소리에 맞춰 1분 정도씩 나눠서 합니다.",
-      "icon": "jump"
+      "icon": "jump",
+      "tempoBpm": 120
     },
     {
       "id": "cat_jumping_jack",
@@ -1174,9 +1174,9 @@
       "bodyPart": "기타",
       "type": "strength",
       "timed": true,
-      "tempoSec": 0.5,
       "guide": "차렷 자세에서 뛰면서 다리를 어깨너비보다 넓게 벌리고 팔은 머리 위로 올립니다. 다시 뛰어 처음 자세로. 착지할 때 무릎을 살짝 굽혀 충격을 줄입니다.",
-      "icon": "jump"
+      "icon": "jump",
+      "tempoBpm": 120
     },
     {
       "id": "cat_jump_rope",
@@ -1189,9 +1189,9 @@
       "bodyPart": "유산소",
       "type": "strength",
       "timed": true,
-      "tempoSec": 0.5,
       "guide": "손목만 돌려 줄을 넘기고, 발은 바닥에서 2~3cm만 뜨게 합니다. 시선은 정면, 팔꿈치는 몸통 가까이. 줄 없이 흉내만 내도(섀도우 줄넘기) 같은 효과를 냅니다.",
-      "icon": "jump"
+      "icon": "jump",
+      "tempoBpm": 120
     },
     {
       "id": "cat_high_knees",
@@ -1203,9 +1203,9 @@
       "bodyPart": "하체",
       "type": "strength",
       "timed": true,
-      "tempoSec": 0.5,
       "guide": "제자리에서 달리듯 무릎을 골반 높이까지 번갈아 올립니다. 상체는 세우고 배에 힘을 준 채, 발볼로 가볍게 착지합니다.",
-      "icon": "jump"
+      "icon": "jump",
+      "tempoBpm": 120
     },
     {
       "id": "cat_mountain_climber",
@@ -1217,9 +1217,9 @@
       "bodyPart": "복근",
       "type": "strength",
       "timed": true,
-      "tempoSec": 0.5,
       "guide": "푸시업 자세에서 무릎을 가슴 쪽으로 번갈아 당깁니다. 엉덩이가 솟지 않게 어깨-엉덩이-발을 일직선으로 유지합니다.",
-      "icon": "bw_prone"
+      "icon": "bw_prone",
+      "tempoBpm": 120
     },
     {
       "id": "cat_treadmill",
