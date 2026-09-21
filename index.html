@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- 훈련일지 v1.21 · 빌드 2026-09-21 -->
+<!-- 훈련일지 v1.22 · 빌드 2026-09-21 -->
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -505,7 +505,8 @@ nav.bottomnav button.active{color:var(--ink);background:var(--paper);}
         <button class="btn ghost small" id="btnOpenCatalog">📚 카탈로그에서 추가</button>
         <button class="btn ghost small" id="btnOpenAddLibrary">+ 새 종목 만들기</button>
       </div>
-      <div class="small-note">종목을 누르면 음성 안내 간격·휴식·세트 구성을 바꿀 수 있습니다.</div>
+      <div class="small-note">종목을 누르면 박자(BPM)·준비·휴식·세트 구성·자세를 바꿀 수 있습니다.
+        오늘 탭에서 종목 카드를 펼쳐 <b>⚙ 종목 설정</b>을 눌러도 같은 화면이 열립니다.</div>
     </div>
   </div>
 </section>
@@ -629,7 +630,7 @@ nav.bottomnav button.active{color:var(--ink);background:var(--paper);}
    화면 상단(훈련일지 옆)에 표시되어, 어느 버전이 실제로 올라가 있는지
    바로 눈으로 구분할 수 있게 해줍니다.
 ============================================================ */
-const APP_VERSION = 'v1.21';
+const APP_VERSION = 'v1.22';
 const APP_BUILD = '2026-09-21';
 
 /* ============================================================
@@ -1317,6 +1318,7 @@ function renderEntryCard(en){
       actions.innerHTML = `
         <button class="btn ghost small btnAddSet" style="flex:2;">+ 세트 추가${isTimedEx?'':'(패턴)'}</button>
         ${isTimedEx?'':'<button class="btn ghost small btnCopySet" style="flex:1;">동일 복사</button>'}
+        ${lib ? '<button class="btn ghost small btnExSet" style="flex:1 1 100%;">⚙ 종목 설정 (박자·준비·휴식·자세)</button>' : ''}
         <button class="btn ghost small btnDone" style="flex:1 1 100%;">완료로 표시</button>
         ${en.adHoc? '<button class="btn ghost small btnRemove">이 종목 빼기</button>' : ''}
       `;
@@ -1396,6 +1398,12 @@ function renderEntryCard(en){
   }
   card.appendChild(body);
 
+  const btnExSet = body.querySelector('.btnExSet');
+  if(btnExSet) btnExSet.addEventListener('click',(e)=>{
+    e.stopPropagation();
+    const it = findLibItem(en.exerciseId);
+    if(it) openLibraryDetailSheet(it); else showToast('라이브러리에 없는 종목이에요');
+  });
   const btnDone = body.querySelector('.btnDone');
   if(btnDone) btnDone.addEventListener('click',(e)=>{ e.stopPropagation(); en.completed=true; en.expanded=false; renderEntryList(); });
   const btnRemove = body.querySelector('.btnRemove');
@@ -1705,7 +1713,11 @@ function openPickerSheet(mode, weekday){
       <div class="meta">${esc(it.bodyPart||'')} · ${kind} · ${n ? `${n}번 했음` : '아직 안 해봄'}</div>
       ${it.guide ? `<div class="form-guide"><b>자세</b>${esc(it.guide)}</div>` : ''}
       ${last ? `<div class="vol-line" style="text-align:center;">마지막: ${esc(last)}</div>` : ''}
-      <div class="btn-row"><button class="btn ghost small pkDel" style="color:var(--red);border-color:var(--red);">이 종목 삭제</button></div>`;
+      <div class="btn-row">
+        <button class="btn ghost small pkSet">⚙ 설정</button>
+        <button class="btn ghost small pkDel" style="color:var(--red);border-color:var(--red);">삭제</button>
+      </div>`;
+    d.querySelector('.pkSet').addEventListener('click', ()=>openLibraryDetailSheet(it));
     const del = d.querySelector('.pkDel');
     del.addEventListener('click', ()=>{
       if(del.dataset.armed==='1'){ clearTimeout(del._tm); deleteLibraryItem(it.id, it.name, mode, weekday); return; }
@@ -3601,7 +3613,7 @@ function openLibraryDetailSheet(it){
       await saveLib(`update ${it.name}`);
       renderLibraryManage(); renderEntryList();
       showToast(m==='time' ? '시간 버티기로 바꿨어요 (세트는 초 단위)' : '저장됨');
-      closeSheet(); openLibraryDetailSheet(it);
+      closeSheet(); openLibraryDetailSheet(it);   // 바뀐 구성으로 다시 그린다
     });
   });
   stepInput.addEventListener('change', async ()=>{
