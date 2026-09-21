@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- 훈련일지 v1.20 · 빌드 2026-09-21 -->
+<!-- 훈련일지 v1.21 · 빌드 2026-09-21 -->
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -629,7 +629,7 @@ nav.bottomnav button.active{color:var(--ink);background:var(--paper);}
    화면 상단(훈련일지 옆)에 표시되어, 어느 버전이 실제로 올라가 있는지
    바로 눈으로 구분할 수 있게 해줍니다.
 ============================================================ */
-const APP_VERSION = 'v1.20';
+const APP_VERSION = 'v1.21';
 const APP_BUILD = '2026-09-21';
 
 /* ============================================================
@@ -2063,7 +2063,7 @@ function renderLibraryManage(){
     const tags = it.type==='cardio'
       ? '유산소'
       : (it.timed
-          ? `버티기 · 휴식 ${cfg.restSec}초${own?' *':''}`
+          ? `버티기${tempoBpmOf(it)?' · '+tempoBpmOf(it)+'BPM':''} · 휴식 ${cfg.restSec}초${own?' *':''}`
           : `${it.repsOnly?'맨몸':(it.weightStep??DEFAULT_WEIGHT_STEP)+'kg'} · ${cfg.repTermSec}/${cfg.restSec}초${own?' *':''}`);
     row.innerHTML = `${exIconHTML(it,'sm')}<span class="nm">${esc(it.name)} <span class="muted">(${esc(it.bodyPart)})</span></span>
       <span class="tags">${esc(tags)}</span>
@@ -3478,6 +3478,14 @@ function openLibraryDetailSheet(it){
     ${isStrength ? `
       <div class="sheet-group">
         <div class="sheet-group-label">음성 가이드</div>
+        <div id="ldTempoWrap" style="${it.timed?'':'display:none;'}">
+          <div class="sheet-group-label">박자 소리 <span class="muted" style="font-size:11px;">BPM · 분당 몇 번</span></div>
+          <div class="chip-row" style="margin-bottom:6px;">
+            <button type="button" class="chip-btn tpChip" data-bpm="0">없음</button>
+            ${TEMPO_BPMS.map(v=>`<button type="button" class="chip-btn tpChip" data-bpm="${v}">${v}</button>`).join('')}
+          </div>
+          <div class="small-note" id="ldTempoNote"></div>
+        </div>
         ${it.timed ? '' : dial('repTermSec','안내 간격','횟수를 읽고 나서 쉬는 시간',1,10,1)}
         ${dial('prepSec','준비 시간','첫 세트 안내 후 시작까지',5,90,5)}
         ${dial('restSec','세트 휴식','다음 세트 안내를 포함한 시간',10,180,5)}
@@ -3504,14 +3512,6 @@ function openLibraryDetailSheet(it){
           <button type="button" class="ldMode" data-mode="weight">무게 × 횟수</button>
           <button type="button" class="ldMode" data-mode="reps">횟수만</button>
           <button type="button" class="ldMode" data-mode="time">시간 버티기</button>
-        </div>
-        <div id="ldTempoWrap" style="${it.timed?'':'display:none;'}">
-          <div class="sheet-group-label">박자 소리 <span class="muted" style="font-size:11px;">BPM · 분당 몇 번</span></div>
-          <div class="chip-row" style="margin-bottom:6px;">
-            <button type="button" class="chip-btn tpChip" data-bpm="0">없음</button>
-            ${TEMPO_BPMS.map(v=>`<button type="button" class="chip-btn tpChip" data-bpm="${v}">${v}</button>`).join('')}
-          </div>
-          <div class="small-note" id="ldTempoNote"></div>
         </div>
         <div class="dial-row" id="ldStepWrap" style="${exNoWeight(it)?'display:none;':''}">
           <span class="dl">무게 조절 단위</span>
@@ -3572,8 +3572,7 @@ function openLibraryDetailSheet(it){
     const m = exMode(it);
     inner.querySelectorAll('.ldMode').forEach(b=>b.classList.toggle('active', b.dataset.mode===m));
     stepWrap.style.display = (m==='weight') ? 'flex' : 'none';
-    tempoWrap.style.display = (m==='time') ? 'flex' : 'none';
-    tempoNote.style.display = (m==='time') ? 'block' : 'none';
+    tempoWrap.style.display = (m==='time') ? 'block' : 'none';   // 칩·안내가 세로로 쌓여야 한다
     syncTempo();
   };
   let _tpTm;
