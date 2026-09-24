@@ -1,0 +1,61 @@
+{
+  "date": "2026-09-22",
+  "weekday": "tue",
+  "bodyWeight": 80.2,
+  "muscleMass": 33.4,
+  "fatMass": 26.4,
+  "rpe": null,
+  "memo": "",
+  "entries": [
+    {
+      "instanceId": "miz4gvg",
+      "exerciseId": "ex_shiv21i",
+      "name": "제자리 뛰기",
+      "type": "strength",
+      "adHoc": true,
+      "sets": [
+        {
+          "weight": 0,
+          "reps": 60,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 60,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 60,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 60,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 60,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 60,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 60,
+          "failed": false
+        }
+      ]
+    }
+  ],
+  "calories": {
+    "strength": 117,
+    "cardio": 0,
+    "total": 117
+  },
+  "savedAt": "2026-09-24T06:44:20.630Z"
+}
