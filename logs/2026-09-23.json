@@ -1,0 +1,26 @@
+{
+  "date": "2026-09-23",
+  "weekday": "wed",
+  "bodyWeight": 80.2,
+  "muscleMass": 33.4,
+  "fatMass": 26.4,
+  "rpe": null,
+  "memo": "",
+  "entries": [
+    {
+      "instanceId": "70bl0n1",
+      "exerciseId": "running",
+      "name": "러닝",
+      "type": "cardio",
+      "adHoc": true,
+      "distance": 4.5,
+      "duration": 50
+    }
+  ],
+  "calories": {
+    "strength": 0,
+    "cardio": 602,
+    "total": 602
+  },
+  "savedAt": "2026-09-24T06:44:05.823Z"
+}
