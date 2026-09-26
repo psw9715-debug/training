@@ -150,5 +150,18 @@
       "pogo hop"
     ],
     "tempoBpm": 150
+  },
+  {
+    "id": "ex_mxf5klm",
+    "name": "덤벨 플라이",
+    "bodyPart": "가슴",
+    "type": "strength",
+    "catalogId": "cat_db_fly",
+    "icon": "bench_flat",
+    "aliases": [
+      "플라이",
+      "dumbbell fly"
+    ],
+    "weightStep": 2
   }
 ]
