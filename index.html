@@ -632,7 +632,7 @@ nav.bottomnav button.active{color:var(--ink);background:var(--paper);}
    화면 상단(훈련일지 옆)에 표시되어, 어느 버전이 실제로 올라가 있는지
    바로 눈으로 구분할 수 있게 해줍니다.
 ============================================================ */
-const APP_VERSION = 'v1.25';
+const APP_VERSION = 'v1.26';
 const APP_BUILD = '2026-09-26';
 
 /* ============================================================
@@ -3149,22 +3149,27 @@ function beep(strong){
    박자 간격도 자바스크립트가 아니라 음원 자체가 들고 있어 안 밀린다.
 ------------------------------------------------------------ */
 const loopCache = {};
-function buildBeatLoop(bpm, beats){
-  const key = bpm + 'x' + beats;
-  if(loopCache[key]) return loopCache[key];
-  const sr = 11025;                                   // 1~1.4kHz 딸깍이면 이걸로 충분
-  const spb = Math.round(sr * 60 / bpm);              // 한 박 = 정수 샘플 (이음매가 안 튄다)
-  const n = spb * beats;
+/* 박자를 소리로 구워 낸다.
+   <audio> 의 loop 는 되감는 순간 9ms 쯤 늦는다(측정값). 짧은 걸
+   돌리면 그 늦음을 몇 초마다 듣게 되니, 달릴 시간을 아는 구간은
+   처음부터 끝까지 한 통으로 굽는다 — 이음매가 아예 없다. 10분이
+   넘으면 10분씩 이어 붙이고(끝나는 즉시 다음 통), 시간을 아예
+   안 정했을 때만 20초짜리 루프를 돈다.                           */
+const TRACK_CHUNK_SEC = 10 * 60;                      // 한 통은 10분까지 (10분이 13MB 쯤)
+function renderBeatWav(bpm, beats, sr){
+  const spb = sr * 60 / bpm;                          // 소수점 그대로 둔다
+  const n = Math.round(beats * spb);                  // 통째로 한 번만 반올림 (밀림이 쌓이지 않는다)
   const pcm = new Int16Array(n);
+  const len = Math.round(sr * 0.05);
   for(let b = 0; b < beats; b++){
-    const strong = (b === 0);
+    const strong = (b % 4 === 0);
     const f = strong ? 1400 : 1000;
-    const len = Math.min(spb, Math.round(sr * 0.06));
-    for(let i = 0; i < len; i++){
+    const at = Math.round(b * spb);                   // 박마다 제자리에서 반올림한다
+    for(let i = 0; i < len && at + i < n; i++){
       const t = i / sr;
-      const env = Math.min(1, t / 0.003) * Math.exp(-t * 55);
+      const env = Math.min(1, t / 0.002) * Math.exp(-t * 90);
       const v = Math.sin(2 * Math.PI * f * t) * env * (strong ? 0.8 : 0.55);
-      pcm[b * spb + i] = Math.max(-32767, Math.min(32767, v * 32767)) | 0;
+      pcm[at + i] = Math.max(-32767, Math.min(32767, v * 32767)) | 0;
     }
   }
   const bytes = new Uint8Array(44 + n * 2);
@@ -3175,9 +3180,36 @@ function buildBeatLoop(bpm, beats){
   dv.setUint32(24,sr,true); dv.setUint32(28,sr*2,true); dv.setUint16(32,2,true); dv.setUint16(34,16,true);
   put(36,'data'); dv.setUint32(40, n*2, true);
   new Int16Array(bytes.buffer, 44).set(pcm);
-  const url = URL.createObjectURL(new Blob([bytes], { type:'audio/wav' }));
-  loopCache[key] = url;
-  return url;
+  return URL.createObjectURL(new Blob([bytes], { type:'audio/wav' }));
+}
+function loopBeatCount(bpm){
+  // 20초쯤 되는 길이를 네 박 단위로 끊어 쓴다 (강세가 항상 첫 박에 오게)
+  return Math.max(8, Math.round(bpm / 3 / 4) * 4);
+}
+/* 되감아 도는 짧은 루프 — 44.1kHz (기기 출력과 같은 계열이라 덜컥임이 적다) */
+function buildBeatLoop(bpm, beats){
+  beats = beats || loopBeatCount(bpm);
+  const key = bpm + 'x' + beats;
+  if(!loopCache[key]) loopCache[key] = renderBeatWav(bpm, beats, 44100);
+  return loopCache[key];
+}
+/* 구간 전체를 한 통으로 — 11.025kHz (10분이 13MB 쯤 된다).
+   굽는 데 10분짜리가 0.25초쯤 걸려서, 시작 안내를 말하는 동안과
+   구간이 바뀌기 10초 전에 미리 구워 둔다.                        */
+let _tracks = {};                                     // 최대 두 개만 들고 있는다
+function trackKey(bpm, sec){ return bpm + 't' + Math.round(sec); }
+function warmBeatTrack(bpm, sec){
+  sec = Math.min(Number(sec) || 0, TRACK_CHUNK_SEC);
+  if(!(sec > 0)) return null;
+  const k = trackKey(bpm, sec);
+  if(_tracks[k]) return _tracks[k];
+  const inUse = loopAudio && loopAudio.dataset.bkey;
+  Object.keys(_tracks).forEach(old=>{
+    if(old === inUse) return;
+    URL.revokeObjectURL(_tracks[old]); delete _tracks[old];
+  });
+  _tracks[k] = renderBeatWav(bpm, Math.ceil(sec * bpm / 60) + 1, 11025);
+  return _tracks[k];
 }
 let loopAudio = null;
 function loopAudioEl(){
@@ -3187,21 +3219,47 @@ function loopAudioEl(){
     loopAudio.playsInline = true;
     loopAudio.preload = 'auto';
     loopAudio.src = BEEP_SRC.lo;     // 손짓 안에서 열어 두려면 처음부터 소스가 있어야 한다
+    loopAudio.addEventListener('ended', chainBeatTrack);
   }
   return loopAudio;
 }
-function startBeatLoop(bpm){
+/* sec 을 주면 그만큼을 통째로 굽는다(길면 10분씩 나눠 잇는다).
+   안 주면 짧은 루프를 돈다. */
+function startBeatLoop(bpm, sec){
   const a = loopAudioEl();
-  const url = buildBeatLoop(bpm, 4);
-  if(a.dataset.bpm !== String(bpm)){ a.src = url; a.dataset.bpm = String(bpm); }
+  sec = Number(sec) || 0;
+  const whole = sec > 0;
+  const chunk = whole ? Math.min(sec, TRACK_CHUNK_SEC) : 0;
+  const key = whole ? trackKey(bpm, chunk) : (bpm + 'L');
+  if(a.dataset.bkey !== key){
+    a.loop = !whole;
+    a.src = whole ? warmBeatTrack(bpm, chunk) : buildBeatLoop(bpm);
+    a.dataset.bkey = key;
+  }
+  a.dataset.bpm = String(bpm);
+  a.dataset.rest = String(whole ? Math.max(0, sec - chunk) : 0);
   a.currentTime = 0;
   const pr = a.play();
   if(pr && pr.catch) pr.catch(()=>{});
 }
+/* 한 통이 끝나면 곧바로 다음 통을 잇는다 (타이머가 아니라 이벤트라
+   화면이 꺼져 있어도 바로 이어진다) */
+function chainBeatTrack(){
+  if(!loopAudio || !vs.active || vs.paused || vs.abort) return;
+  const rest = Number(loopAudio.dataset.rest) || 0;
+  if(rest > 0) startBeatLoop(Number(loopAudio.dataset.bpm) || 0, rest);
+}
+/* 다음 통을 미리 구워 둔다 */
+function warmNextChunk(){
+  if(!loopAudio || loopAudio.loop) return;
+  const rest = Number(loopAudio.dataset.rest) || 0;
+  const left = (loopAudio.duration || 0) - (loopAudio.currentTime || 0);
+  if(rest > 0 && left > 0 && left < 20) warmBeatTrack(Number(loopAudio.dataset.bpm) || 0, rest);
+}
 function stopBeatLoop(){
   if(!loopAudio) return;
   try{ loopAudio.pause(); loopAudio.currentTime = 0; }catch(e){}
-  loopAudio.dataset.bpm = '';
+  loopAudio.dataset.bpm = ''; loopAudio.dataset.bkey = ''; loopAudio.dataset.rest = '0';
 }
 /* 잠금화면에 제목과 재생/일시정지가 뜨게 해 둔다 */
 function setMediaSession(title, sub){
@@ -3222,24 +3280,7 @@ function clearMediaSession(){
   }catch(e){}
 }
 
-/* 스스로 어긋남을 바로잡는 박자 루프. 멈춰 있는 동안에는 소리만 쉰다. */
-function startMetronome(intervalMs){
-  stopMetronome();
-  const t0 = performance.now();
-  let n = 0;
-  const step = ()=>{
-    if(!vs.active || vs.abort){ stopMetronome(); return; }
-    if(!vs.paused) beep(n % 4 === 0);
-    n++;
-    let next = t0 + n*intervalMs - performance.now();
-    if(next < -intervalMs){                       // 한참 밀렸으면 박자를 다시 맞춘다
-      n = Math.ceil((performance.now() - t0) / intervalMs);
-      next = t0 + n*intervalMs - performance.now();
-    }
-    vs.met = setTimeout(step, Math.max(5, next));
-  };
-  step();
-}
+/* 남아 있던 타이머 박자의 뒷정리 (이제 박자는 통짜 오디오로 낸다) */
 function stopMetronome(){ clearTimeout(vs.met); vs.met = null; }
 
 /* 고른 빠르기를 네 박만 들려준다 */
@@ -3366,12 +3407,13 @@ async function runCadenceSession(){
               : (steps ? `약 ${Math.round(steps).toLocaleString()}걸음` : '박자에 발을 맞추세요'));
   setMediaSession(entry.name, cadenceLabel(lib) || (segs[0].bpm + ' BPM'));
 
+  if(totalMs) warmBeatTrack(plan[0].bpm, (plan[0].end - plan[0].start)/1000);
   await speakAsync(multi
     ? `${entry.name}, 구간 ${ordinalKo(plan.length)} 개, 첫 구간 ${sinoKo(plan[0].bpm)} 비피엠, 시작`
     : `${entry.name}, ${sinoKo(plan[0].bpm)} 비피엠, 시작`);
   if(vs.abort) return;
 
-  startBeatLoop(plan[0].bpm);
+  startBeatLoop(plan[0].bpm, totalMs ? (plan[0].end - plan[0].start)/1000 : 0);
 
   // 남은 시간 안내 (전체 기준)
   const marks = [];
@@ -3382,6 +3424,7 @@ async function runCadenceSession(){
 
   const r = await new Promise(resolve=>{
     let idx = 0, pausedMs = 0, last = Date.now();
+    const warmed = {};
     const tick = ()=>{
       if(vs.abort){ clearInterval(vs.cadTm); vs.cadTm = null; return resolve('abort'); }
       const now = Date.now();
@@ -3395,9 +3438,17 @@ async function runCadenceSession(){
       while(ni + 1 < plan.length && elapsed >= plan[ni].end) ni++;
       if(ni !== idx){
         idx = ni;
-        startBeatLoop(plan[idx].bpm);
+        startBeatLoop(plan[idx].bpm, totalMs ? (plan[idx].end - plan[idx].start)/1000 : 0);
         setMediaSession(entry.name, `구간 ${idx+1}/${plan.length} · ${plan[idx].bpm} BPM`);
         speakNow(`${ordinalKo(idx+1)}번째 구간, ${sinoKo(plan[idx].bpm)} 비피엠`);
+      }
+
+      warmNextChunk();
+
+      // 다음 구간 소리를 미리 구워 둔다 (경계에서 끊기지 않게)
+      if(totalMs && plan[idx+1] && !warmed[idx+1] && plan[idx].end - elapsed < 10000){
+        warmed[idx+1] = true;
+        warmBeatTrack(plan[idx+1].bpm, (plan[idx+1].end - plan[idx+1].start)/1000);
       }
 
       const remain = Math.max(0, capMs - elapsed);
@@ -3446,21 +3497,22 @@ async function runVoiceSession(){
 
     if(lib.timed){
       // 버티기 — 초를 하나씩 세지 않고, 끝나가는 시점만 짚어준다
-      const tempo = tempoOf(lib);
-      voPhase('hold', tempo ? '진행 중' : '버티는 중');
+      const bpm = tempoBpmOf(lib);
+      const holdMs = reps * 1000;
+      voPhase('hold', bpm ? '진행 중' : '버티는 중');
       // 큰 숫자가 남은 초라 시간은 이미 보인다. 페이스 조절에 쓰이는 건 남은 세트 수.
       voSub(i + 1 < sets.length ? `남은 세트 ${sets.length - i - 1}` : '마지막 세트');
+      if(bpm) warmBeatTrack(bpm, holdMs/1000);      // 말하는 동안 미리 구워 둔다
       await speakAsync('시작');
       if(vs.abort) return;
-      if(tempo) startMetronome(tempo * 1000);
-      const holdMs = reps * 1000;
+      if(bpm) startBeatLoop(bpm, holdMs/1000);      // 통짜로 구운 박자 — 이음매가 없다
       const marks = [];
       cfg.warnAt.forEach(w=>{ if(w*1000 < holdMs - 1500) marks.push({ remain: w*1000, text: sinoKo(w) + '초' }); });
       if(holdMs >= 5000) [3,2,1].forEach(w=>marks.push({ remain: w*1000, text: sinoKo(w) }));
       const held = await vsCountdown(holdMs, marks, (remain, prog)=>{
         voBig(Math.ceil(remain/1000)); voRing(prog);
       });
-      stopMetronome();
+      stopBeatLoop();
       if(held === 'abort') return;
       await speakAsync('끝');
       if(vs.abort) return;
@@ -3507,7 +3559,11 @@ function toggleVoicePause(){
   b.classList.toggle('paused', vs.paused);
   document.getElementById('voiceOverlay').classList.toggle('paused', vs.paused);
   if(loopAudio && loopAudio.dataset.bpm){
-    try{ vs.paused ? loopAudio.pause() : loopAudio.play(); }catch(e){}
+    try{
+      if(vs.paused) loopAudio.pause();
+      else if(loopAudio.ended) chainBeatTrack();      // 멈춘 사이에 한 통이 끝났으면 다음 통으로
+      else loopAudio.play();
+    }catch(e){}
   }
   if('mediaSession' in navigator){
     try{ navigator.mediaSession.playbackState = vs.paused ? 'paused' : 'playing'; }catch(e){}
