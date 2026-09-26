@@ -71,7 +71,8 @@
     "bodyPart": "유산소",
     "type": "cardio",
     "distanceUnit": "km",
-    "met": 9
+    "met": 9,
+    "fav": true
   },
   {
     "id": "swimming",
