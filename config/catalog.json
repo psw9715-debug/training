@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated": "2026-09-21",
+  "updated": "2026-09-26",
   "note": "일반 헬스장 + 생활 운동 기준 기본 종목 판. 여기서 골라 담으면 내 라이브러리(config/exercises.json)로 복사됩니다. timed:true 는 횟수가 아니라 시간을 버티는 종목이며, 세트의 숫자를 초로 읽습니다. 없는 기구는 '새 종목 만들기'로 직접 추가하세요.",
   "items": [
     {
@@ -1233,7 +1233,8 @@
       "type": "cardio",
       "distanceUnit": "km",
       "met": 9.0,
-      "icon": "treadmill"
+      "icon": "treadmill",
+      "tempoBpm": 170
     },
     {
       "id": "cat_outdoor_run",
@@ -1247,7 +1248,8 @@
       "type": "cardio",
       "distanceUnit": "km",
       "met": 9.5,
-      "icon": "treadmill"
+      "icon": "treadmill",
+      "tempoBpm": 170
     },
     {
       "id": "cat_cycle",

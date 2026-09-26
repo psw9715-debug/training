@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- 훈련일지 v1.23 · 빌드 2026-09-21 -->
+<!-- 훈련일지 v1.24 · 빌드 2026-09-26 -->
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -207,6 +207,8 @@ a{color:var(--blue);}
 .vo.phase-count{ --vo-accent:#7FD1A0; }
 .vo.phase-rest{ --vo-accent:#E0A44A; }
 .vo.phase-hold{ --vo-accent:#79B4E8; }
+.vo.phase-run{ --vo-accent:#6FD3C4; }
+.vo-big.t{ font-size:min(21vw,76px); letter-spacing:-1px; }
 .vo-pausetag{ display:none; font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--amber);
   letter-spacing:.5px; margin-top:10px; }
 .vo-hint{ flex-shrink:0; text-align:center; font-family:'IBM Plex Mono',monospace; font-size:10.5px;
@@ -630,8 +632,8 @@ nav.bottomnav button.active{color:var(--ink);background:var(--paper);}
    화면 상단(훈련일지 옆)에 표시되어, 어느 버전이 실제로 올라가 있는지
    바로 눈으로 구분할 수 있게 해줍니다.
 ============================================================ */
-const APP_VERSION = 'v1.23';
-const APP_BUILD = '2026-09-21';
+const APP_VERSION = 'v1.24';
+const APP_BUILD = '2026-09-26';
 
 /* ============================================================
    상수
@@ -779,7 +781,9 @@ function exUnit(x){ return exIsTimed(x) ? '초' : '회'; }
 function exMode(x){ const l = libOf(x)||{}; return l.timed ? 'time' : (l.repsOnly ? 'reps' : 'weight'); }
 /* 박자는 BPM(분당 몇 번)으로 정한다. 120 BPM = 0.5초에 한 번.
    초로 적던 예전 값(tempoSec)도 그대로 읽어 준다. */
-const TEMPO_BPMS = [60, 90, 120, 150, 180];
+const TEMPO_BPMS = [60, 90, 120, 150, 180];                                  // 근력·버티기
+const TEMPO_BPMS_RUN = [100,110,120,130,140,150,160,170,180];                // 달리기 케이던스
+function bpmChoices(x){ return (libOf(x)||{}).type === 'cardio' ? TEMPO_BPMS_RUN : TEMPO_BPMS; }
 function tempoBpmOf(x){
   const l = libOf(x) || {};
   if(l.tempoBpm) return Number(l.tempoBpm) || 0;
@@ -793,6 +797,10 @@ function tempoOf(x){                                            // 초 간격
 function tempoReps(x, sec){
   const t = tempoOf(x);
   return (t && sec) ? Math.round(sec / t) : 0;
+}
+function fmtMMSS(ms){
+  const t = Math.max(0, Math.round(ms/1000));
+  return `${Math.floor(t/60)}:${String(t%60).padStart(2,'0')}`;
 }
 function fmtSecKo(sec){
   sec = Math.round(Number(sec)||0);
@@ -1224,7 +1232,9 @@ function renderEntryCard(en){
 
   const header = document.createElement('div');
   header.className = 'ex-card-header';
-  const canVoice = en.type!=='cardio' && voiceSetsOf(en).length>0;
+  const canVoice = en.type==='cardio'
+    ? tempoBpmOf(findLibItem(en.exerciseId)) > 0
+    : voiceSetsOf(en).length > 0;
   header.innerHTML = `
     <button class="ex-check ${en.completed?'checked':''}" aria-label="완료 체크">✓</button>
     ${exIconHTML(findLibItem(en.exerciseId) || {name:en.name}, 'sm')}
@@ -1392,7 +1402,9 @@ function renderEntryCard(en){
       const unit = lib?.distanceUnit || 'km';
       const d=Number(en.distance)||0, t=Number(en.duration)||0;
       if(d>0||t>0){
-        body.innerHTML = `<div class="chip-row"><span class="chip">${en.distance||0}${unit} · ${en.duration||0}분${d>0&&t>0?` (${paceLabel(t,d,unit)})`:''}</span></div>`;
+        const cbpm = tempoBpmOf(findLibItem(en.exerciseId));
+        body.innerHTML = `<div class="chip-row"><span class="chip">${en.distance||0}${unit} · ${en.duration||0}분${d>0&&t>0?` (${paceLabel(t,d,unit)})`:''}</span>`
+          + (cbpm?`<span class="chip">${cbpm} BPM</span>`:'') + `</div>`;
       } else {
         body.innerHTML = `<div class="empty" style="padding:10px;">탭해서 입력하세요</div>`;
       }
@@ -3190,21 +3202,65 @@ function vsCountdown(totalMs, marks, onTick){
 async function startVoiceSession(en){
   if(vs.active) return;
   if(!window.speechSynthesis){ showToast('이 브라우저는 음성을 지원하지 않아요'); return; }
-  if(en.type === 'cardio'){ showToast('유산소는 음성 가이드를 지원하지 않아요'); return; }
-  const sets = voiceSetsOf(en);
-  if(!sets.length){ showToast('먼저 횟수를 입력해주세요'); return; }
+  const lib0 = findLibItem(en.exerciseId) || {};
+  const cadence = en.type === 'cardio';
+  let sets = [];
+  if(cadence){
+    if(!tempoBpmOf(lib0)){ showToast('먼저 ⚙ 종목 설정에서 케이던스(BPM)를 정해주세요'); return; }
+  } else {
+    sets = voiceSetsOf(en);
+    if(!sets.length){ showToast('먼저 횟수를 입력해주세요'); return; }
+  }
   stopVoiceSample();
 
   vs.active = true; vs.paused = false; vs.abort = false;
-  vs.entry = en; vs.lib = findLibItem(en.exerciseId) || {}; vs.cfg = voiceCfgFor(en.exerciseId); vs.sets = sets;
+  vs.entry = en; vs.lib = lib0; vs.cfg = voiceCfgFor(en.exerciseId); vs.sets = sets;
 
   voOpen(en.name);
   document.getElementById('voFig').innerHTML = exIconHTML(vs.lib);
   ensureAudio();          // 화면을 누른 지금이 소리를 켤 수 있는 유일한 순간
   acquireWakeLock();
-  try{ await runVoiceSession(); }
+  try{ await (cadence ? runCadenceSession() : runVoiceSession()); }
   catch(e){ showToast('음성 재생 오류: ' + e.message); }
   finally{ if(vs.active) endVoiceSession(); }
+}
+
+/* 달리기 케이던스 — 세트가 없다. 정해 둔 박자로 소리만 내주고,
+   적어 둔 시간이 있으면 그만큼 세고 끝낸다. 없으면 흘러간 시간을
+   센다. 발을 박자에 맞추는 게 전부라 화면은 시간만 크게 띄운다. */
+async function runCadenceSession(){
+  const { lib, entry } = vs;
+  const bpm = tempoBpmOf(lib);
+  const mins = Number(entry.duration) || 0;
+  const totalMs = mins ? mins * 60000 : 0;
+  const capMs = totalMs || 3 * 3600 * 1000;      // 시간을 안 적었으면 세 시간까지
+  const unit = lib.distanceUnit || 'km';
+
+  document.getElementById('voSetLine').textContent =
+    [entry.distance ? `${entry.distance}${unit}` : '', mins ? `${mins}분` : ''].filter(Boolean).join(' · ') || '케이던스';
+  document.getElementById('voTarget').textContent = `${bpm} BPM`;
+  voPhase('run', '달리는 중', false);
+  voSub(mins ? `약 ${(mins*bpm).toLocaleString()}걸음` : '박자에 발을 맞추세요');
+  voBig('0:00', true); voRing(0);
+
+  await speakAsync(`${entry.name}, ${sinoKo(bpm)} 비피엠, 시작`);
+  if(vs.abort) return;
+  startMetronome(60000 / bpm);
+
+  const marks = [];
+  if(totalMs) [600, 300, 60].forEach(sec=>{
+    if(sec*1000 < totalMs - 5000) marks.push({ remain: sec*1000, text: sinoKo(sec/60) + '분 남았습니다' });
+  });
+
+  const r = await vsCountdown(capMs, marks, (remain, prog)=>{
+    voBig(fmtMMSS(totalMs ? remain : capMs - remain), true);
+    voRing(totalMs ? prog : 0);
+  });
+  stopMetronome();
+  if(r === 'abort') return;
+  await speakAsync('수고하셨습니다');
+  if(vs.abort) return;
+  await new Promise(res=>setTimeout(res, 1200));
 }
 
 async function runVoiceSession(){
@@ -3311,7 +3367,11 @@ function voHeader(idx, total, targetLabel){
   document.getElementById('voSetLine').textContent = `${idx+1} / ${total} 세트`;
   document.getElementById('voTarget').textContent = targetLabel;
 }
-function voBig(v){ document.getElementById('voBig').textContent = v; }
+function voBig(v, isTime){
+  const el = document.getElementById('voBig');
+  el.textContent = v;
+  el.classList.toggle('t', !!isTime);   // 3:42 같은 시간은 자리수가 많아 조금 작게
+}
 function voSub(t){ document.getElementById('voSub').textContent = t || ''; }
 function voRing(prog){
   const el = document.getElementById('voRing');
@@ -3509,7 +3569,7 @@ function openLibraryDetailSheet(it){
   };
   const inner = openSheetHTML(it.name, `
     <span class="exi-box exi-lg">${exIconHTML(it)}</span>
-    <p class="muted" style="text-align:center;">${esc(it.bodyPart||'')} · ${it.type==='cardio'?'유산소':(it.timed?'시간 버티기':(it.repsOnly?'맨몸(횟수만)':'근력'))}</p>
+    <p class="muted" style="text-align:center;">${[esc(it.bodyPart||''), it.type==='cardio'?'유산소':(it.timed?'시간 버티기':(it.repsOnly?'맨몸(횟수만)':'근력'))].filter((v,i,a)=>v && a.indexOf(v)===i).join(' · ')}</p>
     ${it.guide ? `<div class="form-guide"><b>자세</b> ${esc(it.guide)}</div>` : ''}
     ${isStrength ? `
       <div class="sheet-group">
@@ -3518,7 +3578,7 @@ function openLibraryDetailSheet(it){
           <div class="sheet-group-label">박자 소리 <span class="muted" style="font-size:11px;">BPM · 분당 몇 번</span></div>
           <div class="chip-row" style="margin-bottom:6px;">
             <button type="button" class="chip-btn tpChip" data-bpm="0">없음</button>
-            ${TEMPO_BPMS.map(v=>`<button type="button" class="chip-btn tpChip" data-bpm="${v}">${v}</button>`).join('')}
+            ${bpmChoices(it).map(v=>`<button type="button" class="chip-btn tpChip" data-bpm="${v}">${v}</button>`).join('')}
           </div>
           <div class="small-note" id="ldTempoNote"></div>
         </div>
@@ -3555,9 +3615,21 @@ function openLibraryDetailSheet(it){
           <span class="dv">kg</span>
         </div>
       </div>
-    ` : '<p class="muted">유산소 종목은 음성 가이드를 지원하지 않습니다.</p>'}
+    ` : `
+      <div class="sheet-group">
+        <div class="sheet-group-label">케이던스 <span class="muted" style="font-size:11px;">BPM · 분당 발 딛는 수</span></div>
+        <div id="ldTempoWrap">
+          <div class="chip-row" style="margin-bottom:6px;">
+            <button type="button" class="chip-btn tpChip" data-bpm="0">없음</button>
+            ${bpmChoices(it).map(v=>`<button type="button" class="chip-btn tpChip" data-bpm="${v}">${v}</button>`).join('')}
+          </div>
+          <div class="small-note" id="ldTempoNote"></div>
+        </div>
+        <div class="small-note">정하면 오늘 탭 카드에 🔊 가 생깁니다. 누르면 그 박자로 소리만 내주니,
+          박자에 발을 맞춰 뛰면 됩니다. 시간을 적어 두었으면 그만큼 세고 끝냅니다.</div>
+      </div>
+    `}
   `);
-  if(!isStrength) return;
 
   const saveLib = async (msg)=>{
     try{
@@ -3567,6 +3639,45 @@ function openLibraryDetailSheet(it){
   };
   let _libTm;
   const saveLibDebounced = ()=>{ clearTimeout(_libTm); _libTm = setTimeout(()=>saveLib(`voice settings ${it.name}`), 900); };
+
+  /* 박자 칩은 근력이든 유산소든 똑같이 동작한다 */
+  {
+    const tempoNote = inner.querySelector('#ldTempoNote');
+    const firstSec = ()=> Math.floor(Number((((state.templates[it.id]||{}).sets||[])[0]||{}).reps) || 0);
+    const syncTempoChips = ()=>{
+      const bpm = tempoBpmOf(it);
+      inner.querySelectorAll('.tpChip').forEach(c=>c.classList.toggle('selected', Number(c.dataset.bpm)===bpm));
+      if(!tempoNote) return;
+      if(!bpm){ tempoNote.textContent = isStrength ? '소리 없이 시간만 셉니다.' : '소리 없이 지나갑니다.'; return; }
+      if(isStrength){
+        const sec = firstSec();
+        tempoNote.textContent = `${bpm} BPM · ${+(60/bpm).toFixed(2)}초에 한 번`
+          + (sec ? ` · 한 세트 ${sec}초면 약 ${Math.round(sec*bpm/60)}번` : '');
+      } else {
+        const tpl = state.templates[it.id] || {};
+        const min = Number(tpl.duration) || 0;
+        tempoNote.textContent = `${bpm} BPM · 1분에 ${bpm}걸음`
+          + (min ? ` · ${min}분 뛰면 약 ${(min*bpm).toLocaleString()}걸음` : '');
+      }
+    };
+    let _tpTm2;
+    inner.querySelectorAll('.tpChip').forEach(c=>{
+      c.addEventListener('click', ()=>{
+        ensureAudio();
+        const bpm = Number(c.dataset.bpm) || 0;
+        delete it.tempoSec;
+        if(bpm) it.tempoBpm = bpm; else delete it.tempoBpm;
+        syncTempoChips();
+        if(bpm) previewTempo(bpm);
+        renderEntryList();
+        clearTimeout(_tpTm2);
+        _tpTm2 = setTimeout(()=>saveLib(`tempo ${it.name}`), 800);
+      });
+    });
+    syncTempoChips();
+    it.__syncTempoChips = syncTempoChips;
+  }
+  if(!isStrength) return;
 
   inner.querySelectorAll('input[data-vkey]').forEach(el=>{
     el.addEventListener('input', ()=>{
@@ -3593,17 +3704,7 @@ function openLibraryDetailSheet(it){
   const stepWrap = inner.querySelector('#ldStepWrap');
   const stepInput = inner.querySelector('#ldWeightStep');
   const tempoWrap = inner.querySelector('#ldTempoWrap');
-  const tempoNote = inner.querySelector('#ldTempoNote');
-  const firstSec  = ()=> Math.floor(Number((((state.templates[it.id]||{}).sets||[])[0]||{}).reps) || 0);
-  const syncTempo = ()=>{
-    const bpm = tempoBpmOf(it);
-    inner.querySelectorAll('.tpChip').forEach(c=>c.classList.toggle('selected', Number(c.dataset.bpm)===bpm));
-    const sec = firstSec();
-    tempoNote.textContent = bpm
-      ? `${bpm} BPM · ${+(60/bpm).toFixed(2)}초에 한 번`
-        + (sec ? ` · 한 세트 ${sec}초면 약 ${Math.round(sec*bpm/60)}번` : '')
-      : '소리 없이 시간만 셉니다.';
-  };
+  const syncTempo = ()=>{ if(it.__syncTempoChips) it.__syncTempoChips(); };
   const syncMode = ()=>{
     const m = exMode(it);
     inner.querySelectorAll('.ldMode').forEach(b=>b.classList.toggle('active', b.dataset.mode===m));
@@ -3611,20 +3712,6 @@ function openLibraryDetailSheet(it){
     tempoWrap.style.display = (m==='time') ? 'block' : 'none';   // 칩·안내가 세로로 쌓여야 한다
     syncTempo();
   };
-  let _tpTm;
-  inner.querySelectorAll('.tpChip').forEach(c=>{
-    c.addEventListener('click', ()=>{
-      ensureAudio();
-      const bpm = Number(c.dataset.bpm) || 0;
-      delete it.tempoSec;                  // 예전 형식은 정리하고 BPM 으로 통일
-      if(bpm) it.tempoBpm = bpm; else delete it.tempoBpm;
-      syncTempo();
-      if(bpm) previewTempo(bpm);           // 고른 빠르기를 네 박만 들려준다
-      renderEntryList();
-      clearTimeout(_tpTm);
-      _tpTm = setTimeout(()=>saveLib(`tempo ${it.name}`), 800);
-    });
-  });
   syncMode();
   inner.querySelectorAll('.ldMode').forEach(b=>{
     b.addEventListener('click', async ()=>{
