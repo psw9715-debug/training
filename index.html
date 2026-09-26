@@ -632,7 +632,7 @@ nav.bottomnav button.active{color:var(--ink);background:var(--paper);}
    화면 상단(훈련일지 옆)에 표시되어, 어느 버전이 실제로 올라가 있는지
    바로 눈으로 구분할 수 있게 해줍니다.
 ============================================================ */
-const APP_VERSION = 'v1.24';
+const APP_VERSION = 'v1.25';
 const APP_BUILD = '2026-09-26';
 
 /* ============================================================
@@ -784,6 +784,26 @@ function exMode(x){ const l = libOf(x)||{}; return l.timed ? 'time' : (l.repsOnl
 const TEMPO_BPMS = [60, 90, 120, 150, 180];                                  // 근력·버티기
 const TEMPO_BPMS_RUN = [100,110,120,130,140,150,160,170,180];                // 달리기 케이던스
 function bpmChoices(x){ return (libOf(x)||{}).type === 'cardio' ? TEMPO_BPMS_RUN : TEMPO_BPMS; }
+/* 구간이 있으면 구간을, 없으면 한 가지 빠르기를 하나짜리 구간으로 본다 */
+function cadenceSegments(lib, fallbackMin){
+  const iv = (lib && lib.intervals || []).filter(x=>Number(x.min) > 0 && Number(x.bpm) > 0);
+  if(iv.length) return iv.map(x=>({ min: Number(x.min), bpm: Number(x.bpm) }));
+  const bpm = tempoBpmOf(lib);
+  if(!bpm) return [];
+  return [{ min: Number(fallbackMin) || 0, bpm }];
+}
+function segTotalMin(segs){ return segs.reduce((t,x)=>t + x.min, 0); }
+function segTotalSteps(segs){ return segs.reduce((t,x)=>t + x.min * x.bpm, 0); }
+function cadenceLabel(lib){
+  const iv = (lib && lib.intervals || []).filter(x=>Number(x.min) > 0 && Number(x.bpm) > 0);
+  if(iv.length){
+    const bs = iv.map(x=>Number(x.bpm));
+    const lo = Math.min.apply(null, bs), hi = Math.max.apply(null, bs);
+    return `구간 ${iv.length}개 · ${lo===hi ? lo : lo + '~' + hi} BPM`;
+  }
+  const bpm = tempoBpmOf(lib);
+  return bpm ? bpm + ' BPM' : '';
+}
 function tempoBpmOf(x){
   const l = libOf(x) || {};
   if(l.tempoBpm) return Number(l.tempoBpm) || 0;
@@ -1233,7 +1253,7 @@ function renderEntryCard(en){
   const header = document.createElement('div');
   header.className = 'ex-card-header';
   const canVoice = en.type==='cardio'
-    ? tempoBpmOf(findLibItem(en.exerciseId)) > 0
+    ? cadenceSegments(findLibItem(en.exerciseId), 0).length > 0
     : voiceSetsOf(en).length > 0;
   header.innerHTML = `
     <button class="ex-check ${en.completed?'checked':''}" aria-label="완료 체크">✓</button>
@@ -1402,9 +1422,9 @@ function renderEntryCard(en){
       const unit = lib?.distanceUnit || 'km';
       const d=Number(en.distance)||0, t=Number(en.duration)||0;
       if(d>0||t>0){
-        const cbpm = tempoBpmOf(findLibItem(en.exerciseId));
+        const cbpm = cadenceLabel(findLibItem(en.exerciseId));
         body.innerHTML = `<div class="chip-row"><span class="chip">${en.distance||0}${unit} · ${en.duration||0}분${d>0&&t>0?` (${paceLabel(t,d,unit)})`:''}</span>`
-          + (cbpm?`<span class="chip">${cbpm} BPM</span>`:'') + `</div>`;
+          + (cbpm?`<span class="chip">${cbpm}</span>`:'') + `</div>`;
       } else {
         body.innerHTML = `<div class="empty" style="padding:10px;">탭해서 입력하세요</div>`;
       }
@@ -3066,8 +3086,8 @@ function ensureAudio(){
      소리를 죽인 채 재생했다가 곧바로 되감아 둔다. 여기서 볼륨을
      건드렸다가 나중에 되돌리면 첫 박자가 무음으로 나가 버리므로,
      muted 로만 막고 한 호흡 안에 전부 되돌려 놓는다. */
-  ['lo','hi'].forEach(k=>beepPool[k].forEach(a=>{
-    if(a.dataset.unlocked) return;
+  const unlock = (a)=>{
+    if(!a || a.dataset.unlocked) return;
     a.dataset.unlocked = '1';
     a.muted = true;
     try{
@@ -3075,7 +3095,9 @@ function ensureAudio(){
       if(pr && pr.catch) pr.catch(()=>{});
     }catch(e){}
     a.pause(); a.currentTime = 0; a.muted = false;
-  }));
+  };
+  ['lo','hi'].forEach(k=>beepPool[k].forEach(unlock));
+  unlock(loopAudioEl());        // 박자 루프도 같은 손짓 안에서 열어 둔다
   try{
     const AC = window.AudioContext || window.webkitAudioContext;
     if(AC){
@@ -3117,6 +3139,87 @@ function beep(strong){
     }catch(e){ /* 아래로 */ }
   }
   beepWebAudio(strong);
+}
+
+/* ------------------------------------------------------------
+   달리기용 박자 — 타이머로 하나씩 울리면 화면이 꺼지는 순간 멈춘다.
+   iOS 가 백그라운드에서 자바스크립트 타이머를 세워 버리기 때문이다.
+   대신 박자가 이미 들어 있는 짧은 소리를 만들어 끊김 없이 돌린다.
+   재생 중인 <audio> 가 있으면 iOS 는 화면을 꺼도 페이지를 살려 둔다.
+   박자 간격도 자바스크립트가 아니라 음원 자체가 들고 있어 안 밀린다.
+------------------------------------------------------------ */
+const loopCache = {};
+function buildBeatLoop(bpm, beats){
+  const key = bpm + 'x' + beats;
+  if(loopCache[key]) return loopCache[key];
+  const sr = 11025;                                   // 1~1.4kHz 딸깍이면 이걸로 충분
+  const spb = Math.round(sr * 60 / bpm);              // 한 박 = 정수 샘플 (이음매가 안 튄다)
+  const n = spb * beats;
+  const pcm = new Int16Array(n);
+  for(let b = 0; b < beats; b++){
+    const strong = (b === 0);
+    const f = strong ? 1400 : 1000;
+    const len = Math.min(spb, Math.round(sr * 0.06));
+    for(let i = 0; i < len; i++){
+      const t = i / sr;
+      const env = Math.min(1, t / 0.003) * Math.exp(-t * 55);
+      const v = Math.sin(2 * Math.PI * f * t) * env * (strong ? 0.8 : 0.55);
+      pcm[b * spb + i] = Math.max(-32767, Math.min(32767, v * 32767)) | 0;
+    }
+  }
+  const bytes = new Uint8Array(44 + n * 2);
+  const dv = new DataView(bytes.buffer);
+  const put = (o, str)=>{ for(let i = 0; i < str.length; i++) dv.setUint8(o + i, str.charCodeAt(i)); };
+  put(0,'RIFF'); dv.setUint32(4, 36 + n*2, true); put(8,'WAVEfmt ');
+  dv.setUint32(16,16,true); dv.setUint16(20,1,true); dv.setUint16(22,1,true);
+  dv.setUint32(24,sr,true); dv.setUint32(28,sr*2,true); dv.setUint16(32,2,true); dv.setUint16(34,16,true);
+  put(36,'data'); dv.setUint32(40, n*2, true);
+  new Int16Array(bytes.buffer, 44).set(pcm);
+  const url = URL.createObjectURL(new Blob([bytes], { type:'audio/wav' }));
+  loopCache[key] = url;
+  return url;
+}
+let loopAudio = null;
+function loopAudioEl(){
+  if(!loopAudio){
+    loopAudio = new Audio();
+    loopAudio.loop = true;
+    loopAudio.playsInline = true;
+    loopAudio.preload = 'auto';
+    loopAudio.src = BEEP_SRC.lo;     // 손짓 안에서 열어 두려면 처음부터 소스가 있어야 한다
+  }
+  return loopAudio;
+}
+function startBeatLoop(bpm){
+  const a = loopAudioEl();
+  const url = buildBeatLoop(bpm, 4);
+  if(a.dataset.bpm !== String(bpm)){ a.src = url; a.dataset.bpm = String(bpm); }
+  a.currentTime = 0;
+  const pr = a.play();
+  if(pr && pr.catch) pr.catch(()=>{});
+}
+function stopBeatLoop(){
+  if(!loopAudio) return;
+  try{ loopAudio.pause(); loopAudio.currentTime = 0; }catch(e){}
+  loopAudio.dataset.bpm = '';
+}
+/* 잠금화면에 제목과 재생/일시정지가 뜨게 해 둔다 */
+function setMediaSession(title, sub){
+  if(!('mediaSession' in navigator)) return;
+  try{
+    navigator.mediaSession.metadata = new MediaMetadata({ title, artist: sub, album: '훈련일지' });
+    navigator.mediaSession.playbackState = 'playing';
+    navigator.mediaSession.setActionHandler('pause', ()=>toggleVoicePause());
+    navigator.mediaSession.setActionHandler('play',  ()=>toggleVoicePause());
+    navigator.mediaSession.setActionHandler('stop',  ()=>endVoiceSession());
+  }catch(e){}
+}
+function clearMediaSession(){
+  if(!('mediaSession' in navigator)) return;
+  try{
+    navigator.mediaSession.playbackState = 'none';
+    ['pause','play','stop'].forEach(a=>navigator.mediaSession.setActionHandler(a, null));
+  }catch(e){}
 }
 
 /* 스스로 어긋남을 바로잡는 박자 루프. 멈춰 있는 동안에는 소리만 쉰다. */
@@ -3177,7 +3280,7 @@ function playBeepTest(){
    vs.paused 는 카운트다운 루프가 매 틱마다 확인한다. 발화 도중에
    일시정지를 누르면 그 한 마디는 끝까지 나오고 그다음 침묵부터
    멈춘다(발화 단위가 1초 미만이라 체감 차이가 없다).            */
-const vs = { active:false, paused:false, abort:false, entry:null, lib:null, cfg:null, sets:[], tm:null, met:null, wakeLock:null };
+const vs = { active:false, paused:false, abort:false, entry:null, lib:null, cfg:null, sets:[], tm:null, met:null, cadTm:null, wakeLock:null };
 
 function vsCountdown(totalMs, marks, onTick){
   return new Promise(resolve=>{
@@ -3206,7 +3309,7 @@ async function startVoiceSession(en){
   const cadence = en.type === 'cardio';
   let sets = [];
   if(cadence){
-    if(!tempoBpmOf(lib0)){ showToast('먼저 ⚙ 종목 설정에서 케이던스(BPM)를 정해주세요'); return; }
+    if(!cadenceSegments(lib0, en.duration).length){ showToast('먼저 ⚙ 종목 설정에서 케이던스(BPM)를 정해주세요'); return; }
   } else {
     sets = voiceSetsOf(en);
     if(!sets.length){ showToast('먼저 횟수를 입력해주세요'); return; }
@@ -3226,37 +3329,97 @@ async function startVoiceSession(en){
 }
 
 /* 달리기 케이던스 — 세트가 없다. 정해 둔 박자로 소리만 내주고,
-   적어 둔 시간이 있으면 그만큼 세고 끝낸다. 없으면 흘러간 시간을
-   센다. 발을 박자에 맞추는 게 전부라 화면은 시간만 크게 띄운다. */
+   적어 둔 시간이 있으면 그만큼 세고 끝낸다. 구간을 나눠 두었으면
+   구간마다 박자를 바꾼다.
+   화면이 꺼져도 박자가 유지되어야 해서, 소리는 타이머가 아니라
+   박자를 미리 구워 넣은 오디오를 끊김 없이 돌려서 낸다. 시간도
+   쌓아 세지 않고 시계(Date.now)로 되짚는다 — 잠긴 동안 타이머가
+   느려져도 돌아오면 숫자가 맞는다. */
 async function runCadenceSession(){
   const { lib, entry } = vs;
-  const bpm = tempoBpmOf(lib);
   const mins = Number(entry.duration) || 0;
-  const totalMs = mins ? mins * 60000 : 0;
-  const capMs = totalMs || 3 * 3600 * 1000;      // 시간을 안 적었으면 세 시간까지
+  const segs = cadenceSegments(lib, mins);
+  if(!segs.length) return;
+  const multi = segs.length > 1;
+  const planMin = segTotalMin(segs);
+  const totalMs = planMin ? planMin * 60000 : 0;        // 0 = 시간을 안 정한 자유 달리기
+  const capMs = totalMs || 3 * 3600 * 1000;
   const unit = lib.distanceUnit || 'km';
 
+  // 구간의 시작·끝 시각을 미리 깔아 둔다 (시간이 없으면 한 구간이 끝까지)
+  let acc = 0;
+  const plan = segs.map(sg=>{
+    const ms = sg.min ? sg.min * 60000 : capMs;
+    const o = { bpm: sg.bpm, min: sg.min, start: acc, end: acc + ms };
+    acc += ms;
+    return o;
+  });
+
   document.getElementById('voSetLine').textContent =
-    [entry.distance ? `${entry.distance}${unit}` : '', mins ? `${mins}분` : ''].filter(Boolean).join(' · ') || '케이던스';
-  document.getElementById('voTarget').textContent = `${bpm} BPM`;
+    [entry.distance ? `${entry.distance}${unit}` : '', planMin ? `${planMin}분` : ''].filter(Boolean).join(' · ') || '케이던스';
+  document.getElementById('voTarget').textContent = cadenceLabel(lib) || (segs[0].bpm + ' BPM');
   voPhase('run', '달리는 중', false);
-  voSub(mins ? `약 ${(mins*bpm).toLocaleString()}걸음` : '박자에 발을 맞추세요');
   voBig('0:00', true); voRing(0);
 
-  await speakAsync(`${entry.name}, ${sinoKo(bpm)} 비피엠, 시작`);
-  if(vs.abort) return;
-  startMetronome(60000 / bpm);
+  const steps = segTotalSteps(segs);
+  voSub(multi ? `구간 1 / ${plan.length} · ${plan[0].bpm} BPM`
+              : (steps ? `약 ${Math.round(steps).toLocaleString()}걸음` : '박자에 발을 맞추세요'));
+  setMediaSession(entry.name, cadenceLabel(lib) || (segs[0].bpm + ' BPM'));
 
+  await speakAsync(multi
+    ? `${entry.name}, 구간 ${ordinalKo(plan.length)} 개, 첫 구간 ${sinoKo(plan[0].bpm)} 비피엠, 시작`
+    : `${entry.name}, ${sinoKo(plan[0].bpm)} 비피엠, 시작`);
+  if(vs.abort) return;
+
+  startBeatLoop(plan[0].bpm);
+
+  // 남은 시간 안내 (전체 기준)
   const marks = [];
   if(totalMs) [600, 300, 60].forEach(sec=>{
     if(sec*1000 < totalMs - 5000) marks.push({ remain: sec*1000, text: sinoKo(sec/60) + '분 남았습니다' });
   });
+  marks.sort((a,b)=>b.remain-a.remain);
 
-  const r = await vsCountdown(capMs, marks, (remain, prog)=>{
-    voBig(fmtMMSS(totalMs ? remain : capMs - remain), true);
-    voRing(totalMs ? prog : 0);
+  const r = await new Promise(resolve=>{
+    let idx = 0, pausedMs = 0, last = Date.now();
+    const tick = ()=>{
+      if(vs.abort){ clearInterval(vs.cadTm); vs.cadTm = null; return resolve('abort'); }
+      const now = Date.now();
+      if(vs.paused) pausedMs += now - last;         // 멈춘 만큼은 시간에서 뺀다
+      last = now;
+      const elapsed = Math.max(0, now - t0 - pausedMs);
+      if(vs.paused) return;
+
+      // 구간이 바뀌었는가 (화면이 꺼져 있던 동안 두 칸 넘어갔을 수도 있다)
+      let ni = idx;
+      while(ni + 1 < plan.length && elapsed >= plan[ni].end) ni++;
+      if(ni !== idx){
+        idx = ni;
+        startBeatLoop(plan[idx].bpm);
+        setMediaSession(entry.name, `구간 ${idx+1}/${plan.length} · ${plan[idx].bpm} BPM`);
+        speakNow(`${ordinalKo(idx+1)}번째 구간, ${sinoKo(plan[idx].bpm)} 비피엠`);
+      }
+
+      const remain = Math.max(0, capMs - elapsed);
+      while(marks.length && remain <= marks[0].remain) speakNow(marks.shift().text);
+
+      voBig(fmtMMSS(totalMs ? remain : elapsed), true);
+      voRing(totalMs ? elapsed / totalMs : 0);
+      if(multi){
+        const segRemain = Math.max(0, plan[idx].end - elapsed);
+        const nextBpm = plan[idx+1] ? ` → 다음 ${plan[idx+1].bpm}` : '';
+        voSub(`구간 ${idx+1} / ${plan.length} · ${plan[idx].bpm} BPM · ${fmtMMSS(segRemain)} 남음${nextBpm}`);
+      }
+      document.getElementById('voTarget').textContent = plan[idx].bpm + ' BPM';
+
+      if(elapsed >= capMs){ clearInterval(vs.cadTm); vs.cadTm = null; resolve('done'); }
+    };
+    const t0 = Date.now();
+    vs.cadTm = setInterval(tick, 250);
+    tick();
   });
-  stopMetronome();
+
+  stopBeatLoop();
   if(r === 'abort') return;
   await speakAsync('수고하셨습니다');
   if(vs.abort) return;
@@ -3323,7 +3486,10 @@ async function runVoiceSession(){
 function endVoiceSession(){
   vs.abort = true;
   clearTimeout(vs.tm);
+  clearInterval(vs.cadTm);
   stopMetronome();
+  stopBeatLoop();
+  clearMediaSession();
   try{ speechSynthesis.cancel(); }catch(e){}
   vs.active = false; vs.paused = false;
   releaseWakeLock();
@@ -3340,6 +3506,12 @@ function toggleVoicePause(){
   b.textContent = vs.paused ? '계속하기' : '일시정지';
   b.classList.toggle('paused', vs.paused);
   document.getElementById('voiceOverlay').classList.toggle('paused', vs.paused);
+  if(loopAudio && loopAudio.dataset.bpm){
+    try{ vs.paused ? loopAudio.pause() : loopAudio.play(); }catch(e){}
+  }
+  if('mediaSession' in navigator){
+    try{ navigator.mediaSession.playbackState = vs.paused ? 'paused' : 'playing'; }catch(e){}
+  }
   try{ vs.paused ? speechSynthesis.pause() : speechSynthesis.resume(); }catch(e){}
 }
 
@@ -3626,7 +3798,23 @@ function openLibraryDetailSheet(it){
           <div class="small-note" id="ldTempoNote"></div>
         </div>
         <div class="small-note">정하면 오늘 탭 카드에 🔊 가 생깁니다. 누르면 그 박자로 소리만 내주니,
-          박자에 발을 맞춰 뛰면 됩니다. 시간을 적어 두었으면 그만큼 세고 끝냅니다.</div>
+          박자에 발을 맞춰 뛰면 됩니다. 시간을 적어 두었으면 그만큼 세고 끝냅니다.
+          화면을 꺼도 박자는 계속됩니다.</div>
+      </div>
+      <div class="divider"></div>
+      <div class="sheet-group">
+        <div class="sheet-group-label">구간 <span class="muted" style="font-size:11px;">분 단위로 나눠 빠르기를 바꾼다</span></div>
+        <div class="seg-tabs" style="margin-bottom:10px;">
+          <button type="button" class="ldIvMode" data-iv="off">한 가지</button>
+          <button type="button" class="ldIvMode" data-iv="on">구간별</button>
+        </div>
+        <div id="ldIvWrap">
+          <div id="ldIvRows"></div>
+          <div class="btn-row" style="margin-top:6px;">
+            <button class="btn ghost small" id="ldIvAdd">+ 구간 추가</button>
+          </div>
+        </div>
+        <div class="small-note" id="ldIvNote"></div>
       </div>
     `}
   `);
@@ -3656,8 +3844,13 @@ function openLibraryDetailSheet(it){
       } else {
         const tpl = state.templates[it.id] || {};
         const min = Number(tpl.duration) || 0;
-        tempoNote.textContent = `${bpm} BPM · 1분에 ${bpm}걸음`
-          + (min ? ` · ${min}분 뛰면 약 ${(min*bpm).toLocaleString()}걸음` : '');
+        const iv = (it.intervals || []).filter(x=>Number(x.min)>0 && Number(x.bpm)>0);
+        if(iv.length){
+          tempoNote.textContent = `구간을 나눠 두어서 아래 구간대로 돕니다 (${cadenceLabel(it)}).`;
+        } else {
+          tempoNote.textContent = `${bpm} BPM · 1분에 ${bpm}걸음`
+            + (min ? ` · ${min}분 뛰면 약 ${(min*bpm).toLocaleString()}걸음` : '');
+        }
       }
     };
     let _tpTm2;
@@ -3677,7 +3870,77 @@ function openLibraryDetailSheet(it){
     syncTempoChips();
     it.__syncTempoChips = syncTempoChips;
   }
-  if(!isStrength) return;
+  /* 구간 편집 — 유산소만 */
+  if(!isStrength){
+    const ivRows = inner.querySelector('#ldIvRows');
+    const ivWrap = inner.querySelector('#ldIvWrap');
+    const ivNote = inner.querySelector('#ldIvNote');
+    const ivAdd  = inner.querySelector('#ldIvAdd');
+    let ivs = (it.intervals || []).filter(x=>Number(x.min)>0 && Number(x.bpm)>0)
+                                  .map(x=>({ min:Number(x.min), bpm:Number(x.bpm) }));
+    let ivOn = ivs.length > 0;
+    let _ivTm;
+    const ivSave = ()=>{
+      if(ivOn && ivs.length) it.intervals = ivs.map(x=>({ min:Number(x.min)||0, bpm:Number(x.bpm)||0 }));
+      else delete it.intervals;
+      if(it.__syncTempoChips) it.__syncTempoChips();
+      renderEntryList();
+      clearTimeout(_ivTm);
+      _ivTm = setTimeout(()=>saveLib(`intervals ${it.name}`), 800);
+    };
+    const drawIv = ()=>{
+      inner.querySelectorAll('.ldIvMode').forEach(b=>b.classList.toggle('active', (b.dataset.iv==='on')===ivOn));
+      ivWrap.style.display = ivOn ? 'block' : 'none';
+      if(!ivOn){
+        ivNote.textContent = '한 가지 빠르기로 끝까지 갑니다.';
+      } else {
+        ivRows.innerHTML = ivs.length ? ivs.map((x,i)=>`
+          <div class="setblock"><div class="setline">
+            <span class="setnum">${i+1}</span>
+            <input type="number" inputmode="numeric" min="1" data-ivi="${i}" data-ivf="min" value="${x.min}" style="flex:1;min-width:0;text-align:center;"><span class="unit-label">분</span>
+            <select data-ivi="${i}" data-ivf="bpm" style="flex:1.2;min-width:0;">
+              ${Array.from(new Set(TEMPO_BPMS_RUN.concat(x.bpm))).sort((a,b)=>a-b)
+                  .map(v=>`<option value="${v}"${v===x.bpm?' selected':''}>${v}</option>`).join('')}
+            </select><span class="unit-label">BPM</span>
+            <button class="delsetbtn" data-ivdel="${i}">🗑</button>
+          </div></div>`).join('')
+          : '<p class="muted">구간이 없습니다. 아래에서 추가하세요.</p>';
+        ivRows.querySelectorAll('[data-ivi]').forEach(el=>{
+          el.addEventListener('change', ()=>{
+            ivs[Number(el.dataset.ivi)][el.dataset.ivf] = Number(el.value) || 0;
+            drawIv(); ivSave();
+          });
+        });
+        ivRows.querySelectorAll('[data-ivdel]').forEach(b=>{
+          b.addEventListener('click', ()=>{ ivs.splice(Number(b.dataset.ivdel),1); drawIv(); ivSave(); });
+        });
+        const tm = segTotalMin(ivs), st = segTotalSteps(ivs);
+        ivNote.textContent = ivs.length
+          ? `총 ${tm}분 · 약 ${Math.round(st).toLocaleString()}걸음`
+          : '구간을 하나 이상 넣어야 구간별로 돕니다.';
+      }
+    };
+    inner.querySelectorAll('.ldIvMode').forEach(b=>{
+      b.addEventListener('click', ()=>{
+        ivOn = b.dataset.iv === 'on';
+        if(ivOn && !ivs.length){
+          const base = tempoBpmOf(it) || 160;
+          const tpl = state.templates[it.id] || {};
+          const half = Math.max(1, Math.round((Number(tpl.duration) || 20) / 2));
+          ivs = [{ min: half, bpm: base }, { min: half, bpm: Math.min(180, base + 20) }];
+        }
+        drawIv(); ivSave();
+      });
+    });
+    ivAdd.addEventListener('click', ()=>{
+      const last = ivs[ivs.length-1] || { min: 5, bpm: tempoBpmOf(it) || 160 };
+      ivs.push({ min: Number(last.min) || 5, bpm: Number(last.bpm) || 160 });
+      drawIv(); ivSave();
+    });
+    drawIv();
+    return;
+  }
+
 
   inner.querySelectorAll('input[data-vkey]').forEach(el=>{
     el.addEventListener('input', ()=>{
