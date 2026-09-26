@@ -76,7 +76,7 @@
     "fav": true,
     "intervals": [
       {
-        "min": 10,
+        "min": 1,
         "bpm": 180
       },
       {
