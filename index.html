@@ -632,7 +632,7 @@ nav.bottomnav button.active{color:var(--ink);background:var(--paper);}
    화면 상단(훈련일지 옆)에 표시되어, 어느 버전이 실제로 올라가 있는지
    바로 눈으로 구분할 수 있게 해줍니다.
 ============================================================ */
-const APP_VERSION = 'v1.26';
+const APP_VERSION = 'v1.27';
 const APP_BUILD = '2026-09-26';
 
 /* ============================================================
@@ -782,7 +782,7 @@ function exMode(x){ const l = libOf(x)||{}; return l.timed ? 'time' : (l.repsOnl
 /* 박자는 BPM(분당 몇 번)으로 정한다. 120 BPM = 0.5초에 한 번.
    초로 적던 예전 값(tempoSec)도 그대로 읽어 준다. */
 const TEMPO_BPMS = [60, 90, 120, 150, 180];                                  // 근력·버티기
-const TEMPO_BPMS_RUN = [100,110,120,130,140,150,160,170,180];                // 달리기 케이던스
+const TEMPO_BPMS_RUN = [100,110,120,130,140,150,160,170,180,190,200,210];    // 달리기 케이던스
 function bpmChoices(x){ return (libOf(x)||{}).type === 'cardio' ? TEMPO_BPMS_RUN : TEMPO_BPMS; }
 /* 구간이 있으면 구간을, 없으면 한 가지 빠르기를 하나짜리 구간으로 본다 */
 function cadenceSegments(lib, fallbackMin){
