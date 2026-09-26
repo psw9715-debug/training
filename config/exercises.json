@@ -72,7 +72,8 @@
     "type": "cardio",
     "distanceUnit": "km",
     "met": 9,
-    "tempoBpm": 180
+    "tempoBpm": 180,
+    "fav": true
   },
   {
     "id": "swimming",
