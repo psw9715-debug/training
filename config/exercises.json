@@ -73,7 +73,17 @@
     "distanceUnit": "km",
     "met": 9,
     "tempoBpm": 180,
-    "fav": true
+    "fav": true,
+    "intervals": [
+      {
+        "min": 25,
+        "bpm": 180
+      },
+      {
+        "min": 25,
+        "bpm": 180
+      }
+    ]
   },
   {
     "id": "swimming",
