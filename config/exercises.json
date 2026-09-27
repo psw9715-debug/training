@@ -179,7 +179,8 @@
       "제자리 점프",
       "pogo hop"
     ],
-    "tempoBpm": 150
+    "tempoBpm": 150,
+    "fav": true
   },
   {
     "id": "ex_mxf5klm",
