@@ -141,7 +141,8 @@
     "name": "스쿼트",
     "bodyPart": "하체",
     "type": "strength",
-    "repsOnly": true
+    "repsOnly": true,
+    "fav": true
   },
   {
     "id": "ex_qdk9w3w",
