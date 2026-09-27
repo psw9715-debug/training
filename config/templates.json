@@ -646,6 +646,21 @@
         "weight": 0,
         "reps": 60,
         "failed": false
+      },
+      {
+        "weight": 0,
+        "reps": 60,
+        "failed": false
+      },
+      {
+        "weight": 0,
+        "reps": 60,
+        "failed": false
+      },
+      {
+        "weight": 0,
+        "reps": 60,
+        "failed": false
       }
     ]
   }
