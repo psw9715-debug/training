@@ -48,6 +48,21 @@
           "weight": 0,
           "reps": 60,
           "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 60,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 60,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 60,
+          "failed": false
         }
       ]
     },
@@ -59,12 +74,95 @@
       "adHoc": true,
       "distance": 4.5,
       "duration": 50
+    },
+    {
+      "instanceId": "npxeknk",
+      "exerciseId": "ex_qdk9w3w",
+      "name": "카프 레이즈 홀드 (까치발 버티기)",
+      "type": "strength",
+      "adHoc": true,
+      "sets": [
+        {
+          "weight": 0,
+          "reps": 20,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 20,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 20,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 20,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 20,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 20,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 20,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 20,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 20,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 20,
+          "failed": false
+        }
+      ]
+    },
+    {
+      "instanceId": "h0er4dw",
+      "exerciseId": "ex_4woxit3",
+      "name": "스쿼트",
+      "type": "strength",
+      "adHoc": true,
+      "sets": [
+        {
+          "weight": 0,
+          "reps": 20,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 20,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 20,
+          "failed": false
+        }
+      ]
     }
   ],
   "calories": {
-    "strength": 117,
+    "strength": 384,
     "cardio": 602,
-    "total": 718
+    "total": 986
   },
-  "savedAt": "2026-09-27T12:11:20.341Z"
+  "savedAt": "2026-09-27T14:03:42.474Z"
 }
