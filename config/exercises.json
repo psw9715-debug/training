@@ -209,5 +209,18 @@
       "jumping jack"
     ],
     "tempoBpm": 120
+  },
+  {
+    "id": "ex_7o540pd",
+    "name": "인클라인 덤벨프레스",
+    "bodyPart": "가슴",
+    "type": "strength",
+    "catalogId": "cat_incline_db",
+    "icon": "bench_incline",
+    "aliases": [
+      "인클라인덤벨",
+      "incline dumbbell"
+    ],
+    "weightStep": 2
   }
 ]
