@@ -113,7 +113,8 @@
     "id": "ex_312xm4p",
     "name": "시티드 체스트프레스",
     "bodyPart": "가슴",
-    "type": "strength"
+    "type": "strength",
+    "fav": true
   },
   {
     "id": "ex_m3he3gn",
