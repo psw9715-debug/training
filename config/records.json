@@ -31,9 +31,9 @@
   "shoulder_press": {
     "type": "strength",
     "name": "숄더프레스",
-    "weight": 35,
+    "weight": 40,
     "reps": 1,
-    "date": "2026-09-07"
+    "date": "2026-10-19"
   },
   "butterfly": {
     "type": "strength",
@@ -112,5 +112,12 @@
     "weight": 30,
     "reps": 4,
     "date": "2026-09-17"
+  },
+  "ex_4ig24xc": {
+    "type": "strength",
+    "name": "오버헤드 트라이셉 익스텐션",
+    "weight": 60,
+    "reps": 1,
+    "date": "2026-10-19"
   }
 }
