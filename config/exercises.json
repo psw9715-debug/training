@@ -225,5 +225,19 @@
       "incline dumbbell"
     ],
     "weightStep": 2
+  },
+  {
+    "id": "ex_vyyxlce",
+    "name": "트라이셉 푸시다운",
+    "bodyPart": "팔",
+    "type": "strength",
+    "catalogId": "cat_pushdown",
+    "icon": "cable",
+    "aliases": [
+      "푸시다운",
+      "푸쉬다운",
+      "triceps pushdown"
+    ],
+    "weightStep": 5
   }
 ]
