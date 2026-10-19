@@ -239,5 +239,17 @@
       "triceps pushdown"
     ],
     "weightStep": 5
+  },
+  {
+    "id": "ex_4ig24xc",
+    "name": "오버헤드 트라이셉 익스텐션",
+    "bodyPart": "팔",
+    "type": "strength",
+    "catalogId": "cat_oh_ext",
+    "icon": "cable",
+    "aliases": [
+      "오버헤드익스텐션"
+    ],
+    "weightStep": 2.5
   }
 ]
