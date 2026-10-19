@@ -15,7 +15,8 @@
     "id": "butterfly",
     "name": "버터플라이",
     "bodyPart": "가슴",
-    "type": "strength"
+    "type": "strength",
+    "fav": true
   },
   {
     "id": "pushup",
