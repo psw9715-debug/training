@@ -39,7 +39,8 @@
     "id": "shoulder_press",
     "name": "숄더프레스",
     "bodyPart": "어깨",
-    "type": "strength"
+    "type": "strength",
+    "fav": true
   },
   {
     "id": "arm_curl",
