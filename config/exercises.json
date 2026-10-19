@@ -109,7 +109,8 @@
     "bodyPart": "유산소",
     "type": "cardio",
     "distanceUnit": "m",
-    "met": 7
+    "met": 7,
+    "fav": true
   },
   {
     "id": "ex_312xm4p",
