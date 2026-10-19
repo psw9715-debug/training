@@ -276,12 +276,21 @@
           "failed": false
         }
       ]
+    },
+    {
+      "instanceId": "xpmfsrq",
+      "exerciseId": "swimming",
+      "name": "수영",
+      "type": "cardio",
+      "adHoc": true,
+      "distance": 1000,
+      "duration": 50
     }
   ],
   "calories": {
     "strength": 743,
-    "cardio": 0,
-    "total": 743
+    "cardio": 463,
+    "total": 1206
   },
-  "savedAt": "2026-10-19T09:30:00.323Z"
+  "savedAt": "2026-10-19T09:30:15.152Z"
 }
