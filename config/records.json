@@ -119,5 +119,12 @@
     "weight": 60,
     "reps": 1,
     "date": "2026-10-19"
+  },
+  "ex_7kfqiic": {
+    "type": "strength",
+    "name": "케이블 로우",
+    "weight": 55,
+    "reps": 1,
+    "date": "2026-10-21"
   }
 }
