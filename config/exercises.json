@@ -9,7 +9,8 @@
     "id": "cable_crossover",
     "name": "케이블 크로스오버",
     "bodyPart": "가슴",
-    "type": "strength"
+    "type": "strength",
+    "fav": true
   },
   {
     "id": "butterfly",
