@@ -254,5 +254,18 @@
       "오버헤드익스텐션"
     ],
     "weightStep": 2.5
+  },
+  {
+    "id": "ex_7kfqiic",
+    "name": "케이블 로우",
+    "bodyPart": "등",
+    "type": "strength",
+    "catalogId": "cat_cable_row",
+    "icon": "seated_row",
+    "aliases": [
+      "케이블로우",
+      "cable row"
+    ],
+    "weightStep": 5
   }
 ]
