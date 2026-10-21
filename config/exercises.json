@@ -29,7 +29,8 @@
     "id": "lat_pulldown",
     "name": "렛풀다운",
     "bodyPart": "등",
-    "type": "strength"
+    "type": "strength",
+    "fav": true
   },
   {
     "id": "long_pull",
