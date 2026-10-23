@@ -254,7 +254,8 @@
     "aliases": [
       "오버헤드익스텐션"
     ],
-    "weightStep": 2.5
+    "weightStep": 2.5,
+    "fav": true
   },
   {
     "id": "ex_7kfqiic",
