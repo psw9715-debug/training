@@ -133,7 +133,8 @@
     "name": "싯업",
     "bodyPart": "복근",
     "type": "strength",
-    "repsOnly": true
+    "repsOnly": true,
+    "fav": true
   },
   {
     "id": "ex_cdjmplq",
