@@ -294,12 +294,105 @@
       "adHoc": true,
       "distance": 3.7,
       "duration": 23
+    },
+    {
+      "instanceId": "358fykx",
+      "exerciseId": "ex_shiv21i",
+      "name": "제자리 뛰기",
+      "type": "strength",
+      "adHoc": true,
+      "sets": [
+        {
+          "weight": 0,
+          "reps": 60,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 60,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 60,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 60,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 60,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 60,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 60,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 60,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 60,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 60,
+          "failed": false
+        }
+      ]
+    },
+    {
+      "instanceId": "ybtii4w",
+      "exerciseId": "ex_4woxit3",
+      "name": "스쿼트",
+      "type": "strength",
+      "adHoc": true,
+      "sets": [
+        {
+          "weight": 0,
+          "reps": 20,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 20,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 20,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 20,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 20,
+          "failed": false
+        }
+      ]
     }
   ],
   "calories": {
-    "strength": 728,
+    "strength": 970,
     "cardio": 720,
-    "total": 1448
+    "total": 1690
   },
-  "savedAt": "2026-10-25T11:58:08.685Z"
+  "savedAt": "2026-10-25T13:48:50.766Z"
 }
