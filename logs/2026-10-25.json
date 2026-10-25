@@ -1,9 +1,9 @@
 {
   "date": "2026-10-25",
   "weekday": "sun",
-  "bodyWeight": 79.8,
-  "muscleMass": 33.6,
-  "fatMass": 25.7,
+  "bodyWeight": 77.6,
+  "muscleMass": 32.2,
+  "fatMass": 26.9,
   "rpe": null,
   "memo": "",
   "entries": [
@@ -279,9 +279,9 @@
     }
   ],
   "calories": {
-    "strength": 748,
+    "strength": 728,
     "cardio": 0,
-    "total": 748
+    "total": 728
   },
-  "savedAt": "2026-10-25T06:03:09.421Z"
+  "savedAt": "2026-10-25T07:11:40.231Z"
 }
