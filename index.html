@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- 훈련일지 v1.24 · 빌드 2026-09-26 -->
+<!-- 훈련일지 v1.28 · 빌드 2026-10-26 -->
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -315,10 +315,33 @@ nav.bottomnav button{ flex:1;display:flex;flex-direction:column;align-items:cent
   font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600; padding:6px 2px;border-radius:8px;cursor:pointer; }
 nav.bottomnav button .icon{font-size:19px;line-height:1;}
 nav.bottomnav button.active{color:var(--ink);background:var(--paper);}
+/* 세로 고정 — 운동 중에 손목이 돌아가도 화면이 눕지 않게.
+   아이폰 사파리에는 화면 잠금 API가 없어서(설치형 안드로이드에서만 먹는다),
+   가로로 돌아가면 내용을 그만큼 되돌려 돌려 세로처럼 보이게 한다. */
+@media (orientation: landscape) and (max-height: 600px){
+  html[data-portrait="1"]{ overflow:hidden; }
+  html[data-portrait="1"] body{
+    position:fixed; top:0; left:0;
+    width:100vh; height:100vw;
+    transform-origin: top left;
+    overflow:hidden;                    /* 스크롤은 안쪽 상자가 맡는다 */
+    padding-bottom:0;
+  }
+  /* 본문만 구르게 하면 바닥 탭·오버레이·토스트가 제자리에 붙어 있는다
+     (돌려 놓은 요소 안에서는 position:fixed 가 그 요소 기준이 된다) */
+  html[data-portrait="1"] #appScroll{
+    position:absolute; inset:0; overflow-y:auto; overflow-x:hidden;
+    -webkit-overflow-scrolling:touch;
+    padding-bottom: calc(76px + env(safe-area-inset-bottom));
+  }
+  html[data-portrait="1"][data-rot="90"]  body{ transform: rotate(-90deg) translateX(-100%); }
+  html[data-portrait="1"][data-rot="270"] body{ transform: rotate(90deg) translateY(-100%); }
+}
 </style>
 </head>
 <body>
 
+<div id="appScroll">
 <header class="top">
   <div class="stamp-title"><span class="dot"></span>훈련일지</div>
   <div class="subtitle" id="statusLine">GitHub 연결 대기 중...</div>
@@ -379,6 +402,13 @@ nav.bottomnav button.active{color:var(--ink);background:var(--paper);}
     <div class="small-note">▶ 를 누르면 실제 흐름 그대로 들려줍니다 (세트 안내 → 카운트 세 번). 재생 중에 다시 누르면 멈춥니다.
       목록은 이 아이폰에 설치된 한국어 음성만 나옵니다 — <b>설정 &gt; 손쉬운 사용 &gt; 음성 콘텐츠 &gt; 음성 &gt; 한국어</b>
       에서 '향상됨' 또는 '프리미엄' 을 내려받으면 목록도 늘고 품질도 크게 좋아집니다.</div>
+  </div>
+
+  <div class="card">
+    <h2>화면 <span class="badge" id="portraitBadge">세로 고정</span></h2>
+    <p class="muted">운동 중에 폰이 돌아가도 화면이 가로로 눕지 않게 세로로 고정합니다.</p>
+    <div class="btn-row"><button class="btn ghost" id="btnPortrait">세로 고정 끄기</button></div>
+    <div class="small-note">글자 입력이 이상하게 보이면 꺼 보세요.</div>
   </div>
 
   <div class="card">
@@ -587,6 +617,7 @@ nav.bottomnav button.active{color:var(--ink);background:var(--paper);}
 </section>
 
 </main>
+</div><!-- /#appScroll -->
 
 <nav class="bottomnav" id="tabNav">
   <button data-tab="today" class="active"><span class="icon">📅</span>오늘</button>
@@ -632,8 +663,8 @@ nav.bottomnav button.active{color:var(--ink);background:var(--paper);}
    화면 상단(훈련일지 옆)에 표시되어, 어느 버전이 실제로 올라가 있는지
    바로 눈으로 구분할 수 있게 해줍니다.
 ============================================================ */
-const APP_VERSION = 'v1.27';
-const APP_BUILD = '2026-09-26';
+const APP_VERSION = 'v1.28';
+const APP_BUILD = '2026-10-26';
 
 /* ============================================================
    상수
@@ -945,6 +976,47 @@ const state = {
    예전 파일이 그대로 와서, 눌렀는데 아무것도 안 바뀐 것처럼 보인다.
    눌렀을 때의 버전을 적어 두었다가 돌아와서 비교해 알려준다. */
 const RELOAD_FROM_KEY = 'training-log:reloadFrom';
+
+/* ---- 세로 고정 ----------------------------------------------------
+   아이폰 사파리는 화면 방향을 잠글 수 없어서(안드로이드·설치형만 가능),
+   가로로 돌아간 만큼 내용을 되돌려 돌린다. 실제로 보이는 모습은
+   세로 그대로다. 설정에서 끌 수 있다.                              */
+const PORTRAIT_KEY = 'training-log:portraitLock';
+function portraitLockOn(){
+  try{ return localStorage.getItem(PORTRAIT_KEY) !== '0'; }catch(e){ return true; }
+}
+function applyPortraitLock(){
+  const on = portraitLockOn();
+  const html = document.documentElement;
+  html.dataset.portrait = on ? '1' : '0';
+  let rot = Number((screen.orientation && screen.orientation.angle) ?? window.orientation ?? 0);
+  if(!isFinite(rot)) rot = 0;
+  rot = ((rot % 360) + 360) % 360;
+  if(rot !== 90 && rot !== 270) rot = (window.innerWidth > window.innerHeight) ? 90 : 0;
+  html.dataset.rot = String(rot);
+  if(on && screen.orientation && screen.orientation.lock){
+    try{ const p = screen.orientation.lock('portrait'); if(p && p.catch) p.catch(()=>{}); }catch(e){}
+  }
+  const btn = document.getElementById('btnPortrait');
+  const badge = document.getElementById('portraitBadge');
+  if(btn) btn.textContent = on ? '세로 고정 끄기' : '세로 고정 켜기';
+  if(badge) badge.textContent = on ? '세로 고정' : '고정 안 함';
+}
+function togglePortraitLock(){
+  const next = portraitLockOn() ? '0' : '1';
+  try{ localStorage.setItem(PORTRAIT_KEY, next); }catch(e){}
+  applyPortraitLock();
+  showToast(next === '1' ? '세로로 고정합니다' : '화면 고정을 풀었습니다');
+}
+function bindPortraitLock(){
+  const btn = document.getElementById('btnPortrait');
+  if(btn) btn.addEventListener('click', togglePortraitLock);
+  const relay = ()=>setTimeout(applyPortraitLock, 60);
+  window.addEventListener('orientationchange', relay);
+  window.addEventListener('resize', relay);
+  if(screen.orientation && screen.orientation.addEventListener) screen.orientation.addEventListener('change', relay);
+  applyPortraitLock();
+}
 function reportReloadResult(){
   let from = null;
   try{ from = localStorage.getItem(RELOAD_FROM_KEY); localStorage.removeItem(RELOAD_FROM_KEY); }catch(e){}
@@ -968,6 +1040,7 @@ async function init(){
   if(svl) svl.textContent = `${APP_VERSION} · ${APP_BUILD}`;
   bindTabNav(); bindSettingsHandlers(); bindTodayHandlers(); bindRoutineHandlers();
   bindGoalsHandlers(); bindAiCoachHandlers(); bindHistoryHandlers(); bindVoiceHandlers();
+  bindPortraitLock();
   document.getElementById('dateInput').value = state.currentDate;
   const bw = document.getElementById('bodyWeightInput');
   if(bw) bw.addEventListener('input', updateCalorieBadge);
