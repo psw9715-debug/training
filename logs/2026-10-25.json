@@ -351,6 +351,56 @@
           "weight": 0,
           "reps": 60,
           "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 60,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 60,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 60,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 60,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 60,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 60,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 60,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 60,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 60,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 60,
+          "failed": false
         }
       ]
     },
@@ -385,14 +435,39 @@
           "weight": 0,
           "reps": 20,
           "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 20,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 20,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 20,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 20,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 20,
+          "failed": false
         }
       ]
     }
   ],
   "calories": {
-    "strength": 970,
+    "strength": 1213,
     "cardio": 720,
-    "total": 1690
+    "total": 1933
   },
-  "savedAt": "2026-10-25T13:48:50.766Z"
+  "savedAt": "2026-10-26T01:26:08.243Z"
 }
