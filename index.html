@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- 훈련일지 v1.28 · 빌드 2026-10-26 -->
+<!-- 훈련일지 v1.29 · 빌드 2026-10-26 -->
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -663,7 +663,7 @@ nav.bottomnav button.active{color:var(--ink);background:var(--paper);}
    화면 상단(훈련일지 옆)에 표시되어, 어느 버전이 실제로 올라가 있는지
    바로 눈으로 구분할 수 있게 해줍니다.
 ============================================================ */
-const APP_VERSION = 'v1.28';
+const APP_VERSION = 'v1.29';
 const APP_BUILD = '2026-10-26';
 
 /* ============================================================
@@ -3109,6 +3109,7 @@ if(window.speechSynthesis){
 function speakAsync(text, voiceOverride){
   return new Promise(resolve=>{
     if(!window.speechSynthesis || !text) return resolve();
+    try{ if(speechSynthesis.paused) speechSynthesis.resume(); }catch(e){}   // 끊긴 뒤 멈춰 있는 걸 깨운다
     const u = voiceEngine.make(text, voiceOverride);
     let done = false;
     const fin = ()=>{ if(done) return; done = true; clearTimeout(tm); resolve(); };
@@ -3304,13 +3305,17 @@ function startBeatLoop(bpm, sec){
   const whole = sec > 0;
   const chunk = whole ? Math.min(sec, TRACK_CHUNK_SEC) : 0;
   const key = whole ? trackKey(bpm, chunk) : (bpm + 'L');
-  if(a.dataset.bkey !== key){
+  // 소스를 다시 물리는 건 13MB 를 다시 읽는 일이라, 같은 박자면 그대로 쓴다.
+  // (구운 걸 누가 버렸으면 다시 굽는다)
+  if(a.dataset.bkey !== key || (whole && !_tracks[key]) || a.error){
     a.loop = !whole;
     a.src = whole ? warmBeatTrack(bpm, chunk) : buildBeatLoop(bpm);
     a.dataset.bkey = key;
   }
   a.dataset.bpm = String(bpm);
+  a.dataset.sec = String(sec);
   a.dataset.rest = String(whole ? Math.max(0, sec - chunk) : 0);
+  vs.beat = true;                       // 지금은 소리가 나고 있어야 한다는 표시
   a.currentTime = 0;
   const pr = a.play();
   if(pr && pr.catch) pr.catch(()=>{});
@@ -3318,7 +3323,7 @@ function startBeatLoop(bpm, sec){
 /* 한 통이 끝나면 곧바로 다음 통을 잇는다 (타이머가 아니라 이벤트라
    화면이 꺼져 있어도 바로 이어진다) */
 function chainBeatTrack(){
-  if(!loopAudio || !vs.active || vs.paused || vs.abort) return;
+  if(!loopAudio || !vs.active || vs.paused || vs.abort || !vs.beat) return;
   const rest = Number(loopAudio.dataset.rest) || 0;
   if(rest > 0) startBeatLoop(Number(loopAudio.dataset.bpm) || 0, rest);
 }
@@ -3329,10 +3334,31 @@ function warmNextChunk(){
   const left = (loopAudio.duration || 0) - (loopAudio.currentTime || 0);
   if(rest > 0 && left > 0 && left < 20) warmBeatTrack(Number(loopAudio.dataset.bpm) || 0, rest);
 }
+/* 안내 음성이 끼어들면 아이폰이 오디오를 멈춰 세우고 되돌려주지 않는다.
+   (말소리와 음악이 같은 길을 쓰기 때문) 그래서 소리가 나고 있어야 할
+   동안에는 계속 지켜보다가, 멈춰 있으면 다시 틀어 준다.             */
+function keepBeatAlive(){
+  const a = loopAudio;
+  if(!a || !vs.beat || !vs.active || vs.paused || vs.abort) return;
+  if(!a.dataset.bpm) return;
+  if(a.error){                                   // 소스가 깨졌으면 다시 물린다
+    const bpm = Number(a.dataset.bpm) || 0, sec = Number(a.dataset.sec) || 0;
+    a.dataset.bkey = '';
+    if(bpm) startBeatLoop(bpm, sec);
+    return;
+  }
+  if(a.ended){ chainBeatTrack(); return; }
+  if(a.paused){
+    const pr = a.play();
+    if(pr && pr.catch) pr.catch(()=>{});
+  }
+}
 function stopBeatLoop(){
+  vs.beat = false;
   if(!loopAudio) return;
+  // 소스(bkey)는 남겨 둔다 — 다음 세트에서 그대로 다시 쓰려고
   try{ loopAudio.pause(); loopAudio.currentTime = 0; }catch(e){}
-  loopAudio.dataset.bpm = ''; loopAudio.dataset.bkey = ''; loopAudio.dataset.rest = '0';
+  loopAudio.dataset.bpm = ''; loopAudio.dataset.rest = '0';
 }
 /* 잠금화면에 제목과 재생/일시정지가 뜨게 해 둔다 */
 function setMediaSession(title, sub){
@@ -3394,7 +3420,7 @@ function playBeepTest(){
    vs.paused 는 카운트다운 루프가 매 틱마다 확인한다. 발화 도중에
    일시정지를 누르면 그 한 마디는 끝까지 나오고 그다음 침묵부터
    멈춘다(발화 단위가 1초 미만이라 체감 차이가 없다).            */
-const vs = { active:false, paused:false, abort:false, entry:null, lib:null, cfg:null, sets:[], tm:null, met:null, cadTm:null, wakeLock:null };
+const vs = { active:false, paused:false, abort:false, entry:null, lib:null, cfg:null, sets:[], tm:null, met:null, cadTm:null, beat:false, wakeLock:null };
 
 function vsCountdown(totalMs, marks, onTick){
   return new Promise(resolve=>{
@@ -3405,7 +3431,7 @@ function vsCountdown(totalMs, marks, onTick){
       const now = performance.now();
       const dt = Math.min(now - last, 400); // 화면이 잠깐 멈춰도 시간이 건너뛰지 않도록
       last = now;
-      if(!vs.paused) elapsed += dt;
+      if(!vs.paused){ elapsed += dt; keepBeatAlive(); }
       const remain = Math.max(0, totalMs - elapsed);
       while(pending.length && remain <= pending[0].remain) speakNow(pending.shift().text);
       if(onTick) onTick(remain, totalMs ? 1 - remain/totalMs : 1);
@@ -3430,7 +3456,7 @@ async function startVoiceSession(en){
   }
   stopVoiceSample();
 
-  vs.active = true; vs.paused = false; vs.abort = false;
+  vs.active = true; vs.paused = false; vs.abort = false; vs.beat = false;
   vs.entry = en; vs.lib = lib0; vs.cfg = voiceCfgFor(en.exerciseId); vs.sets = sets;
 
   voOpen(en.name);
@@ -3516,6 +3542,7 @@ async function runCadenceSession(){
         speakNow(`${ordinalKo(idx+1)}번째 구간, ${sinoKo(plan[idx].bpm)} 비피엠`);
       }
 
+      keepBeatAlive();
       warmNextChunk();
 
       // 다음 구간 소리를 미리 구워 둔다 (경계에서 끊기지 않게)
