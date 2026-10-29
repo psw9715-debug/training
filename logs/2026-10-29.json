@@ -1,0 +1,330 @@
+{
+  "date": "2026-10-29",
+  "weekday": "thu",
+  "bodyWeight": 79.6,
+  "muscleMass": 33.1,
+  "fatMass": 26.3,
+  "rpe": null,
+  "memo": "",
+  "entries": [
+    {
+      "instanceId": "9h8uzuv",
+      "exerciseId": "lat_pulldown",
+      "name": "렛풀다운",
+      "type": "strength",
+      "adHoc": true,
+      "sets": [
+        {
+          "weight": 25,
+          "reps": 12,
+          "failed": false
+        },
+        {
+          "weight": 30,
+          "reps": 10,
+          "failed": false
+        },
+        {
+          "weight": 35,
+          "reps": 8,
+          "failed": false
+        },
+        {
+          "weight": 40,
+          "reps": 6,
+          "failed": false
+        },
+        {
+          "weight": 45,
+          "reps": 4,
+          "failed": false
+        },
+        {
+          "weight": 50,
+          "reps": 2,
+          "failed": false
+        },
+        {
+          "weight": 55,
+          "reps": 1,
+          "failed": false
+        },
+        {
+          "weight": 60,
+          "reps": 1,
+          "failed": false
+        },
+        {
+          "weight": 65,
+          "reps": 1,
+          "failed": false
+        },
+        {
+          "weight": 70,
+          "reps": 1,
+          "failed": false
+        }
+      ]
+    },
+    {
+      "instanceId": "rql5lv0",
+      "exerciseId": "shoulder_press",
+      "name": "숄더프레스",
+      "type": "strength",
+      "adHoc": true,
+      "sets": [
+        {
+          "weight": 5,
+          "reps": 10,
+          "failed": false
+        },
+        {
+          "weight": 10,
+          "reps": 8,
+          "failed": false
+        },
+        {
+          "weight": 15,
+          "reps": 6,
+          "failed": false
+        },
+        {
+          "weight": 20,
+          "reps": 4,
+          "failed": false
+        },
+        {
+          "weight": 25,
+          "reps": 2,
+          "failed": false
+        },
+        {
+          "weight": 30,
+          "reps": 1,
+          "failed": false
+        },
+        {
+          "weight": 35,
+          "reps": 1,
+          "failed": false
+        },
+        {
+          "weight": 40,
+          "reps": 1,
+          "failed": false
+        }
+      ]
+    },
+    {
+      "instanceId": "g8te8w1",
+      "exerciseId": "butterfly",
+      "name": "버터플라이",
+      "type": "strength",
+      "adHoc": true,
+      "sets": [
+        {
+          "weight": 25,
+          "reps": 12,
+          "failed": false
+        },
+        {
+          "weight": 30,
+          "reps": 10,
+          "failed": false
+        },
+        {
+          "weight": 35,
+          "reps": 8,
+          "failed": false
+        },
+        {
+          "weight": 40,
+          "reps": 6,
+          "failed": false
+        },
+        {
+          "weight": 45,
+          "reps": 4,
+          "failed": false
+        },
+        {
+          "weight": 50,
+          "reps": 2,
+          "failed": false
+        },
+        {
+          "weight": 55,
+          "reps": 1,
+          "failed": false
+        },
+        {
+          "weight": 60,
+          "reps": 1,
+          "failed": false
+        }
+      ]
+    },
+    {
+      "instanceId": "trrlsn0",
+      "exerciseId": "ex_312xm4p",
+      "name": "시티드 체스트프레스",
+      "type": "strength",
+      "adHoc": true,
+      "sets": [
+        {
+          "weight": 20,
+          "reps": 10,
+          "failed": false
+        },
+        {
+          "weight": 25,
+          "reps": 8,
+          "failed": false
+        },
+        {
+          "weight": 30,
+          "reps": 6,
+          "failed": false
+        },
+        {
+          "weight": 35,
+          "reps": 4,
+          "failed": false
+        },
+        {
+          "weight": 40,
+          "reps": 2,
+          "failed": false
+        },
+        {
+          "weight": 45,
+          "reps": 1,
+          "failed": false
+        },
+        {
+          "weight": 50,
+          "reps": 1,
+          "failed": false
+        },
+        {
+          "weight": 55,
+          "reps": 1,
+          "failed": false
+        }
+      ]
+    },
+    {
+      "instanceId": "c33pcj5",
+      "exerciseId": "ex_4ig24xc",
+      "name": "오버헤드 트라이셉 익스텐션",
+      "type": "strength",
+      "adHoc": true,
+      "sets": [
+        {
+          "weight": 30,
+          "reps": 12,
+          "failed": false
+        },
+        {
+          "weight": 35,
+          "reps": 10,
+          "failed": false
+        },
+        {
+          "weight": 40,
+          "reps": 8,
+          "failed": false
+        },
+        {
+          "weight": 45,
+          "reps": 6,
+          "failed": false
+        },
+        {
+          "weight": 50,
+          "reps": 4,
+          "failed": false
+        },
+        {
+          "weight": 55,
+          "reps": 2,
+          "failed": false
+        },
+        {
+          "weight": 60,
+          "reps": 1,
+          "failed": false
+        },
+        {
+          "weight": 30,
+          "reps": 10,
+          "failed": false
+        }
+      ]
+    },
+    {
+      "instanceId": "8pgm6ik",
+      "exerciseId": "ex_7kfqiic",
+      "name": "케이블 로우",
+      "type": "strength",
+      "adHoc": true,
+      "sets": [
+        {
+          "weight": 10,
+          "reps": 12,
+          "failed": false
+        },
+        {
+          "weight": 10,
+          "reps": 12,
+          "failed": false
+        },
+        {
+          "weight": 15,
+          "reps": 8,
+          "failed": false
+        },
+        {
+          "weight": 15,
+          "reps": 8,
+          "failed": false
+        },
+        {
+          "weight": 20,
+          "reps": 6,
+          "failed": false
+        },
+        {
+          "weight": 20,
+          "reps": 6,
+          "failed": false
+        },
+        {
+          "weight": 25,
+          "reps": 4,
+          "failed": false
+        },
+        {
+          "weight": 25,
+          "reps": 4,
+          "failed": false
+        }
+      ]
+    },
+    {
+      "instanceId": "nwe1scs",
+      "exerciseId": "swimming",
+      "name": "수영",
+      "type": "cardio",
+      "adHoc": true,
+      "distance": 1000,
+      "duration": 50
+    }
+  ],
+  "calories": {
+    "strength": 829,
+    "cardio": 464,
+    "total": 1293
+  },
+  "savedAt": "2026-10-29T14:48:40.259Z"
+}
