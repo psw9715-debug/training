@@ -1,0 +1,48 @@
+name: 인바디 동기화
+
+on:
+  schedule:
+    - cron: '14 13 * * *'      # 매일 22:14 KST (UTC 13:14)
+  workflow_dispatch:            # Actions 탭에서 손으로도 돌릴 수 있다
+
+concurrency:
+  group: inbody-sync
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0      # git pull --rebase 를 하려면 전체 이력이 필요하다
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: 인바디에서 받아오기
+        env:
+          INBODY_LOGIN_ID: ${{ secrets.INBODY_LOGIN_ID }}
+          INBODY_LOGIN_PW: ${{ secrets.INBODY_LOGIN_PW }}
+          INBODY_COUNTRY_CODE: ${{ vars.INBODY_COUNTRY_CODE || 'KR' }}
+        run: python scripts/inbody_sync.py
+
+      - name: 바뀌었으면 커밋
+        run: |
+          if [ -z "$(git status --porcelain config/inbody.json)" ]; then
+            echo "새 측정 없음"
+            exit 0
+          fi
+          git config user.name  "inbody-sync"
+          git config user.email "actions@users.noreply.github.com"
+          git add config/inbody.json
+          git commit -m "inbody $(date -u -d '+9 hours' +%Y-%m-%d)"
+          for i in 1 2 3 4 5; do
+            git pull --rebase --autostash origin main && git push origin HEAD:main && exit 0
+            sleep $((i * 5))
+          done
+          exit 1

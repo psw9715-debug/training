@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- 훈련일지 v1.30 · 빌드 2026-10-27 -->
+<!-- 훈련일지 v1.31 · 빌드 2026-10-29 -->
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -412,6 +412,16 @@ nav.bottomnav button.active{color:var(--ink);background:var(--paper);}
   </div>
 
   <div class="card">
+    <h2>인바디 자동 기록 <span class="badge" id="inbodyBadge">-</span></h2>
+    <p class="muted">헬스장에서 인바디를 재면, 등록한 전화번호의 인바디 앱 계정으로 결과가 올라갑니다.
+      저장소의 자동 작업이 하루 한 번(밤 10시대) 그 값을 받아와 오늘 탭 컨디션에 채워 둡니다.</p>
+    <div class="small-note" id="inbodyStatus">-</div>
+    <div class="btn-row"><button class="btn ghost small" id="btnInbodyRun">지금 받아오기 (Actions 열기)</button></div>
+    <div class="small-note">처음 한 번은 저장소 <b>Settings › Secrets and variables › Actions</b> 에
+      <code>INBODY_LOGIN_ID</code>(전화번호 숫자만), <code>INBODY_LOGIN_PW</code>(인바디 앱 비밀번호)를 넣어야 합니다.</div>
+  </div>
+
+  <div class="card">
     <h2>화면 <span class="badge" id="portraitBadge">세로 고정</span></h2>
     <p class="muted">운동 중에 폰이 돌아가도 화면이 가로로 눕지 않게 세로로 고정합니다.</p>
     <div class="btn-row"><button class="btn ghost" id="btnPortrait">세로 고정 끄기</button></div>
@@ -455,6 +465,7 @@ nav.bottomnav button.active{color:var(--ink);background:var(--paper);}
       <div class="field"><label>체지방량 (kg)</label><input type="number" inputmode="decimal" step="0.1" id="fatMassInput" placeholder="선택"></div>
     </div>
     <div class="field"><label>메모</label><input type="text" id="memoInput" placeholder="컨디션, 특이사항"></div>
+    <div class="small-note" id="inbodyNote"></div>
   </div>
 
   <div class="btn-row save-actions" style="flex-direction:column;">
@@ -670,8 +681,8 @@ nav.bottomnav button.active{color:var(--ink);background:var(--paper);}
    화면 상단(훈련일지 옆)에 표시되어, 어느 버전이 실제로 올라가 있는지
    바로 눈으로 구분할 수 있게 해줍니다.
 ============================================================ */
-const APP_VERSION = 'v1.30';
-const APP_BUILD = '2026-10-27';
+const APP_VERSION = 'v1.31';
+const APP_BUILD = '2026-10-29';
 
 /* ============================================================
    상수
@@ -964,6 +975,7 @@ const state = {
   templates:{}, templatesSha:null,
   goals:{}, goalsSha:null,
   records:{}, recordsSha:null,
+  inbody:{ scans:[] },
   currentDate: todayISO(),
   routineEditingDay:'mon',
   routineSeg:'assign',
@@ -1058,7 +1070,7 @@ async function init(){
     document.getElementById('cfgRepo').value=cfg.repo;
     document.getElementById('cfgToken').value=cfg.token;
     gh.cfg=cfg;
-    try{ await ensureBootstrapped(); setConnected(true); renderVoiceSettings(); switchTab('today'); await loadTodayTab(); }
+    try{ await ensureBootstrapped(); setConnected(true); renderVoiceSettings(); renderInbodySettings(); switchTab('today'); await loadTodayTab(); }
     catch(e){ setConnected(false); document.getElementById('connectMsg').textContent='자동 연결 실패: '+e.message; switchTab('settings'); }
   } else { switchTab('settings'); }
 }
@@ -1114,7 +1126,7 @@ function bindSettingsHandlers(){
       const me=await gh.whoami();
       const exists=await gh.repoExists();
       if(!exists){ msg.textContent=`저장소가 없어 새로 생성 중... (${owner}/${repo})`; await gh.createRepo(); }
-      await ensureBootstrapped(); await saveConfig(gh.cfg); setConnected(true); renderVoiceSettings();
+      await ensureBootstrapped(); await saveConfig(gh.cfg); setConnected(true); renderVoiceSettings(); renderInbodySettings();
       msg.textContent=`연결 완료! (${me.login})`; showToast('GitHub 연결 완료');
       switchTab('today'); await loadTodayTab();
     }catch(e){
@@ -1179,9 +1191,68 @@ async function ensureBootstrapped(){
   if(!v){ await gh.putFile('config/voice.json', VOICE_DEFAULTS, null, 'init voice defaults'); v = await gh.getFile('config/voice.json'); }
   state.voiceDefaults = {...VOICE_DEFAULTS, ...(v.data||{})}; state.voiceDefaultsSha = v.sha;
 
+  const ib = await gh.getFile('config/inbody.json');     // 없으면 그냥 안 쓴다
+  state.inbody = (ib && ib.data) ? ib.data : { scans: [] };
+
   let rec = await gh.getFile('config/records.json');
   if(!rec){ await gh.putFile('config/records.json', {}, null, 'init records'); rec = await gh.getFile('config/records.json'); }
   state.records = rec.data; state.recordsSha = rec.sha;
+}
+
+/* ---- 인바디 자동 기록 ----------------------------------------------
+   헬스장에서 인바디를 재면 등록한 전화번호의 인바디 앱 계정으로 결과가
+   올라간다. GitHub Actions 가 하루 한 번 그걸 받아 config/inbody.json
+   으로 넣어 두고(.github/workflows/inbody.yml), 여기서는 읽기만 한다. */
+function inbodyScans(){ return ((state.inbody || {}).scans) || []; }
+function inbodyOn(date){
+  // 같은 날 여러 번 쟀으면 마지막 측정을 쓴다
+  return inbodyScans().filter(s=>s.date === date).sort((a,b)=>(a.time||'').localeCompare(b.time||''))[0] || null;
+}
+function inbodyBefore(date){
+  return inbodyScans().filter(s=>s.date < date).sort((a,b)=>b.date.localeCompare(a.date))[0] || null;
+}
+function inbodyLatest(){ return inbodyScans()[0] || null; }
+function fmtDelta(now, before, unit){
+  if(now == null || before == null) return '';
+  const d = Math.round((now - before) * 10) / 10;
+  if(!d) return ' (변화 없음)';
+  return ` (${d > 0 ? '+' : ''}${d}${unit})`;
+}
+function renderInbodySettings(){
+  const badge = document.getElementById('inbodyBadge');
+  const note = document.getElementById('inbodyStatus');
+  if(!badge || !note) return;
+  const scans = inbodyScans();
+  const last = inbodyLatest();
+  badge.textContent = scans.length ? '연결됨' : '대기';
+  note.innerHTML = scans.length
+    ? `마지막 동기화 ${esc((state.inbody || {}).updatedAt || '-')} · 측정 ${scans.length}건<br>`
+      + `최근 측정 ${last.date}${last.time ? ' ' + last.time : ''} · 체중 ${last.weight ?? '-'}kg · 골격근 ${last.smm ?? '-'}kg · 체지방 ${last.bfm ?? '-'}kg`
+    : '아직 받아온 측정이 없습니다. 아래 안내대로 비밀 값을 넣고 한 번 돌려보세요.';
+}
+function renderInbodyNote(date){
+  const el = document.getElementById('inbodyNote');
+  if(!el) return;
+  const s = inbodyOn(date);
+  if(!s){
+    const last = inbodyLatest();
+    el.innerHTML = last
+      ? `<span class="muted">최근 인바디 ${last.date}${last.time ? ' ' + last.time : ''} · 체중 ${last.weight ?? '-'}kg · 골격근 ${last.smm ?? '-'}kg</span>`
+      : '';
+    return;
+  }
+  const prev = inbodyBefore(date);
+  const bits = [
+    `체중 ${s.weight ?? '-'}kg${fmtDelta(s.weight, prev && prev.weight, 'kg')}`,
+    `골격근 ${s.smm ?? '-'}kg${fmtDelta(s.smm, prev && prev.smm, 'kg')}`,
+    `체지방 ${s.bfm ?? '-'}kg${fmtDelta(s.bfm, prev && prev.bfm, 'kg')}`,
+  ];
+  if(s.pbf != null) bits.push(`체지방률 ${s.pbf}%`);
+  if(s.bmi != null) bits.push(`BMI ${s.bmi}`);
+  if(s.vfl != null) bits.push(`내장지방 ${s.vfl}`);
+  if(s.bmr != null) bits.push(`기초대사 ${Math.round(s.bmr)}kcal`);
+  el.innerHTML = `<b>인바디 ${s.date}${s.time ? ' ' + s.time : ''} 측정</b> · ${bits.join(' · ')}`
+    + `<br><span class="muted">위 칸은 이 측정값으로 채웠습니다. 고쳐 쓰면 고친 값이 저장됩니다.</span>`;
 }
 
 /* ============================================================
@@ -1267,10 +1338,12 @@ async function loadTodayTab(){
     });
   }
 
-  document.getElementById('bodyWeightInput').value = savedLog?.bodyWeight ?? state.goals?.lastBodyWeight ?? '';
+  const ibToday = inbodyOn(date);
+  document.getElementById('bodyWeightInput').value = savedLog?.bodyWeight ?? ibToday?.weight ?? state.goals?.lastBodyWeight ?? '';
   document.getElementById('rpeInput').value = savedLog?.rpe ?? '';
-  document.getElementById('muscleMassInput').value = savedLog?.muscleMass ?? state.goals?.lastMuscleMass ?? '';
-  document.getElementById('fatMassInput').value = savedLog?.fatMass ?? state.goals?.lastFatMass ?? '';
+  document.getElementById('muscleMassInput').value = savedLog?.muscleMass ?? ibToday?.smm ?? state.goals?.lastMuscleMass ?? '';
+  document.getElementById('fatMassInput').value = savedLog?.fatMass ?? ibToday?.bfm ?? state.goals?.lastFatMass ?? '';
+  renderInbodyNote(date);
   document.getElementById('memoInput').value = savedLog?.memo ?? '';
 
   if(!savedLog){
@@ -3808,6 +3881,12 @@ function bindVoiceHandlers(){
   });
   document.getElementById('btnOpenCatalog').addEventListener('click', ()=>openCatalogSheet('library'));
   document.getElementById('btnBeepTest').addEventListener('click', playBeepTest);
+  const ibRun = document.getElementById('btnInbodyRun');
+  if(ibRun) ibRun.addEventListener('click', ()=>{
+    const cfg = gh.cfg || {};
+    if(!cfg.owner || !cfg.repo){ showToast('먼저 GitHub 연결을 해주세요'); return; }
+    window.open(`https://github.com/${cfg.owner}/${cfg.repo}/actions/workflows/inbody.yml`, '_blank', 'noopener');
+  });
   document.querySelectorAll('.bvChip').forEach(c=>c.addEventListener('click', ()=>{
     ensureAudio();
     setBeatVol(Number(c.dataset.bv));
