@@ -1,0 +1,26 @@
+{
+  "date": "2026-10-30",
+  "weekday": "fri",
+  "bodyWeight": 79.3,
+  "muscleMass": 33.5,
+  "fatMass": 25.3,
+  "rpe": null,
+  "memo": "",
+  "entries": [
+    {
+      "instanceId": "jajtu4s",
+      "exerciseId": "swimming",
+      "name": "수영",
+      "type": "cardio",
+      "adHoc": true,
+      "distance": 1000,
+      "duration": 50
+    }
+  ],
+  "calories": {
+    "strength": 0,
+    "cardio": 463,
+    "total": 463
+  },
+  "savedAt": "2026-10-30T13:07:11.756Z"
+}
