@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- 훈련일지 v1.38 · 빌드 2026-11-01 -->
+<!-- 훈련일지 v1.39 · 빌드 2026-11-01 -->
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -681,7 +681,7 @@ nav.bottomnav button.active{color:var(--ink);background:var(--paper);}
    화면 상단(훈련일지 옆)에 표시되어, 어느 버전이 실제로 올라가 있는지
    바로 눈으로 구분할 수 있게 해줍니다.
 ============================================================ */
-const APP_VERSION = 'v1.38';
+const APP_VERSION = 'v1.39';
 const APP_BUILD = '2026-11-01';
 
 /* ============================================================
@@ -3530,7 +3530,7 @@ function clearMediaSession(){
 }
 
 /* 스스로 어긋남을 바로잡는 박자 루프. 멈춰 있는 동안에는 소리만 쉰다. */
-function startMetronome(intervalMs){
+function startMetronomeTimer(intervalMs){
   stopMetronome();
   const t0 = performance.now();
   let n = 0;
@@ -3547,7 +3547,79 @@ function startMetronome(intervalMs){
   };
   step();
 }
-function stopMetronome(){ clearTimeout(vs.met); vs.met = null; }
+/* 제자리 뛰기 같은 박자 — 오디오 시계로 미리 예약해서 낸다.
+   예전엔 박자마다 <audio> 를 새로 틀었는데, 아이폰에서는 그때마다
+   오디오를 새로 잡느라 간격이 들쭉날쭉했고, 안내 음성과 겹치면 소리가
+   튀었다. 지금은 0.15초 앞까지 박자를 미리 예약해 두므로 간격이 정확하고,
+   안내 음성이 나오는 동안엔 박자만 작게 줄였다가 끝나면 다시 키운다.
+   첫 박자는 "시작" 끝부분과 겹치지 않게 0.3초 뒤에 들어간다.
+   WebAudio 를 못 쓰는 브라우저에서는 예전 방식으로 돌아간다.        */
+let _clickBuf = null;
+function clickBuffers(){
+  if(_clickBuf) return _clickBuf;
+  const sr = _actx.sampleRate;
+  const make = (f, amp)=>{
+    const len = Math.round(sr * 0.05);
+    const buf = _actx.createBuffer(1, len, sr);
+    const d = buf.getChannelData(0);
+    for(let i = 0; i < len; i++){
+      const t = i / sr;
+      const env = Math.min(1, t / 0.002) * Math.exp(-t * 90);
+      d[i] = Math.sin(2 * Math.PI * f * t) * env * amp;
+    }
+    return buf;
+  };
+  _clickBuf = { hi: make(1400, 0.8), lo: make(1000, 0.55) };
+  return _clickBuf;
+}
+function startMetronome(intervalMs){
+  stopMetronome();
+  const AC = window.AudioContext || window.webkitAudioContext;
+  try{ if(!_actx && AC) _actx = new AC(); }catch(e){}
+  if(!_actx || _actx.state === 'closed') return startMetronomeTimer(intervalMs);
+  const ctx = _actx;
+  if(ctx.state !== 'running'){ try{ ctx.resume(); }catch(e){} }
+  const iv = intervalMs / 1000;
+  const bufs = clickBuffers();
+  const master = ctx.createGain();
+  master.gain.value = Math.min(1.15, beatVol());       // 설정의 소리 크기 (작게/보통/크게)
+  master.connect(ctx.destination);
+  const duck = ctx.createGain();
+  duck.gain.value = 1;
+  duck.connect(master);
+  let n = 0, next = ctx.currentTime + 0.3, level = 1, wasPaused = false;
+  const tick = ()=>{
+    if(!vs.active || vs.abort){ stopMetronome(); return; }
+    if(ctx.state !== 'running'){ try{ ctx.resume(); }catch(e){} }
+    const now = ctx.currentTime;
+    const talking = !!(window.speechSynthesis && speechSynthesis.speaking);
+    const want = vs.paused ? 0 : (talking ? 0.35 : 1);   // 말하는 동안엔 박자를 작게
+    if(want !== level){ level = want; duck.gain.setTargetAtTime(want, now, 0.04); }
+    if(vs.paused){ wasPaused = true; return; }
+    if(wasPaused){ wasPaused = false; next = now + 0.1; }
+    if(next < now - iv){                                 // 한참 멈췄다 돌아오면 밀린 박자는 건너뛴다
+      const skip = Math.ceil((now - next) / iv);
+      n += skip; next += skip * iv;
+    }
+    while(next < now + 0.15){
+      const src = ctx.createBufferSource();
+      src.buffer = (n % 4 === 0) ? bufs.hi : bufs.lo;
+      src.connect(duck);
+      src.start(Math.max(next, now));
+      n++; next += iv;
+    }
+  };
+  vs.metNodes = master;
+  vs.met = setInterval(tick, 25);
+  tick();
+}
+function stopMetronome(){
+  clearTimeout(vs.met); clearInterval(vs.met); vs.met = null;
+  if(vs.metNodes){                                      // 미리 예약해 둔 박자까지 바로 끊는다
+    try{ vs.metNodes.disconnect(); }catch(e){}
+    vs.metNodes = null;
+  }
+}
 
 /* 고른 빠르기를 네 박만 들려준다 */
 let _tempoPreviewTm = null;
