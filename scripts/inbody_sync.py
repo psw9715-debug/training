@@ -83,6 +83,23 @@ def resolve_host(country_iso):
     raise InBodyError(f"{country_iso} 서버를 못 찾음. 쓸 수 있는 코드: {codes}")
 
 
+ERROR_HINTS = {
+    "PW_FAIL": "비밀번호가 맞지 않습니다. 인바디 앱에서 쓰는 비밀번호인지 확인해주세요. "
+               "(카카오·애플 계정으로만 가입했다면 비밀번호 로그인이 안 됩니다 — 앱에서 비밀번호를 먼저 만들어주세요)",
+    "EMPTYDATA": "그 아이디로 계정을 찾지 못했습니다. 전화번호를 숫자만, 가입할 때 쓴 번호로 넣어주세요.",
+    "ID_FAIL": "그 아이디로 계정을 찾지 못했습니다.",
+    "LOCK": "로그인 시도가 많아 잠긴 것 같습니다. 인바디 앱에서 직접 로그인해 풀어주세요.",
+}
+
+
+def hint_for(msg):
+    up = (msg or "").upper()
+    for key, text in ERROR_HINTS.items():
+        if key in up:
+            return text
+    return ""
+
+
 def login(base, country_number, login_id, password):
     payload = envelope(
         country_number,
@@ -97,7 +114,10 @@ def login(base, country_number, login_id, password):
     )
     data = post(f"{base}/V2/Main/GetLoginWithSyncDataPartV2", payload)
     if not data.get("IsSuccess") or not data.get("Token"):
-        raise InBodyError(f"로그인 실패: {data.get('ErrorMsg') or '응답에 토큰 없음'}")
+        msg = data.get("ErrorMsg") or "응답에 토큰 없음"
+        hint = hint_for(msg)
+        # 여기서 다른 조합으로 다시 시도하지 않는다 — 실패가 쌓이면 계정이 잠길 수 있다
+        raise InBodyError(f"로그인 실패: {msg}" + (f"\n  → {hint}" if hint else ""))
     uid = (data.get("Data") or {}).get("UID")
     if not uid:
         raise InBodyError("로그인은 됐는데 UID 가 없음")
@@ -179,8 +199,8 @@ def normalize(rec):
 
 
 def main():
-    login_id = (os.getenv("INBODY_LOGIN_ID") or "").strip()
-    password = os.getenv("INBODY_LOGIN_PW") or ""
+    login_id = "".join(ch for ch in (os.getenv("INBODY_LOGIN_ID") or "") if ch.isdigit())
+    password = (os.getenv("INBODY_LOGIN_PW") or "").strip()
     country = (os.getenv("INBODY_COUNTRY_CODE") or "KR").strip() or "KR"
     if not login_id or not password:
         print("INBODY_LOGIN_ID / INBODY_LOGIN_PW 가 비어 있습니다 "
