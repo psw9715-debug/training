@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- 훈련일지 v1.35 · 빌드 2026-11-01 -->
+<!-- 훈련일지 v1.36 · 빌드 2026-11-01 -->
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -400,6 +400,11 @@ nav.bottomnav button.active{color:var(--ink);background:var(--paper);}
       <button type="button" class="chip-btn bvChip" data-bv="1.5">크게</button>
     </div>
     <div class="small-note">안내 음성 뒤에 배경처럼 깔리게 하려면 '작게' 가 좋습니다.</div>
+    <div class="dial-row" style="align-items:center;">
+      <span class="dl">끊김 없는 박자<br><span class="muted" style="font-size:11px;">화면 꺼져도 유지 · 이어폰용</span></span>
+      <button type="button" class="btn ghost small" id="btnBeatSeamless" style="flex:0 0 auto;">끔</button>
+    </div>
+    <div class="small-note" id="beatSeamlessNote">스피커로 운동하면 <b>꺼 두세요</b>. 켜면 스피커에서 음성 안내가 박자에 묻힐 수 있습니다. (기본: 딸깍 박자 — 음성이 항상 우선)</div>
     <div class="btn-row">
       <button class="btn ghost small" id="btnBeepTest">🔔 박자 소리 들어보기</button>
       <button class="btn ghost small" id="btnMixTest">🔊 박자 + 안내 같이 듣기</button>
@@ -685,7 +690,7 @@ nav.bottomnav button.active{color:var(--ink);background:var(--paper);}
    화면 상단(훈련일지 옆)에 표시되어, 어느 버전이 실제로 올라가 있는지
    바로 눈으로 구분할 수 있게 해줍니다.
 ============================================================ */
-const APP_VERSION = 'v1.35';
+const APP_VERSION = 'v1.36';
 const APP_BUILD = '2026-11-01';
 
 /* ============================================================
@@ -3603,6 +3608,43 @@ function stopBeatLoop(){
   try{ loopAudio.pause(); loopAudio.currentTime = 0; }catch(e){}
   loopAudio.dataset.bpm = ''; loopAudio.dataset.rest = '0';
 }
+
+/* ---- 박자 방식 두 가지 --------------------------------------------
+   딸깍(discrete): 짧은 소리를 하나씩 울린다. 아이폰 스피커에서 음성과
+     부딪히지 않는다(말하는 동안엔 딸깍을 건너뛴다). 기본값.
+   끊김없는(seamless): 박자를 통으로 구워 연속 재생. 화면이 꺼져도
+     유지되지만, 스피커에선 음성과 못 섞여 음성이 묻힌다 → 이어폰용.
+   스피커로 쓰는 사람이 음성을 못 듣는 일이 없도록 기본은 딸깍이다. */
+const BEAT_SEAMLESS_KEY = 'training-log:beatSeamless';
+function beatSeamlessOn(){
+  try{ return localStorage.getItem(BEAT_SEAMLESS_KEY) === '1'; }catch(e){ return false; }
+}
+function startDiscreteBeat(bpm){
+  stopDiscreteBeat();
+  const interval = 60000 / bpm;
+  let n = 0;
+  const t0 = performance.now();
+  const step = ()=>{
+    if(!vs.active || vs.abort){ stopDiscreteBeat(); return; }
+    if(!vs.paused && !speakingNow()) beep(n % 4 === 0);   // 말하는 중엔 비켜 준다
+    n++;
+    let next = t0 + n * interval - performance.now();
+    if(next < -interval){ n = Math.ceil((performance.now() - t0) / interval); next = t0 + n * interval - performance.now(); }
+    vs.met = setTimeout(step, Math.max(5, next));
+  };
+  step();
+}
+function stopDiscreteBeat(){ clearTimeout(vs.met); vs.met = null; }
+
+/* 세션에서 쓰는 박자 켜기/끄기 — 방식에 맞춰 갈라 준다 */
+function beatStart(bpm, sec){
+  if(vs.beatSeamless) startBeatLoop(bpm, sec);
+  else startDiscreteBeat(bpm);
+}
+function beatStop(){
+  stopDiscreteBeat();
+  if(vs.beatSeamless) stopBeatLoop();
+}
 /* 잠금화면에 제목과 재생/일시정지가 뜨게 해 둔다 */
 function setMediaSession(title, sub){
   if(!('mediaSession' in navigator)) return;
@@ -3730,6 +3772,7 @@ async function startVoiceSession(en){
   stopVoiceSample();
 
   vs.active = true; vs.paused = false; vs.abort = false; vs.beat = false;
+  vs.beatSeamless = beatSeamlessOn();
   vs.entry = en; vs.lib = lib0; vs.cfg = voiceCfgFor(en.exerciseId); vs.sets = sets;
 
   voOpen(en.name);
@@ -3779,13 +3822,13 @@ async function runCadenceSession(){
               : (steps ? `약 ${Math.round(steps).toLocaleString()}걸음` : '박자에 발을 맞추세요'));
   setMediaSession(entry.name, cadenceLabel(lib) || (segs[0].bpm + ' BPM'));
 
-  if(totalMs) warmBeatTrack(plan[0].bpm, (plan[0].end - plan[0].start)/1000);
+  if(vs.beatSeamless && totalMs) warmBeatTrack(plan[0].bpm, (plan[0].end - plan[0].start)/1000);
   await speakAsync(multi
     ? `${entry.name}, 구간 ${ordinalKo(plan.length)} 개, 첫 구간 ${sinoKo(plan[0].bpm)} 비피엠, 시작`
     : `${entry.name}, ${sinoKo(plan[0].bpm)} 비피엠, 시작`);
   if(vs.abort) return;
 
-  startBeatLoop(plan[0].bpm, totalMs ? (plan[0].end - plan[0].start)/1000 : 0);
+  beatStart(plan[0].bpm, totalMs ? (plan[0].end - plan[0].start)/1000 : 0);
 
   // 남은 시간 안내 (전체 기준)
   const marks = [];
@@ -3810,18 +3853,19 @@ async function runCadenceSession(){
       while(ni + 1 < plan.length && elapsed >= plan[ni].end) ni++;
       if(ni !== idx){
         idx = ni;
-        startBeatLoop(plan[idx].bpm, totalMs ? (plan[idx].end - plan[idx].start)/1000 : 0);
+        beatStart(plan[idx].bpm, totalMs ? (plan[idx].end - plan[idx].start)/1000 : 0);
         setMediaSession(entry.name, `구간 ${idx+1}/${plan.length} · ${plan[idx].bpm} BPM`);
         speakNow(`${ordinalKo(idx+1)}번째 구간, ${sinoKo(plan[idx].bpm)} 비피엠`);
       }
 
-      keepBeatAlive();
-      warmNextChunk();
-
-      // 다음 구간 소리를 미리 구워 둔다 (경계에서 끊기지 않게)
-      if(totalMs && plan[idx+1] && !warmed[idx+1] && plan[idx].end - elapsed < 10000){
-        warmed[idx+1] = true;
-        warmBeatTrack(plan[idx+1].bpm, (plan[idx+1].end - plan[idx+1].start)/1000);
+      if(vs.beatSeamless){
+        keepBeatAlive();
+        warmNextChunk();
+        // 다음 구간 소리를 미리 구워 둔다 (경계에서 끊기지 않게)
+        if(totalMs && plan[idx+1] && !warmed[idx+1] && plan[idx].end - elapsed < 10000){
+          warmed[idx+1] = true;
+          warmBeatTrack(plan[idx+1].bpm, (plan[idx+1].end - plan[idx+1].start)/1000);
+        }
       }
 
       const remain = Math.max(0, capMs - elapsed);
@@ -3843,7 +3887,7 @@ async function runCadenceSession(){
     tick();
   });
 
-  stopBeatLoop();
+  beatStop();
   if(r === 'abort') return;
   await speakAsync('수고하셨습니다');
   if(vs.abort) return;
@@ -3875,17 +3919,17 @@ async function runVoiceSession(){
       voPhase('hold', bpm ? '진행 중' : '버티는 중');
       // 큰 숫자가 남은 초라 시간은 이미 보인다. 페이스 조절에 쓰이는 건 남은 세트 수.
       voSub(i + 1 < sets.length ? `남은 세트 ${sets.length - i - 1}` : '마지막 세트');
-      if(bpm) warmBeatTrack(bpm, holdMs/1000);      // 말하는 동안 미리 구워 둔다
+      if(vs.beatSeamless && bpm) warmBeatTrack(bpm, holdMs/1000);   // 이어폰용: 미리 구워 둔다
       await speakAsync('시작');
       if(vs.abort) return;
-      if(bpm) startBeatLoop(bpm, holdMs/1000);      // 통짜로 구운 박자 — 이음매가 없다
+      if(bpm) beatStart(bpm, holdMs/1000);          // 딸깍(기본) 또는 끊김없는(이어폰)
       const marks = [];
       cfg.warnAt.forEach(w=>{ if(w*1000 < holdMs - 1500) marks.push({ remain: w*1000, text: sinoKo(w) + '초' }); });
       if(holdMs >= 5000) [3,2,1].forEach(w=>marks.push({ remain: w*1000, text: sinoKo(w) }));
       const held = await vsCountdown(holdMs, marks, (remain, prog)=>{
         voBig(Math.ceil(remain/1000)); voRing(prog);
       });
-      stopBeatLoop();
+      beatStop();
       if(held === 'abort') return;
       await speakAsync('끝');
       if(vs.abort) return;
@@ -4032,6 +4076,15 @@ function bindVoiceHandlers(){
   document.getElementById('btnBeepTest').addEventListener('click', playBeepTest);
   const mixBtn = document.getElementById('btnMixTest');
   if(mixBtn) mixBtn.addEventListener('click', playMixTest);
+  const seamBtn = document.getElementById('btnBeatSeamless');
+  const syncSeam = ()=>{ if(seamBtn) seamBtn.textContent = beatSeamlessOn() ? '켬' : '끔'; };
+  if(seamBtn) seamBtn.addEventListener('click', ()=>{
+    const next = beatSeamlessOn() ? '0' : '1';
+    try{ localStorage.setItem(BEAT_SEAMLESS_KEY, next); }catch(e){}
+    syncSeam();
+    showToast(next === '1' ? '끊김 없는 박자 (이어폰용)' : '딸깍 박자 — 음성 우선');
+  });
+  syncSeam();
   const ibGuide = document.getElementById('btnInbodyGuide');
   if(ibGuide) ibGuide.addEventListener('click', ()=>{
     const cfg = gh.cfg || {};
