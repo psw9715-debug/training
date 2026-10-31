@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- 훈련일지 v1.37 · 빌드 2026-11-01 -->
+<!-- 훈련일지 v1.38 · 빌드 2026-11-01 -->
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -401,8 +401,8 @@ nav.bottomnav button.active{color:var(--ink);background:var(--paper);}
     </div>
     <div class="small-note">안내 음성 뒤에 배경처럼 깔리게 하려면 '작게' 가 좋습니다.</div>
     <div class="btn-row"><button class="btn ghost small" id="btnBeepTest">🔔 박자 소리 들어보기</button></div>
-    <div class="small-note">소리가 안 들리면 <b>아이폰 옆면 무음 스위치</b>를 먼저 확인하세요.
-      말소리는 무음 스위치를 무시하지만 박자음은 영향을 받을 수 있습니다. 볼륨도 같이 올려주세요.</div>
+    <div class="small-note"><b>안내 음성이 안 들리면 아이폰이 무음(진동) 모드인지 먼저 확인하세요.</b>
+      무음 모드에서는 박자음은 나도 안내 음성은 꺼집니다. (이어폰을 끼면 무음 모드여도 들립니다) 볼륨도 같이 올려주세요.</div>
     <div class="divider"></div>
     <div class="sheet-group-label">목소리</div>
     <div id="voiceList"><p class="muted">목록을 불러오는 중...</p></div>
@@ -669,7 +669,7 @@ nav.bottomnav button.active{color:var(--ink);background:var(--paper);}
   <div class="vo-bar">
     <button id="voPause">일시정지</button>
   </div>
-  <div class="vo-hint">화면 아무 곳이나 눌러도 멈춰요</div>
+  <div class="vo-hint">화면 아무 곳이나 눌러도 멈춰요 · 안내가 안 들리면 무음(진동) 모드 확인</div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -681,7 +681,7 @@ nav.bottomnav button.active{color:var(--ink);background:var(--paper);}
    화면 상단(훈련일지 옆)에 표시되어, 어느 버전이 실제로 올라가 있는지
    바로 눈으로 구분할 수 있게 해줍니다.
 ============================================================ */
-const APP_VERSION = 'v1.37';
+const APP_VERSION = 'v1.38';
 const APP_BUILD = '2026-11-01';
 
 /* ============================================================
