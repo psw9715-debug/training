@@ -1,9 +1,15 @@
 name: 인바디 동기화
 
+# 서버 직접 로그인 방식은 한국 v3 서버가 비밀번호를 거부(PW_FAIL)해서 보류 중이다.
+# 매일 실패 메일이 오지 않도록 자동 실행(schedule)은 꺼 두고, 손으로만 돌린다.
+# 실제 동기화는 아이폰 단축어 → config/inbody/ 로 올리는 쪽을 쓴다 (docs/inbody-shortcut.md).
 on:
-  schedule:
-    - cron: '14 13 * * *'      # 매일 22:14 KST (UTC 13:14)
-  workflow_dispatch:            # Actions 탭에서 손으로도 돌릴 수 있다
+  workflow_dispatch:            # Actions 탭에서 손으로만 돌린다
+    inputs:
+      mode:
+        description: '동기화(sync) 또는 오류코드 확인(diag)'
+        type: choice
+        default: diag
     inputs:
       mode:
         description: '동기화(sync) 또는 오류코드 확인(diag)'

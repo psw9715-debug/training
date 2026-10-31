@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- 훈련일지 v1.32 · 빌드 2026-11-01 -->
+<!-- 훈련일지 v1.33 · 빌드 2026-11-01 -->
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -417,12 +417,12 @@ nav.bottomnav button.active{color:var(--ink);background:var(--paper);}
 
   <div class="card">
     <h2>인바디 자동 기록 <span class="badge" id="inbodyBadge">-</span></h2>
-    <p class="muted">헬스장에서 인바디를 재면, 등록한 전화번호의 인바디 앱 계정으로 결과가 올라갑니다.
-      저장소의 자동 작업이 하루 한 번(밤 10시대) 그 값을 받아와 오늘 탭 컨디션에 채워 둡니다.</p>
+    <p class="muted">헬스장에서 인바디를 재면 아이폰 <b>건강(Apple Health)</b> 앱에 체중·체지방·근육량이 쌓입니다.
+      아이폰 <b>단축어</b> 자동화가 하루 한 번 그 값을 저장소에 올리면, 오늘 탭 컨디션에 자동으로 채워집니다.
+      인바디 비밀번호는 필요 없습니다.</p>
     <div class="small-note" id="inbodyStatus">-</div>
-    <div class="btn-row"><button class="btn ghost small" id="btnInbodyRun">지금 받아오기 (Actions 열기)</button></div>
-    <div class="small-note">처음 한 번은 저장소 <b>Settings › Secrets and variables › Actions</b> 에
-      <code>INBODY_LOGIN_ID</code>(전화번호 숫자만), <code>INBODY_LOGIN_PW</code>(인바디 앱 비밀번호)를 넣어야 합니다.</div>
+    <div class="btn-row"><button class="btn ghost small" id="btnInbodyGuide">단축어 만드는 법 보기</button></div>
+    <div class="small-note">인바디 앱 설정에서 <b>Apple 건강 연동</b>을 먼저 켜 두세요.</div>
   </div>
 
   <div class="card">
@@ -685,7 +685,7 @@ nav.bottomnav button.active{color:var(--ink);background:var(--paper);}
    화면 상단(훈련일지 옆)에 표시되어, 어느 버전이 실제로 올라가 있는지
    바로 눈으로 구분할 수 있게 해줍니다.
 ============================================================ */
-const APP_VERSION = 'v1.32';
+const APP_VERSION = 'v1.33';
 const APP_BUILD = '2026-11-01';
 
 /* ============================================================
@@ -1195,8 +1195,7 @@ async function ensureBootstrapped(){
   if(!v){ await gh.putFile('config/voice.json', VOICE_DEFAULTS, null, 'init voice defaults'); v = await gh.getFile('config/voice.json'); }
   state.voiceDefaults = {...VOICE_DEFAULTS, ...(v.data||{})}; state.voiceDefaultsSha = v.sha;
 
-  const ib = await gh.getFile('config/inbody.json');     // 없으면 그냥 안 쓴다
-  state.inbody = (ib && ib.data) ? ib.data : { scans: [] };
+  state.inbody = await loadInbody();     // config/inbody.json + config/inbody/*.json 를 합친다
 
   let rec = await gh.getFile('config/records.json');
   if(!rec){ await gh.putFile('config/records.json', {}, null, 'init records'); rec = await gh.getFile('config/records.json'); }
@@ -1207,6 +1206,66 @@ async function ensureBootstrapped(){
    헬스장에서 인바디를 재면 등록한 전화번호의 인바디 앱 계정으로 결과가
    올라간다. GitHub Actions 가 하루 한 번 그걸 받아 config/inbody.json
    으로 넣어 두고(.github/workflows/inbody.yml), 여기서는 읽기만 한다. */
+/* 인바디 측정값은 두 군데서 온다. 둘 다 읽어 날짜로 합친다.
+     · config/inbody.json          — 한 파일에 모아 둔 형태
+     · config/inbody/YYYY-...json  — 아이폰 단축어가 하루치씩 올리는 파일
+   단축어는 파일 하나만 새로 만들면 되니(기존 걸 읽고 고칠 필요 없음) 훨씬 쉽다. */
+function normInbodyScan(x){
+  if(!x || typeof x !== 'object') return null;
+  const n = (...keys)=>{
+    for(const k of keys){
+      const v = x[k];
+      if(v === undefined || v === null || v === '') continue;
+      const f = Number(v);
+      if(!isNaN(f)) return Math.round(f * 100) / 100;
+    }
+    return null;
+  };
+  let date = x.date || x.Date || '';
+  let time = x.time || x.Time || '';
+  const dt = x.datetime || x.DateTime || x.measuredAt || '';
+  if(!date && dt){ const s2 = String(dt).replace('T',' '); date = s2.slice(0,10); time = time || s2.slice(11,16); }
+  if(!date) return null;
+  date = String(date).slice(0,10).replace(/\//g,'-');
+  const weight = n('weight','Weight','wt','WT','weightKg','bodyWeight');
+  let bfm = n('bfm','BFM','bodyFatMass','fatMass','fatKg');
+  const pbf = n('pbf','PBF','bodyFatPct','bodyFatPercent','percentBodyFat','fatPct');
+  // 건강 앱은 체지방'량'이 없고 체지방'률'만 있을 수 있다 — 체중으로 환산한다
+  if(bfm == null && pbf != null && weight != null) bfm = Math.round(weight * pbf) / 100;
+  return {
+    date, time: String(time || '').slice(0,5),
+    weight,
+    smm: n('smm','SMM','skeletalMuscleMass','muscleMass','leanMassKg','leanBodyMass','lbm'),
+    bfm, pbf,
+    bmi: n('bmi','BMI'),
+    tbw: n('tbw','TBW','totalBodyWater'),
+    vfl: n('vfl','VFL','visceralFatLevel'),
+    bmr: n('bmr','BMR','basalMetabolicRate'),
+    score: n('score','inbodyScore','INBODYSCORE'),
+  };
+}
+async function loadInbody(){
+  const byKey = {};
+  const add = (sc)=>{ const s2 = normInbodyScan(sc); if(s2) byKey[s2.date + 'T' + (s2.time||'')] = s2; };
+  try{
+    const ib = await gh.getFile('config/inbody.json');
+    if(ib && ib.data && Array.isArray(ib.data.scans)) ib.data.scans.forEach(add);
+  }catch(e){}
+  let updatedAt = null;
+  try{
+    const files = await gh.listDir('config/inbody');   // 없으면 []
+    const jsons = (files||[]).filter(f=>f.type === 'file' && /\.json$/i.test(f.name));
+    const got = await Promise.all(jsons.map(f=>gh.getFile('config/inbody/' + f.name).catch(()=>null)));
+    got.forEach(g=>{
+      if(!g || !g.data) return;
+      if(Array.isArray(g.data.scans)) g.data.scans.forEach(add);   // 묶음 파일도 허용
+      else add(g.data);                                            // 보통은 측정 하나
+    });
+    if(jsons.length) updatedAt = '단축어 ' + jsons.length + '개 파일';
+  }catch(e){}
+  const scans = Object.values(byKey).sort((a,b)=>(b.date + (b.time||'')).localeCompare(a.date + (a.time||'')));
+  return { updatedAt, scans };
+}
 function inbodyScans(){ return ((state.inbody || {}).scans) || []; }
 function inbodyOn(date){
   // 같은 날 여러 번 쟀으면 마지막 측정을 쓴다
@@ -1232,7 +1291,7 @@ function renderInbodySettings(){
   note.innerHTML = scans.length
     ? `마지막 동기화 ${esc((state.inbody || {}).updatedAt || '-')} · 측정 ${scans.length}건<br>`
       + `최근 측정 ${last.date}${last.time ? ' ' + last.time : ''} · 체중 ${last.weight ?? '-'}kg · 골격근 ${last.smm ?? '-'}kg · 체지방 ${last.bfm ?? '-'}kg`
-    : '아직 받아온 측정이 없습니다. 아래 안내대로 비밀 값을 넣고 한 번 돌려보세요.';
+    : '아직 올라온 측정이 없습니다. 아래 \'단축어 만드는 법\'을 따라 한 번 올려보세요.';
 }
 function renderInbodyNote(date){
   const el = document.getElementById('inbodyNote');
@@ -3958,11 +4017,13 @@ function bindVoiceHandlers(){
   document.getElementById('btnBeepTest').addEventListener('click', playBeepTest);
   const mixBtn = document.getElementById('btnMixTest');
   if(mixBtn) mixBtn.addEventListener('click', playMixTest);
-  const ibRun = document.getElementById('btnInbodyRun');
-  if(ibRun) ibRun.addEventListener('click', ()=>{
+  const ibGuide = document.getElementById('btnInbodyGuide');
+  if(ibGuide) ibGuide.addEventListener('click', ()=>{
     const cfg = gh.cfg || {};
-    if(!cfg.owner || !cfg.repo){ showToast('먼저 GitHub 연결을 해주세요'); return; }
-    window.open(`https://github.com/${cfg.owner}/${cfg.repo}/actions/workflows/inbody.yml`, '_blank', 'noopener');
+    const url = (cfg.owner && cfg.repo)
+      ? `https://github.com/${cfg.owner}/${cfg.repo}/blob/main/docs/inbody-shortcut.md`
+      : 'https://github.com/psw9715-debug/training/blob/main/docs/inbody-shortcut.md';
+    window.open(url, '_blank', 'noopener');
   });
   document.querySelectorAll('.bvChip').forEach(c=>c.addEventListener('click', ()=>{
     ensureAudio();
