@@ -4,6 +4,12 @@ on:
   schedule:
     - cron: '14 13 * * *'      # 매일 22:14 KST (UTC 13:14)
   workflow_dispatch:            # Actions 탭에서 손으로도 돌릴 수 있다
+    inputs:
+      mode:
+        description: '동기화(sync) 또는 오류코드 확인(diag)'
+        type: choice
+        default: sync
+        options: [sync, diag]
 
 concurrency:
   group: inbody-sync
@@ -29,6 +35,7 @@ jobs:
           INBODY_LOGIN_ID: ${{ secrets.INBODY_LOGIN_ID }}
           INBODY_LOGIN_PW: ${{ secrets.INBODY_LOGIN_PW }}
           INBODY_COUNTRY_CODE: ${{ vars.INBODY_COUNTRY_CODE || 'KR' }}
+          INBODY_MODE: ${{ inputs.mode }}
         run: python scripts/inbody_sync.py
 
       - name: 바뀌었으면 커밋

@@ -198,7 +198,43 @@ def normalize(rec):
     }
 
 
+def diagnose():
+    """계정을 건드리지 않고 오류 코드의 뜻만 알아본다.
+
+    등록돼 있지 않을 번호로 로그인을 한 번 해 본다. 그때 나오는 코드가
+    PW_FAIL_4 와 다르면, 우리 번호는 서버가 알아본다는 뜻이라 문제는
+    비밀번호 쪽이다. 같은 코드가 나오면 PW_FAIL_4 는 '아이디든 비번이든
+    틀림' 을 뭉뚱그린 코드라 번호 형식을 의심해야 한다.
+    """
+    country = (os.getenv("INBODY_COUNTRY_CODE") or "KR").strip() or "KR"
+    base, number = resolve_host(country)
+    print(f"서버: {base} (국가번호 {number})")
+    for label, login_id in (("없는 번호", "99999999999"), ("형식이 이상한 번호", "1")):
+        payload = envelope(
+            number,
+            AuthProvider="", AuthProviderID="", AuthToken="", CustomKey="",
+            DeviceType="Pixel 6 Pro 14",
+            LoginID=login_id, LoginPW="zzzz-not-a-real-password-zzzz", Type="Login",
+            SyncDatetime=FULL_SYNC,
+            SyncDatetimeBasalMedical=FULL_SYNC, SyncDatetimeCardiac=FULL_SYNC,
+            SyncDatetimeExercise=FULL_SYNC, SyncDatetimeInBody=FULL_SYNC,
+            SyncDatetimeNutrition=FULL_SYNC, SyncDatetimeSleep=FULL_SYNC,
+            SyncType="Main;InBody;Exercise;Nutrition;Sleep;EasyTrainning;BasalMedical;",
+        )
+        try:
+            data = post(f"{base}/V2/Main/GetLoginWithSyncDataPartV2", payload)
+            print(f"  {label}: IsSuccess={data.get('IsSuccess')} ErrorMsg={data.get('ErrorMsg')!r}")
+        except InBodyError as e:
+            print(f"  {label}: {e}")
+    print("PW_FAIL_4 와 다른 코드가 나왔다면, 시우님 번호는 서버가 알아보는 것이고"
+          " 막힌 곳은 비밀번호입니다.")
+    return 0
+
+
 def main():
+    if os.getenv("INBODY_MODE") == "diag":
+        return diagnose()
+
     login_id = "".join(ch for ch in (os.getenv("INBODY_LOGIN_ID") or "") if ch.isdigit())
     password = (os.getenv("INBODY_LOGIN_PW") or "").strip()
     country = (os.getenv("INBODY_COUNTRY_CODE") or "KR").strip() or "KR"
