@@ -10,11 +10,6 @@ on:
         description: '동기화(sync) 또는 오류코드 확인(diag)'
         type: choice
         default: diag
-    inputs:
-      mode:
-        description: '동기화(sync) 또는 오류코드 확인(diag)'
-        type: choice
-        default: sync
         options: [sync, diag]
 
 concurrency:

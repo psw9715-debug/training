@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- 훈련일지 v1.34 · 빌드 2026-11-01 -->
+<!-- 훈련일지 v1.35 · 빌드 2026-11-01 -->
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -685,7 +685,7 @@ nav.bottomnav button.active{color:var(--ink);background:var(--paper);}
    화면 상단(훈련일지 옆)에 표시되어, 어느 버전이 실제로 올라가 있는지
    바로 눈으로 구분할 수 있게 해줍니다.
 ============================================================ */
-const APP_VERSION = 'v1.34';
+const APP_VERSION = 'v1.35';
 const APP_BUILD = '2026-11-01';
 
 /* ============================================================
@@ -1217,7 +1217,7 @@ function normInbodyScan(x){
       const v = x[k];
       if(v === undefined || v === null || v === '') continue;
       const f = Number(v);
-      if(!isNaN(f)) return Math.round(f * 100) / 100;
+      if(!isNaN(f)) return Math.round(f * 1000) / 1000;
     }
     return null;
   };
@@ -1229,8 +1229,11 @@ function normInbodyScan(x){
   date = String(date).slice(0,10).replace(/\//g,'-');
   const weight = n('weight','Weight','wt','WT','weightKg','bodyWeight');
   let bfm = n('bfm','BFM','bodyFatMass','fatMass','fatKg');
-  const pbf = n('pbf','PBF','bodyFatPct','bodyFatPercent','percentBodyFat','fatPct');
-  // 건강 앱은 체지방'량'이 없고 체지방'률'만 있을 수 있다 — 체중으로 환산한다
+  let pbf = n('pbf','PBF','bodyFatPct','bodyFatPercent','percentBodyFat','fatPct');
+  // 애플 건강은 체지방률을 0.347(=34.7%)처럼 소수로 줄 때가 있다 — %로 맞춘다
+  if(pbf != null && pbf > 0 && pbf <= 1.5) pbf = pbf * 100;
+  if(pbf != null) pbf = Math.round(pbf * 10) / 10;
+  // 체지방'량'이 없고 체지방'률'만 있으면 체중으로 환산한다
   if(bfm == null && pbf != null && weight != null) bfm = Math.round(weight * pbf) / 100;
   return {
     date, time: String(time || '').slice(0,5),
