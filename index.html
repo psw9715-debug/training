@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- 훈련일지 v1.31 · 빌드 2026-10-29 -->
+<!-- 훈련일지 v1.32 · 빌드 2026-11-01 -->
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -400,7 +400,11 @@ nav.bottomnav button.active{color:var(--ink);background:var(--paper);}
       <button type="button" class="chip-btn bvChip" data-bv="1.5">크게</button>
     </div>
     <div class="small-note">안내 음성 뒤에 배경처럼 깔리게 하려면 '작게' 가 좋습니다.</div>
-    <div class="btn-row"><button class="btn ghost small" id="btnBeepTest">🔔 박자 소리 들어보기</button></div>
+    <div class="btn-row">
+      <button class="btn ghost small" id="btnBeepTest">🔔 박자 소리 들어보기</button>
+      <button class="btn ghost small" id="btnMixTest">🔊 박자 + 안내 같이 듣기</button>
+    </div>
+    <div class="small-note" id="mixTestNote"></div>
     <div class="small-note">소리가 안 들리면 <b>아이폰 옆면 무음 스위치</b>를 먼저 확인하세요.
       말소리는 무음 스위치를 무시하지만 박자음은 영향을 받을 수 있습니다. 볼륨도 같이 올려주세요.</div>
     <div class="divider"></div>
@@ -681,8 +685,8 @@ nav.bottomnav button.active{color:var(--ink);background:var(--paper);}
    화면 상단(훈련일지 옆)에 표시되어, 어느 버전이 실제로 올라가 있는지
    바로 눈으로 구분할 수 있게 해줍니다.
 ============================================================ */
-const APP_VERSION = 'v1.31';
-const APP_BUILD = '2026-10-29';
+const APP_VERSION = 'v1.32';
+const APP_BUILD = '2026-11-01';
 
 /* ============================================================
    상수
@@ -3186,15 +3190,48 @@ if(window.speechSynthesis){
 }
 /* 발화가 끝날 때까지 기다린다. onend 가 오지 않는 기기가 있어 보험으로
    글자 수 기준 타임아웃을 함께 건다. */
+/* 말하는 동안에는 박자를 건드리지 않는다.
+   아이폰은 스피커로 소리를 낼 때 말소리와 재생을 같이 못 낸다. 말을
+   하려고 재생을 눌러 세우는데, 그때 우리가 곧바로 다시 틀어 버리면
+   (v1.29 의 되살리기) 말이 묻혀서 안내가 아예 안 들린다. 블루투스
+   이어폰에서는 둘이 섞여서 멀쩡히 들렸던 이유가 이것이다.
+   그래서 말하는 중에는 되살리기를 쉬고, 끝난 뒤에 제자리로 잇는다. */
+let _speakDepth = 0, _speakQuietUntil = 0;
+function speakingNow(){ return _speakDepth > 0 || Date.now() < _speakQuietUntil; }
+function speakBegin(){
+  _speakDepth++;
+  // 이 기기가 '말할 때 재생을 끊는' 쪽이라고 확인됐으면 먼저 비켜 준다
+  if(vs.beatDucks && loopAudio && vs.beat && !loopAudio.paused){
+    vs.duckedByUs = true;
+    try{ loopAudio.pause(); }catch(e){}
+  }
+}
+function speakDone(startedAt, text){
+  _speakDepth = Math.max(0, _speakDepth - 1);
+  _speakQuietUntil = Date.now() + 250;
+  const a = loopAudio;
+  if(a && vs.beat && !vs.beatDucks){
+    const spoke = Date.now() - startedAt;
+    // 짧은 말("삼")은 원래 빨라서 기준으로 쓰지 않는다
+    const tooFast = String(text || '').length >= 3 && spoke < 200;
+    // 시스템이 재생을 눌러 세웠거나, 말이 나가지도 못하고 끝났으면
+    // 이 기기는 섞어 주지 않는 쪽이다 — 다음부터는 먼저 비켜 준다
+    if((!vs.duckedByUs && a.paused) || tooFast) vs.beatDucks = true;
+  }
+  vs.duckedByUs = false;
+  setTimeout(keepBeatAlive, 60);
+}
 function speakAsync(text, voiceOverride){
   return new Promise(resolve=>{
     if(!window.speechSynthesis || !text) return resolve();
     try{ if(speechSynthesis.paused) speechSynthesis.resume(); }catch(e){}   // 끊긴 뒤 멈춰 있는 걸 깨운다
     const u = voiceEngine.make(text, voiceOverride);
+    const t0 = Date.now();
     let done = false;
-    const fin = ()=>{ if(done) return; done = true; clearTimeout(tm); keepBeatAlive(); resolve(); };
+    const fin = ()=>{ if(done) return; done = true; clearTimeout(tm); speakDone(t0, text); resolve(); };
     const tm = setTimeout(fin, 1500 + String(text).length * 130);
     u.onend = fin; u.onerror = fin;
+    speakBegin();
     try{ speechSynthesis.speak(u); }catch(e){ fin(); }
   });
 }
@@ -3204,7 +3241,12 @@ function speakNow(text){
   try{
     if(speechSynthesis.paused) speechSynthesis.resume();
     const u = voiceEngine.make(text);
-    u.onend = u.onerror = ()=>keepBeatAlive();     // 말이 끝나면 곧바로 배경을 되살린다
+    const t0 = Date.now();
+    let done = false;
+    const fin = ()=>{ if(done) return; done = true; clearTimeout(tm); speakDone(t0, text); };
+    const tm = setTimeout(fin, 1500 + String(text).length * 130);
+    u.onend = u.onerror = fin;
+    speakBegin();
     speechSynthesis.speak(u);
   }catch(e){}
 }
@@ -3452,6 +3494,7 @@ function warmNextChunk(){
 function keepBeatAlive(){
   const a = loopAudio;
   if(!a || !vs.beat || !vs.active || vs.paused || vs.abort) return;
+  if(speakingNow()) return;          // 말할 자리를 비켜 준다 (안 그러면 안내가 묻힌다)
   if(!a.dataset.bpm) return;
   if(a.error){                                   // 소스가 깨졌으면 다시 물린다
     const bpm = Number(a.dataset.bpm) || 0, sec = Number(a.dataset.sec) || 0;
@@ -3523,6 +3566,38 @@ function previewTempo(bpm){
   step();
 }
 
+/* 박자와 안내를 같이 틀어 본다. 아이폰은 스피커로 낼 때 둘을 섞지 못하는
+   경우가 있어서, 어느 쪽인지 여기서 확인하고 앱이 맞춰 간다. */
+let _mixTesting = false;
+async function playMixTest(){
+  if(vs.active){ showToast('운동 안내 중에는 못 합니다'); return; }
+  if(_mixTesting) return;
+  _mixTesting = true;
+  const note = document.getElementById('mixTestNote');
+  const say = (t)=>{ if(note) note.textContent = t; };
+  ensureAudio();
+  vs.active = true; vs.paused = false; vs.abort = false; vs.beatDucks = false;
+  say('박자를 틀고 안내를 두 번 해 봅니다…');
+  startBeatLoop(120, 10);
+  const tick = setInterval(keepBeatAlive, 120);
+  try{
+    await new Promise(r=>setTimeout(r, 2500));
+    await speakAsync('십초');
+    await new Promise(r=>setTimeout(r, 2000));
+    await speakAsync('오초');
+    await new Promise(r=>setTimeout(r, 1500));
+  } finally {
+    clearInterval(tick);
+    stopBeatLoop();
+    const ducks = vs.beatDucks;
+    vs.active = false;
+    _mixTesting = false;
+    say(ducks
+      ? '이 기기는 말할 때 박자를 잠깐 멈춥니다. 안내가 묻히지 않게 앱이 알아서 비켜 주도록 맞췄습니다. (이어폰을 끼면 둘이 같이 납니다)'
+      : '박자와 안내가 같이 잘 납니다.');
+  }
+}
+
 /* 설정에서 눌러 보는 시험 재생 — 운동을 시작하지 않고도 소리를 확인한다 */
 let _beepTestTm = null;
 function playBeepTest(){
@@ -3544,7 +3619,7 @@ function playBeepTest(){
    vs.paused 는 카운트다운 루프가 매 틱마다 확인한다. 발화 도중에
    일시정지를 누르면 그 한 마디는 끝까지 나오고 그다음 침묵부터
    멈춘다(발화 단위가 1초 미만이라 체감 차이가 없다).            */
-const vs = { active:false, paused:false, abort:false, entry:null, lib:null, cfg:null, sets:[], tm:null, met:null, cadTm:null, beat:false, pauseAt:0, wakeLock:null };
+const vs = { active:false, paused:false, abort:false, entry:null, lib:null, cfg:null, sets:[], tm:null, met:null, cadTm:null, beat:false, pauseAt:0, beatDucks:false, duckedByUs:false, wakeLock:null };
 
 function vsCountdown(totalMs, marks, onTick){
   return new Promise(resolve=>{
@@ -3881,6 +3956,8 @@ function bindVoiceHandlers(){
   });
   document.getElementById('btnOpenCatalog').addEventListener('click', ()=>openCatalogSheet('library'));
   document.getElementById('btnBeepTest').addEventListener('click', playBeepTest);
+  const mixBtn = document.getElementById('btnMixTest');
+  if(mixBtn) mixBtn.addEventListener('click', playMixTest);
   const ibRun = document.getElementById('btnInbodyRun');
   if(ibRun) ibRun.addEventListener('click', ()=>{
     const cfg = gh.cfg || {};
