@@ -1,0 +1,135 @@
+{
+  "date": "2026-11-06",
+  "weekday": "fri",
+  "bodyWeight": 79.3,
+  "muscleMass": 33.5,
+  "fatMass": 25.3,
+  "rpe": null,
+  "memo": "",
+  "entries": [
+    {
+      "instanceId": "5hmu9r0",
+      "exerciseId": "ex_shiv21i",
+      "name": "제자리 뛰기",
+      "type": "strength",
+      "adHoc": true,
+      "sets": [
+        {
+          "weight": 0,
+          "reps": 60,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 60,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 60,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 60,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 60,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 60,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 60,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 60,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 60,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 60,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 60,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 60,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 60,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 60,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 60,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 60,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 60,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 60,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 60,
+          "failed": false
+        },
+        {
+          "weight": 0,
+          "reps": 60,
+          "failed": false
+        }
+      ]
+    },
+    {
+      "instanceId": "mypmxze",
+      "exerciseId": "swimming",
+      "name": "수영",
+      "type": "cardio",
+      "adHoc": true,
+      "distance": 1000,
+      "duration": 50
+    }
+  ],
+  "calories": {
+    "strength": 330,
+    "cardio": 463,
+    "total": 793
+  },
+  "savedAt": "2026-11-06T12:48:54.696Z"
+}
