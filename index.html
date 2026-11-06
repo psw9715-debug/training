@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- 훈련일지 v1.40 · 빌드 2026-11-06 -->
+<!-- 훈련일지 v1.41 · 빌드 2026-11-06 -->
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -681,7 +681,7 @@ nav.bottomnav button.active{color:var(--ink);background:var(--paper);}
    화면 상단(훈련일지 옆)에 표시되어, 어느 버전이 실제로 올라가 있는지
    바로 눈으로 구분할 수 있게 해줍니다.
 ============================================================ */
-const APP_VERSION = 'v1.40';
+const APP_VERSION = 'v1.41';
 const APP_BUILD = '2026-11-06';
 
 /* ============================================================
@@ -3313,6 +3313,7 @@ function ensureAudio(){
   };
   ['lo','hi'].forEach(k=>beepPool[k].forEach(unlock));
   unlock(loopAudioEl());        // 박자 루프도 같은 손짓 안에서 열어 둔다
+  unlock(silentAudioEl());      // 박자 중 출력을 붙잡아 둘 소리 없는 오디오도
   try{
     const AC = window.AudioContext || window.webkitAudioContext;
     if(AC){
@@ -3554,6 +3555,25 @@ function startMetronomeTimer(intervalMs){
    안내 음성이 나오는 동안엔 박자만 작게 줄였다가 끝나면 다시 키운다.
    첫 박자는 "시작" 끝부분과 겹치지 않게 0.3초 뒤에 들어간다.
    WebAudio 를 못 쓰는 브라우저에서는 예전 방식으로 돌아간다.        */
+/* 소리 없는 0.5초짜리 오디오. 박자가 도는 동안 이걸 같이 틀어 두면
+   아이폰이 오디오 출력을 내려놓지 않는다. 안내 음성이 지나간 뒤 출력이
+   내려간 채로 남아, 박자는 도는데 소리만 안 나던 문제를 막는다. */
+let _silentEl = null;
+function silentAudioEl(){
+  if(_silentEl) return _silentEl;
+  const sr = 8000, n = sr / 2;
+  const bytes = new Uint8Array(44 + n * 2);
+  const dv = new DataView(bytes.buffer);
+  const put = (o, str)=>{ for(let i = 0; i < str.length; i++) dv.setUint8(o + i, str.charCodeAt(i)); };
+  put(0,'RIFF'); dv.setUint32(4, 36 + n*2, true); put(8,'WAVEfmt ');
+  dv.setUint32(16,16,true); dv.setUint16(20,1,true); dv.setUint16(22,1,true);
+  dv.setUint32(24,sr,true); dv.setUint32(28,sr*2,true); dv.setUint16(32,2,true); dv.setUint16(34,16,true);
+  put(36,'data'); dv.setUint32(40, n*2, true);
+  const a = new Audio(URL.createObjectURL(new Blob([bytes], { type:'audio/wav' })));
+  a.loop = true; a.playsInline = true; a.preload = 'auto';
+  _silentEl = a;
+  return a;
+}
 let _clickBuf = null;
 function clickBuffers(){
   if(_clickBuf) return _clickBuf;
@@ -3580,7 +3600,7 @@ function startMetronome(intervalMs){
   const ctx = _actx;
   const ss = window.speechSynthesis;
   const speechBusy = ()=> !!(ss && (ss.speaking || ss.pending));
-  if(ctx.state !== 'running' && !speechBusy()){ try{ ctx.resume(); }catch(e){} }
+  const keep = silentAudioEl();
   const iv = intervalMs / 1000;
   const bufs = clickBuffers();
   const master = ctx.createGain();
@@ -3590,7 +3610,7 @@ function startMetronome(intervalMs){
   duck.gain.value = 1;
   duck.connect(master);
   let n = 0, next = ctx.currentTime + 0.3, level = 1, wasPaused = false;
-  let busyUntil = 0, stuckSince = 0;
+  let busyUntil = performance.now() + 300, stuckSince = 0;   // "시작" 끝부분과 겹치지 않게
   const tick = ()=>{
     if(!vs.active || vs.abort){ stopMetronome(); return; }
     const wall = performance.now();
@@ -3598,7 +3618,12 @@ function startMetronome(intervalMs){
     // 아이폰은 안내 음성이 나오는 동안 박자 오디오를 멈춰 세운다. 그때 박자를
     // 다시 켜면 이번엔 음성 쪽이 멈춰서, 뒤의 안내가 줄만 서고 안 나온다.
     // 그래서 말하는 동안에는 절대 다시 켜지 않고, 말이 끝난 뒤에만 켠다.
-    if(ctx.state !== 'running' && wall >= busyUntil){ try{ ctx.resume(); }catch(e){} }
+    // 말이 끝난 뒤에는 소리 없는 오디오로 출력을 다시 붙잡고, 박자도 다시 켠다
+    if(wall >= busyUntil && !vs.paused){
+      if(keep.paused){ try{ const p = keep.play(); if(p && p.catch) p.catch(()=>{}); }catch(e){} }
+      if(ctx.state !== 'running'){ try{ ctx.resume(); }catch(e){} }
+    }
+    if(vs.paused && !keep.paused){ try{ keep.pause(); }catch(e){} }
     // 그래도 음성이 멈춰 줄만 서 있으면(일시정지 상태가 아닌데) 깨워 준다
     if(ss && !vs.paused && (ss.paused || (ss.pending && !ss.speaking))){
       if(!stuckSince) stuckSince = wall;
@@ -3628,6 +3653,7 @@ function startMetronome(intervalMs){
 }
 function stopMetronome(){
   clearTimeout(vs.met); clearInterval(vs.met); vs.met = null;
+  if(_silentEl){ try{ _silentEl.pause(); }catch(e){} }
   if(vs.metNodes){                                      // 미리 예약해 둔 박자까지 바로 끊는다
     try{ vs.metNodes.disconnect(); }catch(e){}
     vs.metNodes = null;
