@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- 훈련일지 v1.39 · 빌드 2026-11-01 -->
+<!-- 훈련일지 v1.40 · 빌드 2026-11-06 -->
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -681,8 +681,8 @@ nav.bottomnav button.active{color:var(--ink);background:var(--paper);}
    화면 상단(훈련일지 옆)에 표시되어, 어느 버전이 실제로 올라가 있는지
    바로 눈으로 구분할 수 있게 해줍니다.
 ============================================================ */
-const APP_VERSION = 'v1.39';
-const APP_BUILD = '2026-11-01';
+const APP_VERSION = 'v1.40';
+const APP_BUILD = '2026-11-06';
 
 /* ============================================================
    상수
@@ -3578,7 +3578,9 @@ function startMetronome(intervalMs){
   try{ if(!_actx && AC) _actx = new AC(); }catch(e){}
   if(!_actx || _actx.state === 'closed') return startMetronomeTimer(intervalMs);
   const ctx = _actx;
-  if(ctx.state !== 'running'){ try{ ctx.resume(); }catch(e){} }
+  const ss = window.speechSynthesis;
+  const speechBusy = ()=> !!(ss && (ss.speaking || ss.pending));
+  if(ctx.state !== 'running' && !speechBusy()){ try{ ctx.resume(); }catch(e){} }
   const iv = intervalMs / 1000;
   const bufs = clickBuffers();
   const master = ctx.createGain();
@@ -3588,11 +3590,22 @@ function startMetronome(intervalMs){
   duck.gain.value = 1;
   duck.connect(master);
   let n = 0, next = ctx.currentTime + 0.3, level = 1, wasPaused = false;
+  let busyUntil = 0, stuckSince = 0;
   const tick = ()=>{
     if(!vs.active || vs.abort){ stopMetronome(); return; }
-    if(ctx.state !== 'running'){ try{ ctx.resume(); }catch(e){} }
+    const wall = performance.now();
+    if(speechBusy()) busyUntil = wall + 400;             // 말하는 중, 그리고 끝난 뒤 0.4초
+    // 아이폰은 안내 음성이 나오는 동안 박자 오디오를 멈춰 세운다. 그때 박자를
+    // 다시 켜면 이번엔 음성 쪽이 멈춰서, 뒤의 안내가 줄만 서고 안 나온다.
+    // 그래서 말하는 동안에는 절대 다시 켜지 않고, 말이 끝난 뒤에만 켠다.
+    if(ctx.state !== 'running' && wall >= busyUntil){ try{ ctx.resume(); }catch(e){} }
+    // 그래도 음성이 멈춰 줄만 서 있으면(일시정지 상태가 아닌데) 깨워 준다
+    if(ss && !vs.paused && (ss.paused || (ss.pending && !ss.speaking))){
+      if(!stuckSince) stuckSince = wall;
+      else if(wall - stuckSince > 800){ try{ ss.resume(); }catch(e){} stuckSince = wall; }
+    } else stuckSince = 0;
     const now = ctx.currentTime;
-    const talking = !!(window.speechSynthesis && speechSynthesis.speaking);
+    const talking = !!(ss && ss.speaking);
     const want = vs.paused ? 0 : (talking ? 0.35 : 1);   // 말하는 동안엔 박자를 작게
     if(want !== level){ level = want; duck.gain.setTargetAtTime(want, now, 0.04); }
     if(vs.paused){ wasPaused = true; return; }
